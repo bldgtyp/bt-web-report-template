@@ -1,0 +1,20 @@
+{
+  "name": "@bldgtyp/web-report-template",
+  "version": "0.0.1",
+  "description": "Clonable Astro starter for per-project bt-proj-<slug> repos.",
+  "type": "module",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "repository": "github:bldgtyp/bt-web-report-template",
+  "scripts": {
+    "dev": "echo 'astro dev — wired in Phase 3'",
+    "build": "echo 'astro build — wired in Phase 3'"
+  },
+  "dependencies": {
+    "@bldgtyp/web-report-kit": "workspace:*",
+    "@bldgtyp/web-report-schemas": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
