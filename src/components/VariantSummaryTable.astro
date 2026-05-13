@@ -1,0 +1,36 @@
+---
+import { DataState } from "@bldgtyp/web-report-kit";
+
+import { loadTemplateReportData } from "../data/report";
+
+const report = await loadTemplateReportData();
+const rows = report.variants.slice(0, 8);
+const columns = rows.length > 0 ? Object.keys(rows[0]).slice(0, 6) : [];
+---
+
+{
+  rows.length === 0 ? (
+    <DataState
+      state="pending"
+      title="Variant table pending"
+      message="The template has valid project metadata, but no PHPP-derived variant rows yet."
+    />
+  ) : (
+    <div class="btwr-table-wrap">
+      <table class="btwr-table">
+        <thead>
+          <tr>
+            {columns.map((column) => <th>{column}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              {columns.map((column) => <td>{String(row[column] ?? "")}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

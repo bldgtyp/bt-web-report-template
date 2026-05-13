@@ -7,14 +7,25 @@
   "license": "GPL-3.0-or-later",
   "repository": "github:bldgtyp/bt-web-report-template",
   "scripts": {
-    "dev": "echo 'astro dev — wired in Phase 3'",
-    "build": "echo 'astro build — wired in Phase 3'"
+    "dev": "astro dev",
+    "build": "pnpm validate && astro build",
+    "check": "astro check",
+    "validate": "node scripts/validate-project.mjs",
+    "build:pdf": "pnpm build && node scripts/build-pdf.mjs",
+    "preview": "astro preview",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@astrojs/mdx": "^3.1.9",
     "@bldgtyp/web-report-kit": "workspace:*",
-    "@bldgtyp/web-report-schemas": "workspace:*"
+    "@bldgtyp/web-report-schemas": "workspace:*",
+    "astro": "^4.16.19",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^20.19.41",
     "typescript": "^5.4.0"
   }
 }

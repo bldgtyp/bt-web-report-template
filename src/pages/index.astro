@@ -1,0 +1,32 @@
+---
+import Appendix from "../../content/appendix.mdx";
+import Assemblies from "../../content/envelope/assemblies.mdx";
+import EnvelopeOverview from "../../content/envelope/overview.mdx";
+import EnergyModel from "../../content/energy-model.mdx";
+import Mechanical from "../../content/mechanical.mdx";
+import Summary from "../../content/summary.mdx";
+import Windows from "../../content/windows.mdx";
+import { loadTemplateReportData } from "../data/report";
+import ProjectReportLayout from "../layouts/ProjectReportLayout.astro";
+
+const report = await loadTemplateReportData();
+const tocItems = [
+  { href: "#summary", label: "Summary" },
+  { href: "#energy-model", label: "Energy model" },
+  { href: "#envelope-overview", label: "Envelope" },
+  { href: "#assemblies", label: "Assemblies" },
+  { href: "#windows", label: "Windows" },
+  { href: "#mechanical", label: "Mechanical" },
+  { href: "#appendix", label: "Appendix" },
+];
+---
+
+<ProjectReportLayout report={report} tocItems={tocItems}>
+  <Summary />
+  <EnergyModel />
+  <EnvelopeOverview />
+  <Assemblies />
+  <Windows />
+  <Mechanical />
+  <Appendix />
+</ProjectReportLayout>

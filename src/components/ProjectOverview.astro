@@ -1,0 +1,33 @@
+---
+import { loadTemplateReportData } from "../data/report";
+
+const { project } = await loadTemplateReportData();
+const buildingLocation = [project.building.city, project.building.state].filter(Boolean).join(", ");
+---
+
+<dl class="btwr-project-meta">
+  <div>
+    <dt>Client</dt>
+    <dd>{project.client_name}</dd>
+  </div>
+  <div>
+    <dt>Building</dt>
+    <dd>{project.building_name}</dd>
+  </div>
+  <div>
+    <dt>Location</dt>
+    <dd>{buildingLocation}</dd>
+  </div>
+  <div>
+    <dt>Standard</dt>
+    <dd>{project.target_standard}</dd>
+  </div>
+  <div>
+    <dt>Phase</dt>
+    <dd>{project.phase}</dd>
+  </div>
+  <div>
+    <dt>Report date</dt>
+    <dd>{project.report_date}</dd>
+  </div>
+</dl>

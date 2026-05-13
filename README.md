@@ -1,5 +1,66 @@
 # bt-web-report-template
 
+Clonable Astro starter for one Passive House client report repo
+(`bt-proj-<slug>`). Phase 7 automation will clone this into
+`Dropbox/bldgtyp/<Project>/04_Web/`; until then, it can be used manually.
+
+## Commands
+
+```bash
+pnpm install
+pnpm validate
+pnpm dev
+pnpm check
+pnpm build
+pnpm build:pdf
+```
+
+Use pnpm only.
+
+## Edit Boundaries
+
+- Edit `project.yaml` for project metadata, publish URL, and local data paths.
+- Edit `content/**/*.mdx` for report narrative.
+- Put client-visible images and diagrams in `public/assets/`.
+- Treat `data/` as generated PHPP output. Run `btwr scrape <phpp.xlsx> --out data`
+  from the CLI package instead of hand-editing CSVs.
+- Keep `.bldgtyp/config.local.yaml` local-only for machine-specific notes.
+
+## Data States
+
+The committed starter is intentionally pending-data:
+
+```json
+{ "status": "pending", "variants": [] }
+```
+
+That state must build. After scraping, `data/` should contain:
+`manifest.json`, `variants.csv`, `climate-monthly.csv`, `room-airflows.csv`,
+`building-metrics.csv`, `certification.csv`, `energy.csv`, and
+`demand-detail.csv`.
+
+## Component Use In MDX
+
+MDX sections import short template wrappers such as `SiteEnergyChart`,
+`CertificationMetrics`, and `VariantSummaryTable`. Those wrappers load the
+project data contract; authors should not parse CSVs inside narrative files.
+
+## Deploy
+
+Cloudflare Pages deploys `dist/`. The included workflow expects these repo
+secrets before deployment:
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+Optional repo variable:
+
+- `CLOUDFLARE_PAGES_PROJECT` (defaults to the GitHub repo name)
+
+For Phase 4, create/configure the Pages project manually in the Cloudflare
+dashboard, attach the `<slug>.bldgtyp.com` custom domain, then push `main`.
+API-driven project/domain creation remains Phase 7 scope.
+
 The starter project that `btwr new` clones to bootstrap every
 `bt-proj-<slug>` repo. An Astro app pinned to a specific
 `@bldgtyp/web-report-kit` major.

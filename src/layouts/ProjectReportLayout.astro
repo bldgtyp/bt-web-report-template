@@ -1,0 +1,23 @@
+---
+import { ReportShell } from "@bldgtyp/web-report-kit";
+
+import type { TemplateReportData } from "../data/report";
+import "../styles/project.css";
+
+interface TocItem {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  report: TemplateReportData;
+  tocItems: TocItem[];
+}
+
+const { report, tocItems } = Astro.props;
+const title = `${report.project.project_title} | ${report.project.phase}`;
+---
+
+<ReportShell title={title} manifest={report.manifest} variants={report.variantOrder} tocItems={tocItems}>
+  <slot />
+</ReportShell>

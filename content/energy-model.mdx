@@ -1,0 +1,15 @@
+import { SectionHeading } from "@bldgtyp/web-report-kit";
+import CertificationMetrics from "../src/components/CertificationMetrics.astro";
+import SiteEnergyChart from "../src/components/SiteEnergyChart.astro";
+
+<section className="btwr-section" aria-labelledby="energy-model">
+  <SectionHeading id="energy-model" kicker="PHPP" title="Energy model results" />
+  <div className="btwr-prose">
+    <p>
+      The model narrative belongs here: variant intent, key PHPP assumptions, and why the
+      recommended option is the right performance/cost path for the project.
+    </p>
+  </div>
+  <SiteEnergyChart />
+  <CertificationMetrics />
+</section>

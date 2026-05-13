@@ -1,0 +1,9 @@
+node_modules
+dist
+.astro
+.playwright
+playwright-report
+test-results
+.bldgtyp/config.local.yaml
+*.log
+.DS_Store

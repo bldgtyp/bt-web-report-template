@@ -1,0 +1,13 @@
+import { SectionHeading } from "@bldgtyp/web-report-kit";
+import VariantSummaryTable from "../src/components/VariantSummaryTable.astro";
+
+<section className="btwr-section" aria-labelledby="appendix">
+  <SectionHeading id="appendix" kicker="Appendix" title="Source data and traceability" />
+  <div className="btwr-prose">
+    <p>
+      Appendix content should help reviewers connect report claims back to PHPP rows, source
+      PDFs, and model assumptions without making the main client narrative too dense.
+    </p>
+  </div>
+  <VariantSummaryTable />
+</section>

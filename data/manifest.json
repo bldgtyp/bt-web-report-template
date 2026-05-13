@@ -1,0 +1,9 @@
+{
+  "status": "pending",
+  "project": {
+    "slug": "0000-example-report",
+    "name": "Example Passive House Report"
+  },
+  "schema_version": "0.1.0",
+  "variants": []
+}

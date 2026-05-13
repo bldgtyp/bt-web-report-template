@@ -1,0 +1,18 @@
+import { SectionHeading } from "@bldgtyp/web-report-kit";
+import ProjectOverview from "../src/components/ProjectOverview.astro";
+
+<section className="btwr-section" aria-labelledby="summary">
+  <SectionHeading id="summary" kicker="Summary" title="Recommended performance path" />
+  <div className="btwr-prose">
+    <p>
+      This starter report is ready before the first PHPP scrape. Edit project metadata in
+      <code> project.yaml</code>, write client-facing narrative in MDX, and let generated
+      data flow through <code>data/</code>.
+    </p>
+    <p>
+      Replace this section with the design-analysis recommendation once the project options,
+      envelope assumptions, airtightness target, and certification path are settled.
+    </p>
+  </div>
+  <ProjectOverview />
+</section>
