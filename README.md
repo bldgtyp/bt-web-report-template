@@ -13,6 +13,7 @@ pnpm dev
 pnpm check
 pnpm build
 pnpm build:pdf
+pnpm smoke:fixture
 ```
 
 Use pnpm only.
@@ -38,6 +39,11 @@ That state must build. After scraping, `data/` should contain:
 `manifest.json`, `variants.csv`, `climate-monthly.csv`, `room-airflows.csv`,
 `building-metrics.csv`, `certification.csv`, `energy.csv`, and
 `demand-detail.csv`.
+
+Run `pnpm smoke:fixture` before cloning this template into a real project. It
+temporarily swaps in the Vandam fixture data from the local kit showcase, runs
+validation, Astro check/build, and Playwright smoke tests, then restores the
+committed pending-data starter.
 
 ## Component Use In MDX
 
