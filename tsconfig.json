@@ -10,6 +10,7 @@
     "astro.config.mjs",
     "content/**/*",
     "playwright/**/*",
-    "src/**/*"
+    "src/**/*",
+    "tina/**/*"
   ]
 }

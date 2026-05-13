@@ -10,8 +10,11 @@ Clonable Astro starter for one Passive House client report repo
 pnpm install
 pnpm validate
 pnpm dev
+pnpm dev:editor
 pnpm check
+pnpm check:editor
 pnpm build
+pnpm build:editor
 pnpm build:pdf
 pnpm smoke:fixture
 ```
@@ -26,6 +29,29 @@ Use pnpm only.
 - Treat `data/` as generated PHPP output. Run `btwr scrape <phpp.xlsx> --out data`
   from the CLI package instead of hand-editing CSVs.
 - Keep `.bldgtyp/config.local.yaml` local-only for machine-specific notes.
+
+## TinaCMS Editor
+
+Run the local report editor from the project root:
+
+```bash
+pnpm dev:editor
+```
+
+The command starts Tina around Astro dev. The report is served at
+`http://127.0.0.1:4321/`; the Tina admin route is served by the Astro dev
+server at `http://127.0.0.1:4321/admin/index.html`, with Tina's local data
+server on port `4001`.
+
+The first editor schema exposes the fixed report sections in `content/` and
+`content/envelope/` as locked MDX documents: authors can edit section content,
+but cannot create/delete canonical sections from Tina. Repo-backed media is
+limited to `public/assets`. PHPP-derived files in `data/` are deliberately not
+part of the editor schema.
+
+Use `pnpm check:editor` to audit the Tina config. Use `pnpm build:editor` only
+when you need to inspect the generated admin bundle; generated admin artifacts
+are ignored because the v1 editor is local-only.
 
 ## Data States
 

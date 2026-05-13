@@ -1,0 +1,32 @@
+---
+import { SectionHeading } from "@bldgtyp/web-report-kit";
+
+interface Props {
+  id: string;
+  kicker: string;
+  title: string;
+  dek: string;
+  Content: any;
+  callout_label?: string;
+  callout_body?: string;
+}
+
+const { id, kicker, title, dek, Content, callout_label, callout_body } = Astro.props;
+---
+
+<section class="btwr-section" aria-labelledby={id}>
+  <SectionHeading id={id} kicker={kicker} title={title} />
+  <h2 class="btwr-editorial-heading">{dek}</h2>
+  <div class="btwr-prose">
+    <Content />
+  </div>
+  {
+    callout_label && callout_body ? (
+      <div class="btwr-callout">
+        <strong>{callout_label}</strong>
+        <span>{callout_body}</span>
+      </div>
+    ) : null
+  }
+  <slot />
+</section>
