@@ -4,4 +4,7 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   integrations: [mdx()],
   output: "static",
+  devToolbar: {
+    enabled: false,
+  },
 });
