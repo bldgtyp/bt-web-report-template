@@ -1,0 +1,12 @@
+---
+import { RoomAirflowChart, RoomAirflowTable } from "@bldgtyp/web-report-kit";
+
+import { loadTemplateReportData } from "../data/report";
+
+const report = await loadTemplateReportData();
+---
+
+<div class="btwr-component-stack">
+  <RoomAirflowChart data={report} title="Room airflow balance" />
+  <RoomAirflowTable data={report} caption="Room airflow schedule" />
+</div>

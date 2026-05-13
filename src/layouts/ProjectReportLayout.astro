@@ -16,8 +16,19 @@ interface Props {
 
 const { report, tocItems } = Astro.props;
 const title = `${report.project.project_title} | ${report.project.phase}`;
+const location = [report.project.building.city, report.project.building.state].filter(Boolean).join(", ");
+const projectMeta = {
+  clientName: report.project.client_name,
+  buildingName: report.project.building_name,
+  phase: report.project.phase,
+  reportDate: report.project.report_date,
+  targetStandard: report.project.target_standard,
+  location,
+  climateZone: report.project.building.climate_zone,
+  preparedBy: report.project.prepared_by,
+};
 ---
 
-<ReportShell title={title} manifest={report.manifest} variants={report.variantOrder} tocItems={tocItems}>
+<ReportShell title={title} manifest={report.manifest} variants={report.variantOrder} tocItems={tocItems} projectMeta={projectMeta}>
   <slot />
 </ReportShell>

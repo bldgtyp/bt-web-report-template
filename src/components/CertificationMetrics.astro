@@ -1,29 +1,12 @@
 ---
-import { DataState, MetricCard } from "@bldgtyp/web-report-kit";
+import { CertificationChart, CertificationTable } from "@bldgtyp/web-report-kit";
 
 import { loadTemplateReportData } from "../data/report";
 
 const report = await loadTemplateReportData();
-const metrics = report.certification.slice(0, 4);
 ---
 
-{
-  metrics.length === 0 ? (
-    <DataState
-      state="pending"
-      title="Certification metrics pending"
-      message="Certification and demand rows appear here after the scrape data is copied into data/."
-    />
-  ) : (
-    <div class="btwr-metric-grid">
-      {metrics.map((row) => (
-        <MetricCard
-          label={String(row.metric ?? row.variant_name ?? "Metric")}
-          value={String(row.value ?? "n/a")}
-          units={typeof row.units === "string" ? row.units : undefined}
-          note={typeof row.variant_name === "string" ? row.variant_name : undefined}
-        />
-      ))}
-    </div>
-  )
-}
+<div class="btwr-component-stack">
+  <CertificationChart data={report} title="Certification results vs limits" />
+  <CertificationTable data={report} caption="Certification result and limit rows" />
+</div>

@@ -1,0 +1,25 @@
+---
+import {
+  CertificationChart,
+  CertificationTable,
+  ClimateMonthlyChart,
+  DemandBreakdownChart,
+  EnergySummaryTable,
+  SiteEnergyChart,
+  SourceEnergyChart,
+} from "@bldgtyp/web-report-kit";
+
+import { loadTemplateReportData } from "../data/report";
+
+const report = await loadTemplateReportData();
+---
+
+<div class="btwr-component-stack">
+  <SiteEnergyChart data={report} title="Annual site energy" />
+  <SourceEnergyChart data={report} title="Source energy comparison" />
+  <DemandBreakdownChart data={report} demandType="heating" title="Heating demand breakdown" />
+  <ClimateMonthlyChart data={report} title="Monthly climate profile" />
+  <CertificationChart data={report} title="Passive House thresholds" />
+  <EnergySummaryTable data={report} caption="Key results by variant" />
+  <CertificationTable data={report} caption="Certification result and limit rows" />
+</div>

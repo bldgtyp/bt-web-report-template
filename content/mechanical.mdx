@@ -1,7 +1,11 @@
 import { SectionHeading } from "@bldgtyp/web-report-kit";
+import MechanicalPanels from "../src/components/MechanicalPanels.astro";
 
 <section className="btwr-section" aria-labelledby="mechanical">
-  <SectionHeading id="mechanical" kicker="Systems" title="Ventilation, heating, and cooling" />
+  <SectionHeading id="mechanical" kicker="05" title="Mechanical" />
+  <h2 className="btwr-editorial-heading">
+    Keep systems assumptions legible without turning the client report into a schedule dump.
+  </h2>
   <div className="btwr-prose">
     <p>
       Record the ventilation concept, heating/cooling approach, DHW assumptions, and equipment
@@ -9,4 +13,5 @@ import { SectionHeading } from "@bldgtyp/web-report-kit";
       central plant and corridor/amenity assumptions.
     </p>
   </div>
+  <MechanicalPanels />
 </section>

@@ -1,7 +1,11 @@
 import { SectionHeading } from "@bldgtyp/web-report-kit";
+import EnvelopePanels from "../../src/components/EnvelopePanels.astro";
 
 <section className="btwr-section" aria-labelledby="envelope-overview">
-  <SectionHeading id="envelope-overview" kicker="Envelope" title="Thermal envelope overview" />
+  <SectionHeading id="envelope-overview" kicker="02" title="Model geometry" />
+  <h2 className="btwr-editorial-heading">
+    Establish the modeled building before comparing envelope options.
+  </h2>
   <div className="btwr-prose">
     <p>
       Summarize the enclosure strategy: target U-values, continuity of the control layers,
@@ -12,4 +16,5 @@ import { SectionHeading } from "@bldgtyp/web-report-kit";
       second source of truth.
     </p>
   </div>
+  <EnvelopePanels />
 </section>

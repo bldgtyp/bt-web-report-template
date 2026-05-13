@@ -11,7 +11,8 @@ test("starter report renders pending data state without console errors", async (
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: "Example Passive House Report" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Recommended performance path" })).toBeVisible();
+  await expect(page.locator(".btwr-brand-lockup strong")).toHaveText("BLDGTYP");
+  await expect(page.getByRole("heading", { name: /The report opens with the decision/ })).toBeVisible();
   await expect(page.getByText("Site energy chart pending")).toBeVisible();
   await expect(page.getByRole("link", { name: "Appendix" })).toBeVisible();
 

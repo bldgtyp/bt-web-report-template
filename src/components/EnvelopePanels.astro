@@ -1,0 +1,12 @@
+---
+import { BuildingMetricsTable, VariantInputsTable } from "@bldgtyp/web-report-kit";
+
+import { loadTemplateReportData } from "../data/report";
+
+const report = await loadTemplateReportData();
+---
+
+<div class="btwr-component-stack">
+  <BuildingMetricsTable data={report} caption="Model geometry and building metrics" />
+  <VariantInputsTable data={report} sections={["geometry", "envelope", "windows"]} caption="Envelope and geometry assumptions" />
+</div>

@@ -2,17 +2,27 @@ import { SectionHeading } from "@bldgtyp/web-report-kit";
 import ProjectOverview from "../src/components/ProjectOverview.astro";
 
 <section className="btwr-section" aria-labelledby="summary">
-  <SectionHeading id="summary" kicker="Summary" title="Recommended performance path" />
+  <SectionHeading id="summary" kicker="00" title="Executive summary" />
+  <h2 className="btwr-editorial-heading">
+    The report opens with the decision, then lets the model data support it.
+  </h2>
   <div className="btwr-prose">
     <p>
-      This starter report is ready before the first PHPP scrape. Edit project metadata in
-      <code> project.yaml</code>, write client-facing narrative in MDX, and let generated
-      data flow through <code>data/</code>.
+      Use this page to state the recommended performance path in plain language: which variant
+      is preferred, why it is technically viable, and where the remaining design risks live.
     </p>
     <p>
-      Replace this section with the design-analysis recommendation once the project options,
-      envelope assumptions, airtightness target, and certification path are settled.
+      The starter report remains buildable before the first PHPP scrape. Edit project metadata
+      in <code> project.yaml</code>, write the client-facing narrative in MDX, and let generated
+      CSV data flow through <code>data/</code>.
     </p>
+  </div>
+  <div className="btwr-callout">
+    <strong>Note</strong>
+    <span>
+      Keep high-stakes caveats here: overheating risk, airtightness assumptions, certification
+      path uncertainty, or cost/constructability tradeoffs that could change the recommendation.
+    </span>
   </div>
   <ProjectOverview />
 </section>

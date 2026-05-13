@@ -1,44 +1,9 @@
 ---
-import { DataState } from "@bldgtyp/web-report-kit";
+import { SiteEnergyChart as KitSiteEnergyChart } from "@bldgtyp/web-report-kit";
 
 import { loadTemplateReportData } from "../data/report";
 
 const report = await loadTemplateReportData();
-const rows = report.energy.slice(0, 5);
-const maxValue = Math.max(
-  ...rows.map((row) => {
-    const value = Number(row.value);
-    return Number.isFinite(value) ? value : 0;
-  }),
-  1,
-);
 ---
 
-{
-  rows.length === 0 ? (
-    <DataState
-      state="pending"
-      title="Site energy chart pending"
-      message="Run btwr scrape after the PHPP is ready. The report will build before CSV data exists."
-    />
-  ) : (
-    <div class="btwr-component-stack" aria-label="Site energy chart">
-      <div class="btwr-placeholder-chart" role="img" aria-label={`Site energy preview using ${rows.length} energy rows`}>
-        <div class="btwr-placeholder-chart__bars">
-          {rows.map((row, index) => {
-            const value = Number(row.value);
-            const height = `${Math.max(12, ((Number.isFinite(value) ? value : 0) / maxValue) * 100)}%`;
-            return (
-              <div
-                class="btwr-placeholder-chart__bar"
-                style={`height: ${height}; background: var(--btwr-chart-variant-${(index % 5) + 1});`}
-                title={`${row.variant_name ?? row.variant_id ?? "variant"}: ${row.value ?? "n/a"}`}
-              />
-            );
-          })}
-        </div>
-        <p class="btwr-placeholder-chart__label">Fixture-backed preview. Phase 2 will replace this with the kit chart primitive.</p>
-      </div>
-    </div>
-  )
-}
+<KitSiteEnergyChart data={report} title="Annual site energy" />

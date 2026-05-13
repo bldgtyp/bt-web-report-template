@@ -1,15 +1,20 @@
 import { SectionHeading } from "@bldgtyp/web-report-kit";
-import CertificationMetrics from "../src/components/CertificationMetrics.astro";
-import SiteEnergyChart from "../src/components/SiteEnergyChart.astro";
+import EnergyModelPanels from "../src/components/EnergyModelPanels.astro";
 
 <section className="btwr-section" aria-labelledby="energy-model">
-  <SectionHeading id="energy-model" kicker="PHPP" title="Energy model results" />
+  <SectionHeading id="energy-model" kicker="01" title="Energy model" />
+  <h2 className="btwr-editorial-heading">
+    Compare design variants against site energy, source energy, demand, and certification limits.
+  </h2>
   <div className="btwr-prose">
     <p>
-      The model narrative belongs here: variant intent, key PHPP assumptions, and why the
-      recommended option is the right performance/cost path for the project.
+      This page follows the BLDGTYP Standard mockup: a concise narrative lead, chart-first
+      evidence, and tables that stay close to the PHPP-derived source rows.
+    </p>
+    <p>
+      Use the copy above each chart to explain the result, not to restate every number. The
+      chart and table components below are pulled directly from the shared report kit.
     </p>
   </div>
-  <SiteEnergyChart />
-  <CertificationMetrics />
+  <EnergyModelPanels />
 </section>
