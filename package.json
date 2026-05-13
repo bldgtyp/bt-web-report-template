@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^3.1.9",
-    "@bldgtyp/web-report-kit": "workspace:*",
-    "@bldgtyp/web-report-schemas": "workspace:*",
+    "@bldgtyp/web-report-kit": "^0.1.0",
+    "@bldgtyp/web-report-schemas": "^0.1.0",
     "astro": "^4.16.19",
     "yaml": "^2.9.0"
   },
