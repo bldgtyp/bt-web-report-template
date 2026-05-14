@@ -79,6 +79,12 @@ Tina around Astro dev. The report is served at `http://127.0.0.1:4321/`; the
 Tina admin route is `http://127.0.0.1:4321/admin/index.html`, with Tina's local
 data server on port `4001`.
 
+This is Tina's basic local form editor. It writes MDX/frontmatter files and the
+Astro report preview should hot-reload after saves, but Tina visual/live preview
+is not wired in v1. See
+`../context/plans/2026-05-13/phase-6-tinacms-integration.html#visual-live-preview-future-slice`
+for the future investigation notes.
+
 PHPP-derived files in `data/` are deliberately not part of the editor schema.
 
 ## Data States
