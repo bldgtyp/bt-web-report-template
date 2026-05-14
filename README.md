@@ -1,7 +1,7 @@
 # bt-web-report-template
 
 Clonable Astro starter for one Passive House client report repo
-(`bt-proj-<slug>`). Phase 7 automation will clone this into
+(`bldgtyp-projects/bt-proj-<slug>`). Phase 7 automation will clone this into
 `Dropbox/bldgtyp/<Project>/04_Web/`; until then, it can be used manually.
 
 ## Commands
@@ -80,10 +80,12 @@ project data contract; authors should not parse CSVs inside narrative files.
 ## Deploy
 
 Cloudflare Pages deploys `dist/`. The included workflow expects these repo
-secrets before deployment:
+or organization secrets before deployment:
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
+- `BLDGTYP_PACKAGES_TOKEN` when the project repo needs to install private
+  `@bldgtyp/*` packages from GitHub Packages
 
 Optional repo variable:
 
@@ -91,6 +93,9 @@ Optional repo variable:
 
 For Phase 4, create/configure the Pages project manually in the Cloudflare
 dashboard, attach the `<slug>.bldgtyp.com` custom domain, then push `main`.
+For new project repos, default to the `bldgtyp-projects` org, where
+`BLDGTYP_PACKAGES_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and
+`CLOUDFLARE_API_TOKEN` are configured as private-repo org secrets.
 API-driven project/domain creation remains Phase 7 scope.
 
 The starter project that `btwr new` clones to bootstrap every
