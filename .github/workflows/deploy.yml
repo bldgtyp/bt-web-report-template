@@ -42,7 +42,7 @@ jobs:
           done
           ln -s ../renderer/node_modules runtime/node_modules
           for item in project.yaml content data public; do
-            ln -s "../project/$item" "runtime/$item"
+            cp -a "project/$item" "runtime/$item"
           done
       - run: pnpm build
         working-directory: runtime
