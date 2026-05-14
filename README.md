@@ -1,10 +1,47 @@
 # bt-web-report-template
 
-Clonable Astro starter for one Passive House client report repo
-(`bldgtyp-projects/bt-proj-<slug>`). Phase 7 automation will clone this into
-`Dropbox/bldgtyp/<Project>/04_Web/`; until then, it can be used manually.
+Shared Astro renderer and seed content for BLDGTYP Passive House report repos.
 
-## Commands
+Per-project repos are content-only. A project `04_Web/` should contain
+`project.yaml`, `content/`, `data/`, `public/assets/`, `.github/`, and small
+metadata files only. It should not contain `package.json`, `node_modules`,
+`.astro`, `.wrangler`, `dist`, or local test output.
+
+## Local Runtime
+
+Use the CLI from a project folder or pass the project path explicitly:
+
+```bash
+btwr scrape /path/to/Project/04_Web
+btwr preview /path/to/Project/04_Web
+btwr editor /path/to/Project/04_Web
+btwr build /path/to/Project/04_Web
+```
+
+`btwr preview`, `btwr editor`, and `btwr build` run this renderer from the
+shared app-support runtime:
+
+```text
+~/Library/Application Support/bt-web-report-manager/
+├── renderer/current/
+├── pnpm-store/
+├── builds/<slug>/
+├── previews/<slug>/
+└── cache/
+```
+
+During platform development, set `BTWR_RENDERER_SOURCE` or pass
+`--renderer-source /path/to/bt-web-report-template` so the shared runtime can be
+refreshed from this repo.
+
+If the shared renderer needs to install private `@bldgtyp/*` packages, `btwr`
+uses `NODE_AUTH_TOKEN` when present, otherwise it asks `gh auth token` and passes
+that token to pnpm through a temporary npm config. Tokens are not written into
+the project repo or app-support folder.
+
+## Renderer Commands
+
+These commands are for platform development inside this renderer repo:
 
 ```bash
 pnpm install
@@ -21,41 +58,32 @@ pnpm smoke:fixture
 
 Use pnpm only.
 
-## Edit Boundaries
+## Project Edit Boundaries
 
 - Edit `project.yaml` for project metadata, publish URL, and local data paths.
 - Edit `content/**/*.mdx` for report narrative.
 - Put client-visible images and diagrams in `public/assets/`.
-- Treat `data/` as generated PHPP output. Run `btwr scrape <phpp.xlsx> --out data`
-  from the CLI package instead of hand-editing CSVs.
+- Treat `data/` as generated PHPP output. Run `btwr scrape <project-path>`.
 - Keep `.bldgtyp/config.local.yaml` local-only for machine-specific notes.
 
 ## TinaCMS Editor
 
-Run the local report editor from the project root:
+Run the local report editor through the CLI:
 
 ```bash
-pnpm dev:editor
+btwr editor /path/to/Project/04_Web
 ```
 
-The command starts Tina around Astro dev. The report is served at
-`http://127.0.0.1:4321/`; the Tina admin route is served by the Astro dev
-server at `http://127.0.0.1:4321/admin/index.html`, with Tina's local data
-server on port `4001`.
+The command creates a disposable preview workspace in app support and starts
+Tina around Astro dev. The report is served at `http://127.0.0.1:4321/`; the
+Tina admin route is `http://127.0.0.1:4321/admin/index.html`, with Tina's local
+data server on port `4001`.
 
-The first editor schema exposes the fixed report sections in `content/` and
-`content/envelope/` as locked MDX documents: authors can edit section content,
-but cannot create/delete canonical sections from Tina. Repo-backed media is
-limited to `public/assets`. PHPP-derived files in `data/` are deliberately not
-part of the editor schema.
-
-Use `pnpm check:editor` to audit the Tina config. Use `pnpm build:editor` only
-when you need to inspect the generated admin bundle; generated admin artifacts
-are ignored because the v1 editor is local-only.
+PHPP-derived files in `data/` are deliberately not part of the editor schema.
 
 ## Data States
 
-The committed starter is intentionally pending-data:
+The committed seed content is intentionally pending-data:
 
 ```json
 { "status": "pending", "variants": [] }
@@ -66,53 +94,19 @@ That state must build. After scraping, `data/` should contain:
 `building-metrics.csv`, `certification.csv`, `energy.csv`, and
 `demand-detail.csv`.
 
-Run `pnpm smoke:fixture` before cloning this template into a real project. It
-temporarily swaps in the Vandam fixture data from the local kit showcase, runs
-validation, Astro check/build, and Playwright smoke tests, then restores the
-committed pending-data starter.
-
-## Component Use In MDX
-
-MDX sections import short template wrappers such as `SiteEnergyChart`,
-`CertificationMetrics`, and `VariantSummaryTable`. Those wrappers load the
-project data contract; authors should not parse CSVs inside narrative files.
-
 ## Deploy
 
-Cloudflare Pages deploys `dist/`. The included workflow expects these repo
-or organization secrets before deployment:
+Project repos copy the workflow in `.github/workflows/`. GitHub Actions checks
+out the content repo, checks out `bldgtyp/bt-web-report-template` as the shared
+renderer, creates a temporary runtime workspace, builds `runtime/dist`, and
+deploys that output to Cloudflare Pages.
+
+Required GitHub repo or org secrets:
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
-- `BLDGTYP_PACKAGES_TOKEN` when the project repo needs to install private
-  `@bldgtyp/*` packages from GitHub Packages
+- `BLDGTYP_PACKAGES_TOKEN` when private `@bldgtyp/*` package access is needed
 
 Optional repo variable:
 
 - `CLOUDFLARE_PAGES_PROJECT` (defaults to the GitHub repo name)
-
-For Phase 4, create/configure the Pages project manually in the Cloudflare
-dashboard, attach the `<slug>.bldgtyp.com` custom domain, then push `main`.
-For new project repos, default to the `bldgtyp-projects` org, where
-`BLDGTYP_PACKAGES_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and
-`CLOUDFLARE_API_TOKEN` are configured as private-repo org secrets.
-API-driven project/domain creation remains Phase 7 scope.
-
-The starter project that `btwr new` clones to bootstrap every
-`bt-proj-<slug>` repo. An Astro app pinned to a specific
-`@bldgtyp/web-report-kit` major.
-
-Layout (target):
-
-```
-project.yaml                  hand-typed metadata
-data/                         generated by `btwr scrape`
-content/                      hand-authored MDX
-assets/                       images
-astro.config.mjs
-tina/                         TinaCMS config
-.github/workflows/deploy.yml
-```
-
-See [`../context/design.md`](../context/design.md) for the full folder
-convention.

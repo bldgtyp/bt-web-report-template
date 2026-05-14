@@ -11,7 +11,15 @@ jobs:
     env:
       NODE_AUTH_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout project content
+        uses: actions/checkout@v4
+        with:
+          path: project
+      - name: Checkout shared renderer
+        uses: actions/checkout@v4
+        with:
+          repository: bldgtyp/bt-web-report-template
+          path: renderer
       - uses: pnpm/action-setup@v4
         with:
           version: 10.33.0
@@ -20,9 +28,26 @@ jobs:
           node-version: 22
       - name: Configure GitHub Packages auth
         run: echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
-      - run: pnpm install --ignore-scripts --no-frozen-lockfile
+      - name: Install renderer dependencies
+        run: pnpm install --ignore-scripts --no-frozen-lockfile
+        working-directory: renderer
+      - name: Prepare content-only runtime
+        run: |
+          mkdir runtime
+          for item in astro.config.mjs package.json pnpm-lock.yaml playwright playwright.config.ts scripts src tina tsconfig.json; do
+            ln -s "../renderer/$item" "runtime/$item"
+          done
+          ln -s ../renderer/node_modules runtime/node_modules
+          for item in project.yaml content data public; do
+            ln -s "../project/$item" "runtime/$item"
+          done
       - run: pnpm validate
+        working-directory: runtime
       - run: pnpm check
+        working-directory: runtime
       - run: pnpm check:editor
+        working-directory: runtime
       - run: pnpm build
+        working-directory: runtime
       - run: pnpm build:editor
+        working-directory: runtime

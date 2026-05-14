@@ -14,7 +14,15 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout project content
+        uses: actions/checkout@v4
+        with:
+          path: project
+      - name: Checkout shared renderer
+        uses: actions/checkout@v4
+        with:
+          repository: bldgtyp/bt-web-report-template
+          path: renderer
       - uses: pnpm/action-setup@v4
         with:
           version: 10.33.0
@@ -23,8 +31,21 @@ jobs:
           node-version: 22
       - name: Configure GitHub Packages auth
         run: echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
-      - run: pnpm install --ignore-scripts --no-frozen-lockfile
+      - name: Install renderer dependencies
+        run: pnpm install --ignore-scripts --no-frozen-lockfile
+        working-directory: renderer
+      - name: Prepare content-only runtime
+        run: |
+          mkdir runtime
+          for item in astro.config.mjs package.json pnpm-lock.yaml scripts src tina tsconfig.json; do
+            ln -s "../renderer/$item" "runtime/$item"
+          done
+          ln -s ../renderer/node_modules runtime/node_modules
+          for item in project.yaml content data public; do
+            ln -s "../project/$item" "runtime/$item"
+          done
       - run: pnpm build
+        working-directory: runtime
       - name: Skip deploy until Cloudflare secrets are configured
         if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' }}
         run: |
@@ -33,4 +54,4 @@ jobs:
         if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
         run: |
           PROJECT_NAME="${CLOUDFLARE_PAGES_PROJECT:-${GITHUB_REPOSITORY#*/}}"
-          pnpm dlx wrangler pages deploy dist --project-name "$PROJECT_NAME"
+          pnpm dlx wrangler pages deploy runtime/dist --project-name "$PROJECT_NAME"

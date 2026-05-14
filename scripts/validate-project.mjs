@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import { pathToFileURL } from "node:url";
 import { readProjectFile, projectPathFromRoot } from "../src/data/project-schema.mjs";
 
 const REQUIRED_SECTION_FILES = [
@@ -31,7 +32,7 @@ function requirePackageScripts(root) {
 }
 
 try {
-  const root = new URL("../", import.meta.url);
+  const root = pathToFileURL(`${process.cwd()}/`);
   const project = await readProjectFile(projectPathFromRoot(process.cwd()));
   for (const sectionFile of REQUIRED_SECTION_FILES) {
     requireFile(root, sectionFile);

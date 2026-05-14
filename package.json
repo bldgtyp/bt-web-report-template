@@ -1,7 +1,7 @@
 {
   "name": "@bldgtyp/web-report-template",
   "version": "0.0.1",
-  "description": "Clonable Astro starter for per-project bt-proj-<slug> repos.",
+  "description": "Shared Astro renderer and seed content for content-only bt-web-report project repos.",
   "type": "module",
   "private": true,
   "license": "GPL-3.0-or-later",
