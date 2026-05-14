@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      NODE_AUTH_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
@@ -29,6 +29,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Verify deploy secrets
+        run: |
+          missing=0
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::BLDGTYP_PACKAGES_TOKEN is not available to this repo. Configure it as a repo or org Actions secret with read access to @bldgtyp packages."
+            missing=1
+          fi
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN is not available to this repo. Configure it as a repo or org Actions secret with Cloudflare Pages and bldgtyp.com DNS access."
+            missing=1
+          fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::CLOUDFLARE_ACCOUNT_ID is not available to this repo."
+            missing=1
+          fi
+          exit "$missing"
       - name: Configure GitHub Packages auth
         run: echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
       - name: Install renderer dependencies
@@ -46,17 +62,11 @@ jobs:
           done
       - run: pnpm build
         working-directory: runtime
-      - name: Skip deploy until Cloudflare secrets are configured
-        if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' }}
-        run: |
-          echo "Cloudflare deploy skipped: configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repo secrets to enable deployment."
       - name: Ensure Cloudflare Pages project and domain
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
         run: |
           PROJECT_NAME="${CLOUDFLARE_PAGES_PROJECT:-${GITHUB_REPOSITORY#*/}}"
           node renderer/scripts/setup-cloudflare-pages.mjs --project-yaml project/project.yaml --project-name "$PROJECT_NAME"
       - name: Deploy dist
-        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
         run: |
           PROJECT_NAME="${CLOUDFLARE_PAGES_PROJECT:-${GITHUB_REPOSITORY#*/}}"
           pnpm dlx wrangler pages deploy runtime/dist --project-name "$PROJECT_NAME"

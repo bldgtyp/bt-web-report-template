@@ -108,6 +108,10 @@ renderer, creates or reuses the direct-upload Cloudflare Pages project, adds the
 custom domain from `project.yaml`, creates a temporary runtime workspace, builds
 `runtime/dist`, and deploys that output to Cloudflare Pages.
 
+Project CI runs `pnpm check:editor` to validate the local Tina schema, but it
+does not run `pnpm build:editor`. The Tina admin is a local-only authoring tool
+in v1, not a production deploy artifact.
+
 Required GitHub repo or org secrets:
 
 - `CLOUDFLARE_API_TOKEN`

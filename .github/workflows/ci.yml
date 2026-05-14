@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      NODE_AUTH_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+      NODE_AUTH_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
     steps:
       - name: Checkout project content
         uses: actions/checkout@v4
@@ -26,6 +26,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Verify GitHub Packages auth
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::BLDGTYP_PACKAGES_TOKEN is not available to this repo. Configure it as a repo or org Actions secret with read access to @bldgtyp packages."
+            exit 1
+          fi
       - name: Configure GitHub Packages auth
         run: echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
       - name: Install renderer dependencies
@@ -48,6 +54,4 @@ jobs:
       - run: pnpm check:editor
         working-directory: runtime
       - run: pnpm build
-        working-directory: runtime
-      - run: pnpm build:editor
         working-directory: runtime
