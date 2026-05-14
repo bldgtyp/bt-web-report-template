@@ -4,7 +4,7 @@ import { isAbsolute, resolve } from "node:path";
 import YAML from "yaml";
 
 const SCHEMA_VERSION = "0.1.0";
-const SLUG_PATTERN = /^[0-9]{4}-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const REQUIRED_STRINGS = [
   "schema_version",
@@ -55,7 +55,7 @@ export function validateProjectConfig(value, source = "project.yaml") {
   }
 
   if (typeof value.slug === "string" && !SLUG_PATTERN.test(value.slug)) {
-    errors.push(`${source}: slug must match <jobnum>-<short-name>, for example 2606-vandam`);
+    errors.push(`${source}: slug must be lowercase kebab-case, using only a-z, 0-9, and single hyphens`);
   }
 
   if (typeof value.contact_email === "string" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.contact_email)) {

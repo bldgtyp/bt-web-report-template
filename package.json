@@ -16,6 +16,7 @@
     "validate": "node scripts/validate-project.mjs",
     "build:pdf": "pnpm build && node scripts/build-pdf.mjs",
     "preview": "astro preview",
+    "test:schema": "node scripts/test-project-schema.mjs",
     "test:e2e": "playwright test",
     "smoke:fixture": "node scripts/smoke-fixture-data.mjs"
   },
