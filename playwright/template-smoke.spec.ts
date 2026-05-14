@@ -14,6 +14,8 @@ test("starter report renders available data state without console errors", async
   await expect(page.locator(".btwr-brand-lockup strong")).toHaveText("BLDGTYP");
   await expect(page.getByRole("heading", { name: "Executive summary" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Appendix" })).toBeVisible();
+  await expect(page.locator(".btwr-hero")).toHaveCSS("display", "grid");
+  await expect(page.locator(".btwr-report-grid")).toHaveCSS("display", "grid");
 
   const hasPendingData = (await page.getByText("Site energy chart pending").count()) > 0;
   if (hasPendingData) {
