@@ -67,6 +67,7 @@ function fixedMdxSection(label: string, name: string, path: string, include: str
 
 export default defineConfig({
   branch: process.env.HEAD || process.env.TINA_PUBLIC_BRANCH || "main",
+  localContentPath: process.env.BTWR_TINA_CONTENT_ROOT,
   build: {
     publicFolder: "public",
     outputFolder: "admin",
