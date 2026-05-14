@@ -50,6 +50,11 @@ jobs:
         if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' }}
         run: |
           echo "Cloudflare deploy skipped: configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repo secrets to enable deployment."
+      - name: Ensure Cloudflare Pages project and domain
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        run: |
+          PROJECT_NAME="${CLOUDFLARE_PAGES_PROJECT:-${GITHUB_REPOSITORY#*/}}"
+          node renderer/scripts/setup-cloudflare-pages.mjs --project-yaml project/project.yaml --project-name "$PROJECT_NAME"
       - name: Deploy dist
         if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
         run: |

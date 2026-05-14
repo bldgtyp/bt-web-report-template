@@ -17,6 +17,7 @@
     "build:pdf": "pnpm build && node scripts/build-pdf.mjs",
     "preview": "astro preview",
     "test:schema": "node scripts/test-project-schema.mjs",
+    "test:cloudflare": "node scripts/test-cloudflare-pages-setup.mjs",
     "test:e2e": "playwright test",
     "smoke:fixture": "node scripts/smoke-fixture-data.mjs"
   },
@@ -35,6 +36,7 @@
     "@playwright/test": "^1.60.0",
     "@tinacms/cli": "2.3.0",
     "@types/node": "^20.19.41",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "wrangler": "^4.91.0"
   }
 }

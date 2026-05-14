@@ -1,5 +1,5 @@
 schema_version: "0.1.0"
-slug: "0000-example-report"
+slug: "project-0000"
 project_title: "Example Passive House Report"
 client_name: "Example Client"
 building_name: "Example Residence"
@@ -21,5 +21,5 @@ source_files:
   data_dir: "data"
   assets_dir: "public/assets"
 publishing:
-  production_url: "https://0000-example-report.bldgtyp.com"
+  production_url: "https://project-0000.bldgtyp.com"
   cloudflare_pages_project: "bt-proj-0000-example-report"

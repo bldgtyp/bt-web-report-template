@@ -30,7 +30,7 @@ const baseProject = {
   },
   publishing: {
     production_url: "https://project-2606.bldgtyp.com",
-    cloudflare_pages_project: "bt-proj-project-2606",
+    cloudflare_pages_project: "bt-proj-2606-vandam",
   },
 };
 

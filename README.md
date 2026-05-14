@@ -104,8 +104,9 @@ That state must build. After scraping, `data/` should contain:
 
 Project repos copy the workflow in `.github/workflows/`. GitHub Actions checks
 out the content repo, checks out `bldgtyp/bt-web-report-template` as the shared
-renderer, creates a temporary runtime workspace, builds `runtime/dist`, and
-deploys that output to Cloudflare Pages.
+renderer, creates or reuses the direct-upload Cloudflare Pages project, adds the
+custom domain from `project.yaml`, creates a temporary runtime workspace, builds
+`runtime/dist`, and deploys that output to Cloudflare Pages.
 
 Required GitHub repo or org secrets:
 
@@ -116,3 +117,7 @@ Required GitHub repo or org secrets:
 Optional repo variable:
 
 - `CLOUDFLARE_PAGES_PROJECT` (defaults to the GitHub repo name)
+
+The normal project convention is repo name = Pages project name:
+`bt-proj-<number>-<name>`. The client URL remains separate:
+`https://project-<number>.bldgtyp.com`.
