@@ -2,7 +2,7 @@
 import { ReportShell } from "@bldgtyp/web-report-kit";
 
 import type { TemplateReportData } from "../data/report";
-import projectCss from "../styles/project.css?raw";
+import "../styles/project.css";
 
 interface TocItem {
   href: string;
@@ -35,7 +35,6 @@ const projectMeta = {
   variants={report.variantOrder}
   tocItems={tocItems}
   projectMeta={projectMeta}
-  extraCss={projectCss}
 >
   <slot />
 </ReportShell>
