@@ -112,11 +112,15 @@ Project CI runs `pnpm check:editor` to validate the local Tina schema, but it
 does not run `pnpm build:editor`. The Tina admin is a local-only authoring tool
 in v1, not a production deploy artifact.
 
-Required GitHub repo or org secrets:
+Required organization or repository GitHub Actions secrets:
 
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 - `BLDGTYP_PACKAGES_TOKEN` when private `@bldgtyp/*` package access is needed
+
+Project repos are public, so the normal setup is org-level secrets with
+visibility that includes public repositories. Repo-level secrets remain useful
+only for one-off overrides.
 
 Optional repo variable:
 
