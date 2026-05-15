@@ -46,6 +46,7 @@ export async function ensureCloudflarePages({
 
   const domainName = hostnameFromProductionUrl(productionUrl);
   const projectPath = `/pages/projects/${encodeURIComponent(projectName)}`;
+  const pagesHostname = `${projectName}.pages.dev`;
 
   const project = await cloudflareRequest({
     accountId,
@@ -79,22 +80,119 @@ export async function ensureCloudflarePages({
     apiBaseUrl,
   });
   const existingDomain = domains.result.find((domain) => domain.name === domainName);
+  let domainCreated = false;
+  let domainStatus;
   if (existingDomain) {
     log(`Cloudflare Pages custom domain exists: ${domainName} (${existingDomain.status})`);
-    return { projectName, domainName, domainCreated: false, domainStatus: existingDomain.status };
+    domainStatus = existingDomain.status;
+  } else {
+    const domain = await cloudflareRequest({
+      accountId,
+      apiToken,
+      path: `${projectPath}/domains`,
+      fetchImpl,
+      apiBaseUrl,
+      method: "POST",
+      body: { name: domainName },
+    });
+    domainCreated = true;
+    domainStatus = domain.result.status;
+    log(`Cloudflare Pages custom domain added: ${domainName} (${domain.result.status})`);
   }
 
-  const domain = await cloudflareRequest({
-    accountId,
+  const dnsRecord = await ensurePagesDnsRecord({
     apiToken,
-    path: `${projectPath}/domains`,
     fetchImpl,
     apiBaseUrl,
-    method: "POST",
-    body: { name: domainName },
+    domainName,
+    pagesHostname,
+    log,
   });
-  log(`Cloudflare Pages custom domain added: ${domainName} (${domain.result.status})`);
-  return { projectName, domainName, domainCreated: true, domainStatus: domain.result.status };
+  return { projectName, domainName, domainCreated, domainStatus, dnsRecord };
+}
+
+export async function ensurePagesDnsRecord({
+  apiToken,
+  domainName,
+  pagesHostname,
+  fetchImpl = globalThis.fetch,
+  log = console.log,
+  apiBaseUrl = API_BASE_URL,
+}) {
+  const zone = await findZoneForHostname({ apiToken, hostname: domainName, fetchImpl, apiBaseUrl });
+  if (!zone) {
+    throw new Error(`Could not find a Cloudflare zone for ${domainName}.`);
+  }
+  const encodedName = encodeURIComponent(domainName);
+  const records = await cloudflareRequestRaw({
+    apiToken,
+    path: `/zones/${encodeURIComponent(zone.id)}/dns_records?name=${encodedName}`,
+    fetchImpl,
+    apiBaseUrl,
+  });
+  const conflictingRecord = records.result.find((record) => record.type !== "CNAME");
+  if (conflictingRecord) {
+    throw new Error(`DNS record for ${domainName} already exists with type ${conflictingRecord.type}.`);
+  }
+  const cname = records.result.find((record) => record.type === "CNAME");
+  const body = {
+    type: "CNAME",
+    name: domainName,
+    content: pagesHostname,
+    ttl: 1,
+    proxied: true,
+  };
+  if (!cname) {
+    const created = await cloudflareRequestRaw({
+      apiToken,
+      path: `/zones/${encodeURIComponent(zone.id)}/dns_records`,
+      fetchImpl,
+      apiBaseUrl,
+      method: "POST",
+      body,
+    });
+    log(`Cloudflare DNS CNAME created: ${domainName} -> ${pagesHostname}`);
+    return { zoneName: zone.name, recordId: created.result.id, created: true };
+  }
+  if (cname.content === pagesHostname && cname.proxied === true) {
+    log(`Cloudflare DNS CNAME exists: ${domainName} -> ${pagesHostname}`);
+    return { zoneName: zone.name, recordId: cname.id, created: false };
+  }
+  const updated = await cloudflareRequestRaw({
+    apiToken,
+    path: `/zones/${encodeURIComponent(zone.id)}/dns_records/${encodeURIComponent(cname.id)}`,
+    fetchImpl,
+    apiBaseUrl,
+    method: "PUT",
+    body,
+  });
+  log(`Cloudflare DNS CNAME updated: ${domainName} -> ${pagesHostname}`);
+  return { zoneName: zone.name, recordId: updated.result.id, created: false };
+}
+
+async function findZoneForHostname({ apiToken, hostname, fetchImpl, apiBaseUrl }) {
+  for (const zoneName of candidateZoneNames(hostname)) {
+    const zones = await cloudflareRequestRaw({
+      apiToken,
+      path: `/zones?name=${encodeURIComponent(zoneName)}`,
+      fetchImpl,
+      apiBaseUrl,
+    });
+    const zone = zones.result.find((item) => item.name === zoneName);
+    if (zone) {
+      return zone;
+    }
+  }
+  return null;
+}
+
+export function candidateZoneNames(hostname) {
+  const labels = hostname.split(".").filter(Boolean);
+  const candidates = [];
+  for (let index = 0; index <= labels.length - 2; index += 1) {
+    candidates.push(labels.slice(index).join("."));
+  }
+  return candidates;
 }
 
 export async function cloudflareRequest({
@@ -107,7 +205,27 @@ export async function cloudflareRequest({
   body,
   allowNotFound = false,
 }) {
-  const response = await fetchImpl(`${apiBaseUrl}/accounts/${encodeURIComponent(accountId)}${path}`, {
+  return cloudflareRequestRaw({
+    apiToken,
+    path: `/accounts/${encodeURIComponent(accountId)}${path}`,
+    fetchImpl,
+    apiBaseUrl,
+    method,
+    body,
+    allowNotFound,
+  });
+}
+
+export async function cloudflareRequestRaw({
+  apiToken,
+  path,
+  fetchImpl,
+  apiBaseUrl = API_BASE_URL,
+  method = "GET",
+  body,
+  allowNotFound = false,
+}) {
+  const response = await fetchImpl(`${apiBaseUrl}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${apiToken}`,

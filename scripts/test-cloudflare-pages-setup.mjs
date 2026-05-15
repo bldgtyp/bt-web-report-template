@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 
-import { ensureCloudflarePages, hostnameFromProductionUrl } from "./setup-cloudflare-pages.mjs";
+import { candidateZoneNames, ensureCloudflarePages, hostnameFromProductionUrl } from "./setup-cloudflare-pages.mjs";
 
 assert.equal(hostnameFromProductionUrl("https://project-2606.bldgtyp.com"), "project-2606.bldgtyp.com");
 assert.throws(() => hostnameFromProductionUrl(""), /production_url is required/);
+assert.deepEqual(candidateZoneNames("project-2606.bldgtyp.com"), [
+  "project-2606.bldgtyp.com",
+  "bldgtyp.com",
+]);
 
 const createdCalls = [];
 const createdFetch = async (url, options) => {
@@ -24,6 +28,27 @@ const createdFetch = async (url, options) => {
     assert.deepEqual(JSON.parse(options.body), { name: "project-2606.bldgtyp.com" });
     return jsonResponse({ success: true, result: { name: "project-2606.bldgtyp.com", status: "initializing" } });
   }
+  if (options.method === "GET" && path.endsWith("/zones")) {
+    const name = new URL(url).searchParams.get("name");
+    return jsonResponse({
+      success: true,
+      result: name === "bldgtyp.com" ? [{ id: "zone-id", name: "bldgtyp.com" }] : [],
+    });
+  }
+  if (options.method === "GET" && path.endsWith("/zones/zone-id/dns_records")) {
+    assert.equal(new URL(url).searchParams.get("name"), "project-2606.bldgtyp.com");
+    return jsonResponse({ success: true, result: [] });
+  }
+  if (options.method === "POST" && path.endsWith("/zones/zone-id/dns_records")) {
+    assert.deepEqual(JSON.parse(options.body), {
+      type: "CNAME",
+      name: "project-2606.bldgtyp.com",
+      content: "bt-proj-2606-vandam.pages.dev",
+      ttl: 1,
+      proxied: true,
+    });
+    return jsonResponse({ success: true, result: { id: "record-id" } });
+  }
   throw new Error(`unexpected request: ${options.method} ${path}`);
 };
 
@@ -39,7 +64,8 @@ const created = await ensureCloudflarePages({
 
 assert.equal(created.domainCreated, true);
 assert.equal(created.domainStatus, "initializing");
-assert.equal(createdCalls.length, 4);
+assert.deepEqual(created.dnsRecord, { zoneName: "bldgtyp.com", recordId: "record-id", created: true });
+assert.equal(createdCalls.length, 8);
 
 const existingCalls = [];
 const existingFetch = async (url, options) => {
@@ -52,6 +78,27 @@ const existingFetch = async (url, options) => {
     return jsonResponse({
       success: true,
       result: [{ name: "project-2606.bldgtyp.com", status: "active" }],
+    });
+  }
+  if (options.method === "GET" && path.endsWith("/zones")) {
+    const name = new URL(url).searchParams.get("name");
+    return jsonResponse({
+      success: true,
+      result: name === "bldgtyp.com" ? [{ id: "zone-id", name: "bldgtyp.com" }] : [],
+    });
+  }
+  if (options.method === "GET" && path.endsWith("/zones/zone-id/dns_records")) {
+    return jsonResponse({
+      success: true,
+      result: [
+        {
+          id: "record-id",
+          type: "CNAME",
+          name: "project-2606.bldgtyp.com",
+          content: "bt-proj-2606-vandam.pages.dev",
+          proxied: true,
+        },
+      ],
     });
   }
   throw new Error(`unexpected request: ${options.method} ${path}`);
@@ -69,7 +116,8 @@ const existing = await ensureCloudflarePages({
 
 assert.equal(existing.domainCreated, false);
 assert.equal(existing.domainStatus, "active");
-assert.equal(existingCalls.length, 2);
+assert.deepEqual(existing.dnsRecord, { zoneName: "bldgtyp.com", recordId: "record-id", created: false });
+assert.equal(existingCalls.length, 5);
 
 function jsonResponse(payload, status = 200) {
   return new Response(JSON.stringify(payload), {
