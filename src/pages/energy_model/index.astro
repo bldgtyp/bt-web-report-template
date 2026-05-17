@@ -1,0 +1,38 @@
+---
+import Appendix, { frontmatter as appendix } from "../../../content/appendix.mdx";
+import EnergyModel, { frontmatter as energyModel } from "../../../content/energy-model.mdx";
+import EnergyModelPanels from "../../components/EnergyModelPanels.astro";
+import ReportSection from "../../components/ReportSection.astro";
+import VariantSummaryTable from "../../components/VariantSummaryTable.astro";
+import { reportPages } from "../../data/pages";
+import { loadTemplateReportData } from "../../data/report";
+import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
+
+const report = await loadTemplateReportData();
+const page = reportPages.energyModel;
+const tocItems = [
+  { href: "#energy-model", label: "Energy model" },
+  { href: "#model-data", label: "Model data" },
+];
+---
+
+<ProjectReportLayout
+  report={report}
+  tocItems={tocItems}
+  currentHref={page.href}
+  pageKicker={page.kicker}
+  pageLabel={page.label}
+>
+  <ReportSection
+    id="energy-model"
+    Content={EnergyModel}
+    kicker={energyModel.kicker}
+    title={energyModel.title}
+    dek={energyModel.dek}
+  >
+    <EnergyModelPanels />
+  </ReportSection>
+  <ReportSection id="model-data" Content={Appendix} kicker={appendix.kicker} title="Model data" dek={appendix.dek}>
+    <VariantSummaryTable />
+  </ReportSection>
+</ProjectReportLayout>

@@ -1,0 +1,30 @@
+---
+import Mechanical, { frontmatter as mechanical } from "../../../content/mechanical.mdx";
+import MechanicalPanels from "../../components/MechanicalPanels.astro";
+import ReportSection from "../../components/ReportSection.astro";
+import { reportPages } from "../../data/pages";
+import { loadTemplateReportData } from "../../data/report";
+import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
+
+const report = await loadTemplateReportData();
+const page = reportPages.mechanical;
+const tocItems = [{ href: "#mechanical", label: "Mechanical" }];
+---
+
+<ProjectReportLayout
+  report={report}
+  tocItems={tocItems}
+  currentHref={page.href}
+  pageKicker={page.kicker}
+  pageLabel={page.label}
+>
+  <ReportSection
+    id="mechanical"
+    Content={Mechanical}
+    kicker={mechanical.kicker}
+    title={mechanical.title}
+    dek={mechanical.dek}
+  >
+    <MechanicalPanels />
+  </ReportSection>
+</ProjectReportLayout>

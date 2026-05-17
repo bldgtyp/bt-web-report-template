@@ -1,0 +1,14 @@
+---
+import { reportPageNavItems } from "../data/pages";
+
+const links = reportPageNavItems.filter((item) => item.href !== "/");
+---
+
+<nav class="btwr-page-links" aria-label="Report pages">
+  {links.map((item) => (
+    <a href={item.href}>
+      <span>{item.label}</span>
+      <small>Open section</small>
+    </a>
+  ))}
+</nav>

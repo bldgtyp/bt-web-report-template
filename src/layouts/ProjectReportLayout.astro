@@ -1,8 +1,12 @@
 ---
-import { ReportShell } from "@bldgtyp/web-report-kit";
+import { recommendedVariant } from "@bldgtyp/web-report-kit";
+import componentsCss from "@bldgtyp/web-report-kit/styles/components.css?raw";
+import printCss from "@bldgtyp/web-report-kit/styles/print.css?raw";
+import tokensCss from "@bldgtyp/web-report-kit/tokens.css?raw";
 
+import { reportPageNavItems } from "../data/pages";
 import type { TemplateReportData } from "../data/report";
-import "../styles/project.css";
+import projectCss from "../styles/project.css?raw";
 
 interface TocItem {
   href: string;
@@ -12,29 +16,160 @@ interface TocItem {
 interface Props {
   report: TemplateReportData;
   tocItems: TocItem[];
+  currentHref: string;
+  pageKicker: string;
+  pageLabel: string;
 }
 
-const { report, tocItems } = Astro.props;
-const title = `${report.project.project_title} | ${report.project.phase}`;
+const { report, tocItems, currentHref, pageKicker, pageLabel } = Astro.props;
+const manifest = report.manifest;
+const variants = report.variantOrder;
+const recommended = recommendedVariant(variants);
+const projectName = manifest.project?.name ?? manifest.project?.slug ?? "Untitled project";
+const buildingName = report.project.building_name || projectName;
+const clientName = report.project.client_name || "Client";
+const phase = report.project.phase || "Design analysis";
+const reportDate = report.project.report_date || manifest.generated_at || "Date pending";
+const targetStandard = report.project.target_standard || "Passive House";
 const location = [report.project.building.city, report.project.building.state].filter(Boolean).join(", ");
-const projectMeta = {
-  clientName: report.project.client_name,
-  buildingName: report.project.building_name,
-  phase: report.project.phase,
-  reportDate: report.project.report_date,
-  targetStandard: report.project.target_standard,
-  location,
-  climateZone: report.project.building.climate_zone,
-  preparedBy: report.project.prepared_by,
-};
+const locationChip = [location, report.project.building.climate_zone].filter(Boolean).join(" · ");
+const variantLabel = variants.length === 1 ? "variant" : "variants";
+const title = `${pageLabel} | ${report.project.project_title} | ${phase}`;
+const faviconHref =
+  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><path fill="%233E93AE" d="M6 28V12l12-7 12 7v16h-7V16H13v12H6Z"/></svg>';
 ---
 
-<ReportShell
-  title={title}
-  manifest={report.manifest}
-  variants={report.variantOrder}
-  tocItems={tocItems}
-  projectMeta={projectMeta}
->
-  <slot />
-</ReportShell>
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400&display=swap"
+    />
+    <link rel="icon" href={faviconHref} />
+    <title>{title}</title>
+    <style set:html={tokensCss} />
+    <style set:html={componentsCss} />
+    <style set:html={printCss} />
+    <style set:html={projectCss} />
+  </head>
+  <body class="btwr-report">
+    <header class="btwr-report-header">
+      <div class="btwr-masthead">
+        <a class="btwr-brand-lockup" href="/" aria-label="Open report summary">
+          <svg class="btwr-brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 3h7v7H3V3Zm11 0h7v7h-7V3ZM3 14h7v7H3v-7Zm11 0h7v7h-7v-7Z" />
+          </svg>
+          <span>
+            <strong>BLDGTYP</strong>
+            <em>/ design-phase report</em>
+          </span>
+        </a>
+        <div class="btwr-masthead__project">
+          <span>{clientName}</span>
+          <span>{buildingName}</span>
+        </div>
+        <nav class="btwr-masthead__nav" aria-label="Primary report pages">
+          <span>{reportDate}</span>
+          {
+            reportPageNavItems.map((item) => (
+              <a href={item.href} aria-current={item.href === currentHref ? "page" : undefined}>
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+
+      <div class="btwr-hero">
+        <div class="btwr-hero__copy">
+          <p class="btwr-report-header__eyebrow">{pageKicker} · {pageLabel} · {phase}</p>
+          <h1>{projectName}</h1>
+          <p class="btwr-hero__lede">
+            {
+              variants.length > 0
+                ? `${variants.length} ${variantLabel} tested. ${
+                    recommended ? `${recommended.name} is the current recommended path.` : "The recommended path is pending."
+                  }`
+                : "Project metadata is ready. PHPP-derived model data will populate this report after the scrape runs."
+            }
+          </p>
+          <div class="btwr-hero__chips" aria-label="Report metadata">
+            <span>v1 · {reportDate}</span>
+            <span>{targetStandard}</span>
+            {locationChip && <span>{locationChip}</span>}
+          </div>
+        </div>
+        <div class="btwr-hero__figure" aria-hidden="true">
+          <div class="btwr-placeholder-iso">
+            <span>ISOMETRIC RENDER</span>
+          </div>
+        </div>
+        <dl class="btwr-hero__stats">
+          <div>
+            <dt>Status</dt>
+            <dd>{manifest.status}</dd>
+            <span>data manifest</span>
+          </div>
+          <div>
+            <dt>Variants</dt>
+            <dd>{variants.length || "—"}</dd>
+            <span>{variants.length ? "model options" : "pending scrape"}</span>
+          </div>
+          <div>
+            <dt>Recommended</dt>
+            <dd>{recommended?.name ?? "pending"}</dd>
+            <span>current path</span>
+          </div>
+          <div>
+            <dt>Standard</dt>
+            <dd>{targetStandard}</dd>
+            <span>target basis</span>
+          </div>
+        </dl>
+      </div>
+    </header>
+
+    <div class="btwr-report-grid">
+      <main id="btwr-main" class="btwr-report-main">
+        <slot />
+      </main>
+      <aside class="btwr-toc" aria-label="Page contents">
+        <a class="btwr-toc__skip" href="#btwr-main">Skip to report</a>
+        <nav>
+          <p>On this page</p>
+          <ol>
+            {
+              tocItems.map((item, index) => (
+                <li>
+                  <a href={item.href}>
+                    <span>{String(index).padStart(2, "0")}</span>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ol>
+        </nav>
+        <div class="btwr-toc__recommendation">
+          <p>Recommendation</p>
+          <strong>{recommended?.name ?? "Pending"}</strong>
+          <span>{recommended ? "Current preferred model variant." : "Set by manifest after PHPP scrape."}</span>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="btwr-report-footer">
+      <p>© BLDGTYP, LLC · {buildingName}</p>
+      <p>
+        {manifest.generated_at ? `Generated ${manifest.generated_at}` : "Generated date pending"}
+        {manifest.phpp_version ? ` · PHPP ${manifest.phpp_version}` : ""}
+        {manifest.schema_version ? ` · schema ${manifest.schema_version}` : ""}
+      </p>
+    </footer>
+  </body>
+</html>

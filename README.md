@@ -66,6 +66,20 @@ Use pnpm only.
 - Treat `data/` as generated PHPP output. Run `btwr scrape <project-path>`.
 - Keep `.bldgtyp/config.local.yaml` local-only for machine-specific notes.
 
+## Report Routes
+
+The renderer publishes the client report as five pages, matching the legacy BT
+report structure:
+
+- `/` - Summary / splash entry point
+- `/energy_model/` - Energy Model
+- `/building_envelope/` - Envelope
+- `/windows/` - Windows
+- `/mechanical/` - Mechanical
+
+The masthead is cross-page navigation. The right rail is the table of contents
+for the current page.
+
 ## TinaCMS Editor
 
 Run the local report editor through the CLI:

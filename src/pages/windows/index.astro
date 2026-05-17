@@ -1,0 +1,25 @@
+---
+import Windows, { frontmatter as windows } from "../../../content/windows.mdx";
+import ReportSection from "../../components/ReportSection.astro";
+import { reportPages } from "../../data/pages";
+import { loadTemplateReportData } from "../../data/report";
+import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
+
+const report = await loadTemplateReportData();
+const page = reportPages.windows;
+const tocItems = [{ href: "#windows", label: "Windows" }];
+---
+
+<ProjectReportLayout
+  report={report}
+  tocItems={tocItems}
+  currentHref={page.href}
+  pageKicker={page.kicker}
+  pageLabel={page.label}
+>
+  <ReportSection id="windows" Content={Windows} kicker={windows.kicker} title={windows.title} dek={windows.dek}>
+    <div class="btwr-placeholder-panel">
+      <span>WINDOW SCHEDULE · ORIENTATION · SHGC / U-VALUE COMPARISON</span>
+    </div>
+  </ReportSection>
+</ProjectReportLayout>

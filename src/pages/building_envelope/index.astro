@@ -1,0 +1,39 @@
+---
+import Assemblies, { frontmatter as assemblies } from "../../../content/envelope/assemblies.mdx";
+import EnvelopeOverview, { frontmatter as envelopeOverview } from "../../../content/envelope/overview.mdx";
+import EnvelopePanels from "../../components/EnvelopePanels.astro";
+import ReportSection from "../../components/ReportSection.astro";
+import { reportPages } from "../../data/pages";
+import { loadTemplateReportData } from "../../data/report";
+import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
+
+const report = await loadTemplateReportData();
+const page = reportPages.envelope;
+const tocItems = [
+  { href: "#envelope-overview", label: "Envelope overview" },
+  { href: "#assemblies", label: "Assemblies" },
+];
+---
+
+<ProjectReportLayout
+  report={report}
+  tocItems={tocItems}
+  currentHref={page.href}
+  pageKicker={page.kicker}
+  pageLabel={page.label}
+>
+  <ReportSection
+    id="envelope-overview"
+    Content={EnvelopeOverview}
+    kicker={envelopeOverview.kicker}
+    title={envelopeOverview.title}
+    dek={envelopeOverview.dek}
+  >
+    <EnvelopePanels />
+  </ReportSection>
+  <ReportSection id="assemblies" Content={Assemblies} kicker={assemblies.kicker} title={assemblies.title} dek={assemblies.dek}>
+    <div class="btwr-placeholder-panel">
+      <span>ASSEMBLY DIAGRAMS · DETAILS · THERMAL BRIDGE REFERENCES</span>
+    </div>
+  </ReportSection>
+</ProjectReportLayout>

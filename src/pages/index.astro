@@ -1,33 +1,24 @@
 ---
-import Appendix, { frontmatter as appendix } from "../../content/appendix.mdx";
-import Assemblies, { frontmatter as assemblies } from "../../content/envelope/assemblies.mdx";
-import EnvelopeOverview, { frontmatter as envelopeOverview } from "../../content/envelope/overview.mdx";
-import EnergyModel, { frontmatter as energyModel } from "../../content/energy-model.mdx";
-import Mechanical, { frontmatter as mechanical } from "../../content/mechanical.mdx";
 import Summary, { frontmatter as summary } from "../../content/summary.mdx";
-import Windows, { frontmatter as windows } from "../../content/windows.mdx";
-import EnergyModelPanels from "../components/EnergyModelPanels.astro";
-import EnvelopePanels from "../components/EnvelopePanels.astro";
-import MechanicalPanels from "../components/MechanicalPanels.astro";
 import ProjectOverview from "../components/ProjectOverview.astro";
+import ReportPageLinks from "../components/ReportPageLinks.astro";
 import ReportSection from "../components/ReportSection.astro";
-import VariantSummaryTable from "../components/VariantSummaryTable.astro";
+import { reportPages } from "../data/pages";
 import { loadTemplateReportData } from "../data/report";
 import ProjectReportLayout from "../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
-const tocItems = [
-  { href: "#summary", label: "Executive summary" },
-  { href: "#energy-model", label: "Energy model" },
-  { href: "#envelope-overview", label: "Model geometry" },
-  { href: "#assemblies", label: "Assemblies" },
-  { href: "#windows", label: "Windows" },
-  { href: "#mechanical", label: "Mechanical" },
-  { href: "#appendix", label: "Appendix" },
-];
+const page = reportPages.summary;
+const tocItems = [{ href: "#summary", label: "Executive summary" }];
 ---
 
-<ProjectReportLayout report={report} tocItems={tocItems}>
+<ProjectReportLayout
+  report={report}
+  tocItems={tocItems}
+  currentHref={page.href}
+  pageKicker={page.kicker}
+  pageLabel={page.label}
+>
   <ReportSection
     id="summary"
     Content={Summary}
@@ -38,51 +29,6 @@ const tocItems = [
     callout_body={summary.callout_body}
   >
     <ProjectOverview />
-  </ReportSection>
-  <ReportSection
-    id="energy-model"
-    Content={EnergyModel}
-    kicker={energyModel.kicker}
-    title={energyModel.title}
-    dek={energyModel.dek}
-  >
-    <EnergyModelPanels />
-  </ReportSection>
-  <ReportSection
-    id="envelope-overview"
-    Content={EnvelopeOverview}
-    kicker={envelopeOverview.kicker}
-    title={envelopeOverview.title}
-    dek={envelopeOverview.dek}
-  >
-    <EnvelopePanels />
-  </ReportSection>
-  <ReportSection
-    id="assemblies"
-    Content={Assemblies}
-    kicker={assemblies.kicker}
-    title={assemblies.title}
-    dek={assemblies.dek}
-  >
-    <div class="btwr-placeholder-panel">
-      <span>ASSEMBLY DIAGRAMS · DETAILS · THERMAL BRIDGE REFERENCES</span>
-    </div>
-  </ReportSection>
-  <ReportSection id="windows" Content={Windows} kicker={windows.kicker} title={windows.title} dek={windows.dek}>
-    <div class="btwr-placeholder-panel">
-      <span>WINDOW SCHEDULE · ORIENTATION · SHGC / U-VALUE COMPARISON</span>
-    </div>
-  </ReportSection>
-  <ReportSection
-    id="mechanical"
-    Content={Mechanical}
-    kicker={mechanical.kicker}
-    title={mechanical.title}
-    dek={mechanical.dek}
-  >
-    <MechanicalPanels />
-  </ReportSection>
-  <ReportSection id="appendix" Content={Appendix} kicker={appendix.kicker} title={appendix.title} dek={appendix.dek}>
-    <VariantSummaryTable />
+    <ReportPageLinks />
   </ReportSection>
 </ProjectReportLayout>
