@@ -58,6 +58,37 @@ pnpm smoke:fixture
 
 Use pnpm only.
 
+## Dev Preview Modes
+
+Use the Vandam fixture mode for normal report UI work:
+
+```bash
+cd /Users/em/Dropbox/bldgtyp-00/00_PH_Tools/bt-web-report
+pnpm --filter @bldgtyp/web-report-template dev:fixture
+```
+
+Open the `Local` URL printed by Astro, usually:
+
+```text
+http://127.0.0.1:4321/
+http://127.0.0.1:4321/building_envelope/
+```
+
+`dev:fixture` sets `BTWR_DATA_DIR=../test-files/phpp/2606-Vandam-St/scrape-output`,
+so charts, tables, and recommended-variant UI render with real PHPP scrape
+data while the committed seed `data/` directory stays untouched.
+
+Use plain `pnpm --filter @bldgtyp/web-report-template dev` only when testing
+empty/new-project pending states. The committed seed
+`bt-web-report-template/data/manifest.json` is intentionally:
+
+```json
+{ "status": "pending", "variants": [] }
+```
+
+If Astro says port `4321` is already in use, use the next `Local` URL it prints
+instead, such as `4322` or `4323`.
+
 ## Project Edit Boundaries
 
 - Edit `project.yaml` for project metadata, publish URL, and local data paths.

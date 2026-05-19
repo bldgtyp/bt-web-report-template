@@ -8,8 +8,10 @@
   "repository": "github:bldgtyp/bt-web-report-template",
   "scripts": {
     "dev": "astro dev",
+    "dev:fixture": "BTWR_DATA_DIR=../test-files/phpp/2606-Vandam-St/scrape-output astro dev --host 127.0.0.1 --port 4321",
     "dev:editor": "tinacms dev --port 4001 --noTelemetry -c \"astro dev --host 127.0.0.1 --port 4321\"",
     "build": "pnpm validate && astro build",
+    "build:fixture": "BTWR_DATA_DIR=../test-files/phpp/2606-Vandam-St/scrape-output astro build",
     "build:editor": "tinacms build --local --skip-indexing --skip-cloud-checks --noTelemetry",
     "check": "astro check",
     "check:editor": "tinacms audit --noTelemetry",

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 420" role="img" aria-labelledby="title desc">
+  <title id="title">Roof - Deck assembly thumbnail</title>
+  <desc id="desc">Schematic roof deck assembly placeholder.</desc>
+  <rect width="320" height="420" fill="#ffffff"/>
+  <rect x="48" y="92" width="224" height="196" fill="#f7f8f8" stroke="#30343a"/>
+  <rect x="72" y="112" width="176" height="24" fill="#30343a"/>
+  <rect x="72" y="136" width="176" height="70" fill="#d9eef4"/>
+  <rect x="72" y="206" width="176" height="50" fill="#f8d84a"/>
+  <rect x="92" y="72" width="136" height="20" fill="#8fb4bf"/>
+  <line x1="48" y1="346" x2="272" y2="346" stroke="#30343a"/>
+  <text x="160" y="378" fill="#30343a" font-family="Arial, sans-serif" font-size="20" text-anchor="middle">Roof - Deck</text>
+</svg>

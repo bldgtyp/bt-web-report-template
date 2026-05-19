@@ -1,0 +1,171 @@
+---
+import DataState from "../components/DataState.astro";
+import type { ReportData } from "../data/report-loader";
+import { cellNumber, cellText, formatValue } from "../data/rows";
+import { recommendedVariant } from "../data/variants";
+import { linearAxis } from "./chart-axis";
+
+interface Props {
+  data: ReportData;
+  title?: string;
+}
+
+interface Point {
+  ach: number;
+  heatLoss: number;
+}
+
+const { data, title = "Winter Heat Loss due to Envelope Air Leakage" } = Astro.props;
+const recommended = recommendedVariant(data.variantOrder);
+const recommendedId = recommended?.id ?? data.variantOrder[0]?.id;
+const passiveHouseTargetAch = 0.6;
+const energyCodeTargetAch = 5.0;
+const energyCodeLabel = "Code 2021 / Zone 5(B)";
+const chartWidth = 760;
+const chartHeight = 500;
+const margin = { top: 34, right: 26, bottom: 64, left: 84 };
+const plotWidth = chartWidth - margin.left - margin.right;
+const plotHeight = chartHeight - margin.top - margin.bottom;
+
+function variantInput(fieldId: string): number | null {
+  const row = data.variants.find(
+    (candidate) => cellText(candidate, "variant_id") === recommendedId && cellText(candidate, "field_id") === fieldId,
+  );
+  return row ? cellNumber(row, "value") : null;
+}
+
+const vv = variantInput("airtightness.vv");
+const vn50 = variantInput("airtightness.vn50");
+const coeffE = variantInput("airtightness.wind_protection_coefficient_e");
+const coeffF = variantInput("airtightness.wind_protection_coefficient_f");
+const gt = variantInput("airtightness.gt");
+const recommendedAch = variantInput("envelope.volumetric_air_leakage_rate_n50");
+const hasInputs =
+  data.manifest.status !== "pending" &&
+  recommendedId &&
+  vv !== null &&
+  vn50 !== null &&
+  coeffE !== null &&
+  coeffF !== null &&
+  gt !== null &&
+  recommendedAch !== null;
+
+function heatLossForAch(ach: number): number {
+  if (!hasInputs || ach <= 0) {
+    return 0;
+  }
+  const cAir = 0.33;
+  const nVRest = ((vn50! / vv!) * ach * coeffE!) / (1 + (coeffF! / coeffE!) * Math.pow(0 / ach, 2));
+  return Math.max(0, vv! * cAir * nVRest * gt!);
+}
+
+const points: Point[] = Array.from({ length: 21 }, (_, index) => {
+  const ach = index * 0.5;
+  return { ach, heatLoss: heatLossForAch(ach) };
+});
+const maxHeatLoss = Math.max(...points.map((point) => point.heatLoss), 0);
+const yAxis = linearAxis(maxHeatLoss * 1.08, 7);
+const yTicks = yAxis.ticks.length > 1 ? yAxis.ticks : [0, 4000, 8000, 12000, 16000, 20000, 24000, 28000];
+const yMax = yAxis.max > 0 ? yAxis.max : yTicks.at(-1)!;
+const xMax = 10;
+const xTicks = Array.from({ length: xMax + 1 }, (_, index) => index);
+const x = (ach: number) => margin.left + (ach / xMax) * plotWidth;
+const y = (heatLoss: number) => margin.top + plotHeight - (heatLoss / yMax) * plotHeight;
+const linePath = points.map((point, index) => `${index === 0 ? "M" : "L"} ${x(point.ach).toFixed(2)} ${y(point.heatLoss).toFixed(2)}`).join(" ");
+const recommendedPoint = recommendedAch !== null ? { ach: recommendedAch, heatLoss: heatLossForAch(recommendedAch) } : null;
+const codePoint = { ach: energyCodeTargetAch, heatLoss: heatLossForAch(energyCodeTargetAch) };
+const typicalY = y(yMax * 0.16);
+const yGridLines = yTicks.filter((tick) => tick > 0);
+const xGridLines = xTicks.filter((tick) => tick > 0);
+const targetLabelBaselineY = margin.top + plotHeight - 10;
+---
+
+{
+  !hasInputs ? (
+    <DataState
+      state="pending"
+      title="Airtightness chart pending"
+      message="Recommended-variant airtightness rows are not available yet. Run the PHPP scrape to populate the heat-loss chart."
+    />
+  ) : (
+    <figure class="btwr-chart-frame btwr-airtightness-chart" data-chart="airtightness-heat-loss">
+      <div class="btwr-chart-frame__header">
+        <h3>{title}</h3>
+        <p class="btwr-chart-frame__subtitle">
+          {recommended ? `${recommended.name} shown across a range of blower-door results.` : "Recommended variant pending."}
+        </p>
+      </div>
+      <div class="btwr-chart-frame__plot">
+        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} role="img" aria-labelledby="airtightness-title airtightness-desc">
+          <title id="airtightness-title">{title}</title>
+          <desc id="airtightness-desc">
+            Chart showing annual winter heat loss from envelope air leakage as airtightness increases from 0 to 10 ACH at 50 Pascals.
+          </desc>
+          <defs>
+            <marker id="btwr-airtightness-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+              <path d="M 0 0 L 8 4 L 0 8 z" />
+            </marker>
+            <marker id="btwr-typical-arrow-start" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto" markerUnits="strokeWidth">
+              <path d="M 8 0 L 0 4 L 8 8 z" />
+            </marker>
+            <marker id="btwr-typical-arrow-end" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+              <path d="M 0 0 L 8 4 L 0 8 z" />
+            </marker>
+          </defs>
+          <rect class="btwr-airtightness-chart__plot-bg" x={margin.left} y={margin.top} width={plotWidth} height={plotHeight} />
+          {yGridLines.map((tick) => (
+            <line class="btwr-airtightness-chart__grid" x1={margin.left} y1={y(tick)} x2={margin.left + plotWidth} y2={y(tick)} />
+          ))}
+          {xGridLines.map((tick) => (
+            <line class="btwr-airtightness-chart__grid" x1={x(tick)} y1={margin.top} x2={x(tick)} y2={margin.top + plotHeight} />
+          ))}
+          <line class="btwr-airtightness-chart__target btwr-airtightness-chart__target--ph" x1={x(passiveHouseTargetAch)} y1={margin.top} x2={x(passiveHouseTargetAch)} y2={margin.top + plotHeight} />
+          <line class="btwr-airtightness-chart__target btwr-airtightness-chart__target--code" x1={x(energyCodeTargetAch)} y1={margin.top} x2={x(energyCodeTargetAch)} y2={margin.top + plotHeight} />
+          <path class="btwr-airtightness-chart__line" d={linePath} />
+          <line
+            class="btwr-airtightness-chart__typical"
+            x1={x(energyCodeTargetAch) + 14}
+            y1={typicalY}
+            x2={x(xMax) - 8}
+            y2={typicalY}
+          />
+          <text class="btwr-airtightness-chart__typical-label" x={(x(energyCodeTargetAch) + x(xMax)) / 2} y={typicalY - 10}>Typical Construction</text>
+          <g class="btwr-airtightness-chart__marker" transform={`translate(${x(passiveHouseTargetAch)} ${y(heatLossForAch(passiveHouseTargetAch))})`}>
+            <circle r="5" />
+            <text x="8" y="17">{`${formatValue(passiveHouseTargetAch)} ACH: ${formatValue(heatLossForAch(passiveHouseTargetAch), "kWh/a")}`}</text>
+          </g>
+          <g class="btwr-airtightness-chart__marker" transform={`translate(${x(codePoint.ach)} ${y(codePoint.heatLoss)})`}>
+            <circle r="5" />
+            <text x="8" y="17">{`${formatValue(codePoint.ach)} ACH: ${formatValue(codePoint.heatLoss, "kWh/a")}`}</text>
+          </g>
+          {recommendedPoint && recommendedPoint.ach !== passiveHouseTargetAch && recommendedPoint.ach !== energyCodeTargetAch ? (
+            <g class="btwr-airtightness-chart__marker btwr-airtightness-chart__marker--recommended" transform={`translate(${x(recommendedPoint.ach)} ${y(recommendedPoint.heatLoss)})`}>
+              <circle r="5" />
+              <text x="8" y="-10">{`${recommended?.name ?? "Recommended"}: ${formatValue(recommendedPoint.ach)} ACH`}</text>
+            </g>
+          ) : null}
+          <text class="btwr-airtightness-chart__target-label" text-anchor="end" transform={`translate(${x(passiveHouseTargetAch) - 10} ${margin.top + 96}) rotate(-90)`}>
+            {`Target: ${passiveHouseTargetAch} ACH@50`}
+          </text>
+          <text class="btwr-airtightness-chart__target-label" text-anchor="start" transform={`translate(${x(energyCodeTargetAch) - 10} ${targetLabelBaselineY}) rotate(-90)`}>
+            {`${energyCodeLabel}: ${energyCodeTargetAch} ACH@50`}
+          </text>
+          <line class="btwr-airtightness-chart__axis" x1={margin.left} y1={margin.top} x2={margin.left} y2={margin.top + plotHeight} />
+          <line class="btwr-airtightness-chart__axis" x1={margin.left} y1={margin.top + plotHeight} x2={margin.left + plotWidth} y2={margin.top + plotHeight} />
+          {yTicks.map((tick) => (
+            <text class="btwr-airtightness-chart__tick btwr-airtightness-chart__tick--y" x={margin.left - 10} y={y(tick) + 4}>{formatValue(tick)}</text>
+          ))}
+          {xTicks.map((tick) => (
+            <text class="btwr-airtightness-chart__tick btwr-airtightness-chart__tick--x" x={x(tick)} y={margin.top + plotHeight + 20}>{tick}</text>
+          ))}
+          <text class="btwr-airtightness-chart__axis-label" text-anchor="middle" x={margin.left + plotWidth / 2} y={chartHeight - 16}>
+            Air-Changes / Hour (ACH) @ 50 Pascals
+          </text>
+          <text class="btwr-airtightness-chart__axis-label" text-anchor="middle" transform={`translate(22 ${margin.top + plotHeight / 2}) rotate(-90)`}>
+            Building Heat Loss (kWh/yr)
+          </text>
+        </svg>
+      </div>
+    </figure>
+  )
+}

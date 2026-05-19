@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 420" role="img" aria-labelledby="title desc">
+  <title id="title">Ext. Wall - Front assembly thumbnail</title>
+  <desc id="desc">Schematic exterior wall assembly placeholder.</desc>
+  <rect width="320" height="420" fill="#ffffff"/>
+  <rect x="48" y="54" width="224" height="276" fill="#f7f8f8" stroke="#30343a"/>
+  <rect x="76" y="84" width="44" height="216" fill="#f8d84a"/>
+  <rect x="120" y="84" width="84" height="216" fill="#d9eef4"/>
+  <rect x="204" y="84" width="40" height="216" fill="#8fb4bf"/>
+  <line x1="48" y1="346" x2="272" y2="346" stroke="#30343a"/>
+  <text x="160" y="378" fill="#30343a" font-family="Arial, sans-serif" font-size="20" text-anchor="middle">Ext. Wall - Front</text>
+</svg>

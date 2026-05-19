@@ -49,6 +49,48 @@ const reportSectionFields: TinaField[] = [
   },
 ];
 
+const assemblyFields: TinaField[] = [
+  {
+    type: "string",
+    name: "title",
+    label: "Assembly name",
+    required: true,
+  },
+  {
+    type: "number",
+    name: "order",
+    label: "Sort order",
+    required: true,
+  },
+  {
+    type: "image",
+    name: "image",
+    label: "Thumbnail image",
+    required: true,
+  },
+  {
+    type: "image",
+    name: "pdf",
+    label: "Linked PDF",
+    required: true,
+  },
+  {
+    type: "string",
+    name: "notes",
+    label: "Notes",
+    list: true,
+    ui: {
+      component: "textarea",
+    },
+  },
+  {
+    type: "rich-text",
+    name: "body",
+    label: "Additional content",
+    isBody: true,
+  },
+];
+
 function fixedMdxSection(label: string, name: string, path: string, include: string): Collection {
   return {
     label,
@@ -100,7 +142,29 @@ export default defineConfig({
         "passive-house-certifications",
       ),
       fixedMdxSection("Envelope overview", "envelope_overview", "content/envelope", "overview"),
-      fixedMdxSection("Assemblies", "assemblies", "content/envelope", "assemblies"),
+      fixedMdxSection("Recommended assemblies intro", "assemblies", "content/envelope", "assemblies"),
+      fixedMdxSection("Building airtightness intro", "airtightness", "content/envelope", "airtightness"),
+      fixedMdxSection(
+        "Building airtightness notes",
+        "airtightness_notes",
+        "content/envelope",
+        "airtightness-notes",
+      ),
+      fixedMdxSection("AeroBarrier", "aerobarrier", "content/envelope", "aerobarrier"),
+      {
+        label: "Recommended assemblies",
+        name: "recommended_assemblies",
+        path: "content/envelope/assemblies",
+        format: "mdx" as const,
+        ui: {
+          allowedActions: {
+            create: true,
+            delete: true,
+            createNestedFolder: false,
+          },
+        },
+        fields: assemblyFields,
+      },
       fixedMdxSection("Windows", "windows", "content", "windows"),
       fixedMdxSection("Mechanical", "mechanical", "content", "mechanical"),
       fixedMdxSection("Appendix", "appendix", "content", "appendix"),

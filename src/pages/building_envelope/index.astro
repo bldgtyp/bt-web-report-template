@@ -1,7 +1,10 @@
 ---
+import AeroBarrier, { frontmatter as aeroBarrier } from "../../../content/envelope/aerobarrier.mdx";
+import Airtightness, { frontmatter as airtightness } from "../../../content/envelope/airtightness.mdx";
+import AirtightnessNotes from "../../../content/envelope/airtightness-notes.mdx";
 import Assemblies, { frontmatter as assemblies } from "../../../content/envelope/assemblies.mdx";
-import EnvelopeOverview, { frontmatter as envelopeOverview } from "../../../content/envelope/overview.mdx";
-import EnvelopePanels from "../../components/EnvelopePanels.astro";
+import AirtightnessHeatLossChart from "../../charts/AirtightnessHeatLossChart.astro";
+import AssemblyCards from "../../components/AssemblyCards.astro";
 import ReportSection from "../../components/ReportSection.astro";
 import { reportPages } from "../../data/pages";
 import { loadTemplateReportData } from "../../data/report";
@@ -10,8 +13,9 @@ import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 const report = await loadTemplateReportData();
 const page = reportPages.envelope;
 const sections = {
-  envelopeOverview: { href: "#envelope-overview", label: "Envelope overview", number: "01" },
-  assemblies: { href: "#assemblies", label: "Assemblies", number: "02" },
+  assemblies: { href: "#recommended-assemblies", label: "Recommended Assemblies", number: "01" },
+  airtightness: { href: "#building-airtightness", label: "Building Airtightness", number: "02" },
+  aeroBarrier: { href: "#aerobarrier", label: "AeroBarrier", number: "03" },
 };
 const tocItems = Object.values(sections);
 ---
@@ -24,16 +28,34 @@ const tocItems = Object.values(sections);
   pageLabel={page.label}
 >
   <ReportSection
-    id="envelope-overview"
-    Content={EnvelopeOverview}
-    kicker={sections.envelopeOverview.number}
-    title={envelopeOverview.title}
+    id="recommended-assemblies"
+    Content={Assemblies}
+    kicker={sections.assemblies.number}
+    title={assemblies.title}
+    callout_label={assemblies.callout_label}
+    callout_body={assemblies.callout_body}
   >
-    <EnvelopePanels />
+    <AssemblyCards />
   </ReportSection>
-  <ReportSection id="assemblies" Content={Assemblies} kicker={sections.assemblies.number} title={assemblies.title}>
-    <div class="btwr-placeholder-panel">
-      <span>ASSEMBLY DIAGRAMS · DETAILS · THERMAL BRIDGE REFERENCES</span>
+  <ReportSection
+    id="building-airtightness"
+    Content={Airtightness}
+    kicker={sections.airtightness.number}
+    title={airtightness.title}
+  >
+    <AirtightnessHeatLossChart data={report} />
+    <div class="btwr-prose">
+      <AirtightnessNotes />
     </div>
+  </ReportSection>
+  <ReportSection id="aerobarrier" Content={AeroBarrier} kicker={sections.aeroBarrier.number} title={aeroBarrier.title}>
+    <figure class="btwr-section-hero" slot="before-content">
+      <img
+        src="/assets/envelope/aerobarrier.jpg"
+        width="1200"
+        height="500"
+        alt="AeroBarrier spray nozzle applying aerosolized sealant inside a framed building."
+      />
+    </figure>
   </ReportSection>
 </ProjectReportLayout>

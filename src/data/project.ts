@@ -38,7 +38,7 @@ export async function loadProjectConfig(root = process.cwd()): Promise<ProjectCo
 }
 
 export function projectDataDir(project: ProjectConfig, root = process.cwd()): string {
-  return join(root, project.source_files.data_dir || "data");
+  return join(root, process.env.BTWR_DATA_DIR || project.source_files.data_dir || "data");
 }
 
 export function manifestProject(project: ProjectConfig): { slug: string; name: string } {
