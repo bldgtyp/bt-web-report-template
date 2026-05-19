@@ -1,5 +1,6 @@
 ---
 import {
+  BuildingMetricsTable,
   CertificationChart,
   ClimateMonthlyChart,
   SiteEnergyChart,
@@ -16,9 +17,8 @@ import PassiveHouseThresholds, {
   frontmatter as passiveHouseThresholds,
 } from "../../../content/energy-model/passive-house-thresholds.mdx";
 import SiteEnergy, { frontmatter as siteEnergy } from "../../../content/energy-model/site-energy.mdx";
-import BuildingMetricsTable from "../../components/BuildingMetricsTable.astro";
 import Co2EmissionsChart from "../../components/Co2EmissionsChart.astro";
-import EnergySummaryTable from "../../components/EnergySummaryTable.astro";
+import KeyResultsTable from "../../components/KeyResultsTable.astro";
 import EnvelopeInputsByVariantTable from "../../components/EnvelopeInputsByVariantTable.astro";
 import MechanicalInputsByVariantTable from "../../components/MechanicalInputsByVariantTable.astro";
 import PassiveHouseCertificationsInfo from "../../components/PassiveHouseCertificationsInfo.astro";
@@ -72,7 +72,7 @@ const tocItems = Object.values(sections);
     title={modelVariants.title}
   >
     <div class="btwr-component-stack">
-      <EnergySummaryTable data={report} caption="Key results by variant" />
+      <KeyResultsTable data={report} caption="Key results by variant" />
       <BuildingMetricsTable data={report} caption="Geometry metrics by variant" />
       <EnvelopeInputsByVariantTable data={report} />
       <MechanicalInputsByVariantTable data={report} />

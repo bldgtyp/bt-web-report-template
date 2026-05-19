@@ -1,14 +1,14 @@
 ---
 import {
   CertificationChart,
+  CertificationTable,
   ClimateMonthlyChart,
   DemandBreakdownChart,
   SiteEnergyChart,
   SourceEnergyChart,
 } from "@bldgtyp/web-report-kit";
 
-import CertificationTable from "./CertificationTable.astro";
-import EnergySummaryTable from "./EnergySummaryTable.astro";
+import KeyResultsTable from "./KeyResultsTable.astro";
 import { loadTemplateReportData } from "../data/report";
 
 const report = await loadTemplateReportData();
@@ -20,6 +20,6 @@ const report = await loadTemplateReportData();
   <DemandBreakdownChart data={report} demandType="heating" title="Heating demand breakdown" />
   <ClimateMonthlyChart data={report} title="Monthly climate profile" />
   <CertificationChart data={report} title="Passive House thresholds" />
-  <EnergySummaryTable data={report} caption="Key results by variant" />
+  <KeyResultsTable data={report} caption="Key results by variant" />
   <CertificationTable data={report} caption="Certification result and limit rows" />
 </div>

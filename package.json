@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@astrojs/mdx": "^3.1.9",
-    "@bldgtyp/web-report-kit": "^0.1.1",
+    "@bldgtyp/web-report-kit": "^0.2.0",
     "@bldgtyp/web-report-schemas": "^0.1.0",
     "astro": "^4.16.19",
     "react": "18.3.1",

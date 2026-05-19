@@ -1,12 +1,13 @@
 ---
-import EnergySummaryTable from "./EnergySummaryTable.astro";
-import VariantInputsTable from "./VariantInputsTable.astro";
+import { VariantInputsTable } from "@bldgtyp/web-report-kit";
+
+import KeyResultsTable from "./KeyResultsTable.astro";
 import { loadTemplateReportData } from "../data/report";
 
 const report = await loadTemplateReportData();
 ---
 
 <div class="btwr-component-stack">
-  <EnergySummaryTable data={report} caption="Energy summary by variant" />
+  <KeyResultsTable data={report} caption="Energy summary by variant" />
   <VariantInputsTable data={report} caption="Variant inputs and assumptions" />
 </div>

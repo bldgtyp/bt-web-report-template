@@ -1,4 +1,6 @@
-.btwr-report .btwr-hero {
+/* Edge-to-edge hero with content-max-aware padding; kit defaults to a
+   max-width-centered hero. */
+.btwr-hero {
   box-sizing: border-box;
   width: 100%;
   max-width: none;
@@ -8,17 +10,15 @@
   padding-left: max(var(--btwr-space-5), calc((100% - var(--btwr-content-max)) / 2));
 }
 
-.btwr-report .btwr-report-grid--full {
+.btwr-report-grid--full {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.btwr-report .btwr-masthead {
+.btwr-masthead {
   grid-template-columns: minmax(14rem, auto) minmax(18rem, 1fr) minmax(28rem, auto);
-  gap: var(--btwr-space-5);
-  align-items: center;
 }
 
-.btwr-report .btwr-masthead__meta {
+.btwr-masthead__meta {
   display: flex;
   min-width: 0;
   align-items: center;
@@ -29,7 +29,7 @@
   white-space: nowrap;
 }
 
-.btwr-report .btwr-masthead__project {
+.btwr-masthead__project {
   display: inline-flex;
   min-width: 0;
   align-items: baseline;
@@ -40,16 +40,16 @@
   line-height: 1;
 }
 
-.btwr-report .btwr-masthead__project span:first-child {
+.btwr-masthead__project span:first-child {
   color: var(--btwr-color-heading);
 }
 
-.btwr-report .btwr-masthead__project span:last-child {
+.btwr-masthead__project span:last-child {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.btwr-report .btwr-masthead__date {
+.btwr-masthead__date {
   display: inline-flex;
   align-items: baseline;
   gap: var(--btwr-space-2);
@@ -60,44 +60,46 @@
   line-height: 1;
 }
 
-.btwr-report .btwr-masthead__date span {
+.btwr-masthead__date span {
   color: var(--btwr-color-muted);
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.btwr-report .btwr-masthead__date time {
+.btwr-masthead__date time {
   color: var(--btwr-color-heading);
   font-size: 0.72rem;
   letter-spacing: 0.02em;
 }
 
-.btwr-report .btwr-masthead__nav {
-  align-items: center;
+.btwr-masthead__nav {
   gap: var(--btwr-space-4);
 }
 
-.btwr-report .btwr-masthead__nav a {
+.btwr-masthead__nav a {
   display: inline-flex;
   align-items: center;
   min-height: 2rem;
   padding: 0.45rem 0 0.35rem;
 }
 
-.btwr-report .btwr-toc li:first-child {
+/* TOC: template highlights the current item dynamically via .is-current
+   from the scroll-spy script, so the kit's static first-child accent
+   needs to be reset. */
+.btwr-toc li:first-child {
   border-left-color: var(--btwr-color-border);
 }
 
-.btwr-report .btwr-toc li.is-current {
+.btwr-toc li.is-current {
   border-left-color: var(--btwr-color-accent);
 }
 
-.btwr-report .btwr-toc a[aria-current="location"] {
+.btwr-toc a[aria-current="location"] {
   color: var(--btwr-color-link);
 }
 
-.btwr-report .btwr-toc a[aria-current="location"] span {
+.btwr-toc a[aria-current="location"] span {
   color: var(--btwr-color-accent);
 }
 
@@ -209,169 +211,6 @@
   color: var(--btwr-color-link);
   font-family: var(--btwr-font-label);
   font-size: 0.86em;
-}
-
-.btwr-report .btwr-table-wrap {
-  border-color: var(--btwr-color-border);
-  background: var(--btwr-color-surface);
-}
-
-.btwr-report .btwr-table {
-  min-width: 56rem;
-  table-layout: fixed;
-  color: var(--btwr-color-text);
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.btwr-report .btwr-table caption {
-  display: table-caption;
-  padding: var(--btwr-space-5) var(--btwr-space-5) var(--btwr-space-4);
-  color: var(--btwr-color-heading);
-  font-family: var(--btwr-font-body);
-  letter-spacing: 0;
-  text-align: left;
-  text-transform: none;
-}
-
-.btwr-report .btwr-table th,
-.btwr-report .btwr-table td {
-  padding: 1.05rem 1rem;
-  text-align: right;
-  vertical-align: middle;
-  overflow-wrap: anywhere;
-  white-space: normal;
-  word-break: normal;
-}
-
-.btwr-report .btwr-table thead th {
-  background: var(--btwr-color-surface);
-  border-bottom: 1px solid var(--btwr-color-border);
-  color: var(--btwr-color-subtle);
-  font-family: var(--btwr-font-label);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  line-height: 1.35;
-  text-transform: uppercase;
-}
-
-.btwr-report .btwr-table thead tr:last-child th {
-  border-bottom: 1px solid var(--btwr-color-border);
-}
-
-.btwr-report .btwr-table thead th:first-child,
-.btwr-report .btwr-table tbody th {
-  text-align: left;
-}
-
-.btwr-report .btwr-table tbody th {
-  background: var(--btwr-color-surface);
-  color: var(--btwr-color-heading);
-  font-family: var(--btwr-font-body);
-  font-size: 0.88rem;
-  font-weight: 650;
-  line-height: 1.35;
-}
-
-.btwr-report .btwr-table tbody tr {
-  transition: background-color 120ms ease;
-}
-
-.btwr-report .btwr-table tbody tr:hover th,
-.btwr-report .btwr-table tbody tr:hover td {
-  background: var(--btwr-color-accent-soft);
-}
-
-.btwr-report .btwr-table .btwr-col-recommended {
-  background: var(--btwr-color-accent-soft);
-  color: var(--btwr-color-link);
-  font-weight: 700;
-}
-
-.btwr-report .btwr-table .btwr-cell-number {
-  white-space: normal;
-}
-
-.btwr-report .btwr-table tbody tr:hover .btwr-col-recommended {
-  background: var(--btwr-color-accent-soft);
-}
-
-.btwr-report .btwr-table .btwr-cell-muted {
-  display: block;
-  margin-top: 0.25rem;
-  color: var(--btwr-color-muted);
-  font-family: var(--btwr-font-label);
-  font-size: 0.69rem;
-  font-weight: 300;
-  letter-spacing: 0.02em;
-  line-height: 1.45;
-}
-
-.btwr-report .btwr-table__title {
-  display: block;
-  margin-bottom: var(--btwr-space-2);
-  color: var(--btwr-color-heading);
-  font-size: 1.35rem;
-  font-weight: 650;
-  letter-spacing: 0;
-  line-height: 1.15;
-  text-transform: none;
-}
-
-.btwr-report .btwr-table__subtitle,
-.btwr-report .btwr-table caption em {
-  display: block;
-  max-width: 48rem;
-  color: var(--btwr-color-muted);
-  font-size: 0.88rem;
-  font-style: normal;
-  font-weight: 400;
-  letter-spacing: 0;
-  line-height: 1.55;
-  text-transform: none;
-}
-
-.btwr-report .btwr-table caption em {
-  color: var(--btwr-color-link);
-  font-size: 0.78rem;
-}
-
-.btwr-report .btwr-table__metric-unit {
-  display: block;
-  margin-top: 0.22rem;
-  color: var(--btwr-color-subtle);
-  font-family: var(--btwr-font-label);
-  font-size: 0.68rem;
-  font-weight: 300;
-  letter-spacing: 0.04em;
-  line-height: 1.45;
-}
-
-.btwr-recommended-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 0 0.45rem;
-  padding: 0.2rem 0.58rem;
-  border-radius: 999px;
-  background: var(--btwr-color-surface);
-  color: var(--btwr-color-link);
-  font-family: var(--btwr-font-label);
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.btwr-recommended-tag::before {
-  content: "";
-  width: 0.28rem;
-  height: 0.28rem;
-  margin-right: 0.35rem;
-  border-radius: 999px;
-  background: var(--btwr-color-accent);
 }
 
 .btwr-callout {
@@ -684,7 +523,7 @@
   min-height: 9.6rem;
 }
 
-.btwr-report .btwr-ph-certifications__table {
+.btwr-ph-certifications__table {
   width: 100%;
   min-width: 0;
   border: 1px solid var(--btwr-color-border);
@@ -697,14 +536,14 @@
   table-layout: fixed;
 }
 
-.btwr-report .btwr-ph-certifications__table caption {
+.btwr-ph-certifications__table caption {
   padding: 1rem 1.1rem 0.85rem;
   border-bottom: 1px solid var(--btwr-color-border);
   color: var(--btwr-color-heading);
   text-align: left;
 }
 
-.btwr-report .btwr-ph-certifications__table .btwr-table__title {
+.btwr-ph-certifications__table .btwr-table__title {
   margin: 0;
   font-size: 1rem;
   font-weight: 650;
@@ -738,7 +577,7 @@
   border-bottom: 0;
 }
 
-.btwr-report .btwr-ph-certifications__table .btwr-ph-certifications__table-heading th {
+.btwr-ph-certifications__table .btwr-ph-certifications__table-heading th {
   padding: 0.68rem 0.95rem;
   border-bottom: 1px solid var(--btwr-color-border);
   background: var(--btwr-color-surface);
@@ -939,30 +778,30 @@
 }
 
 @media (max-width: 1180px) {
-  .btwr-report .btwr-masthead {
+  .btwr-masthead {
     grid-template-columns: 1fr;
     gap: var(--btwr-space-3);
   }
 
-  .btwr-report .btwr-masthead__nav {
+  .btwr-masthead__nav {
     justify-content: start;
     overflow-x: auto;
   }
 }
 
 @media (max-width: 860px) {
-  .btwr-report .btwr-masthead {
+  .btwr-masthead {
     grid-template-columns: 1fr;
     gap: var(--btwr-space-3);
   }
 
-  .btwr-report .btwr-masthead__meta {
+  .btwr-masthead__meta {
     flex-wrap: wrap;
     gap: var(--btwr-space-2) var(--btwr-space-4);
     white-space: normal;
   }
 
-  .btwr-report .btwr-masthead__date {
+  .btwr-masthead__date {
     padding-left: 0;
     border-left: 0;
   }
