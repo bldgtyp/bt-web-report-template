@@ -21,9 +21,23 @@ interface Props {
   currentHref: string;
   pageKicker: string;
   pageLabel: string;
+  heroImage?: string;
+  heroImageFull?: string;
+  heroAlt?: string;
+  heroCaption?: string;
 }
 
-const { report, tocItems, currentHref, pageKicker, pageLabel } = Astro.props;
+const {
+  report,
+  tocItems,
+  currentHref,
+  pageKicker,
+  pageLabel,
+  heroImage,
+  heroImageFull,
+  heroAlt,
+  heroCaption,
+} = Astro.props;
 const manifest = report.manifest;
 const variants = report.variantOrder;
 const recommended = recommendedVariant(variants);
@@ -109,11 +123,32 @@ const faviconHref =
                   : "Project metadata is ready. PHPP-derived model data will populate this report after the scrape runs."}
               </p>
             </div>
-            <div class="btwr-hero__figure" aria-hidden="true">
-              <div class="btwr-placeholder-iso">
-                <span>ISOMETRIC RENDER</span>
-              </div>
-            </div>
+            <figure class="btwr-hero__figure">
+              {heroImage ? (
+                <>
+                  <a
+                    class="btwr-hero__image-link"
+                    href={heroImageFull ?? heroImage}
+                    data-btwr-full-src={heroImageFull ?? heroImage}
+                    data-btwr-caption={heroCaption ?? ""}
+                    aria-label="Open hero image larger"
+                  >
+                    <img
+                      class="btwr-hero__image"
+                      src={heroImage}
+                      alt={heroAlt ?? ""}
+                      fetchpriority="high"
+                      decoding="async"
+                    />
+                  </a>
+                  {heroCaption ? <figcaption>{heroCaption}</figcaption> : null}
+                </>
+              ) : (
+                <div class="btwr-placeholder-iso" aria-hidden="true">
+                  <span>ISOMETRIC RENDER</span>
+                </div>
+              )}
+            </figure>
           </div>
         )
       }

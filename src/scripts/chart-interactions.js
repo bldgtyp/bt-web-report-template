@@ -8,6 +8,13 @@
   const markSelector = ".btwr-chart-mark";
   const chartFrameSelector = ".btwr-chart-frame[data-chart]";
   const expandButtonSelector = ".btwr-chart-expand";
+  const imageModalSelector = [
+    ".btwr-hero__figure img",
+    ".btwr-report-main .btwr-section-hero img",
+    ".btwr-report-main .btwr-geometry-figure img",
+    ".btwr-report-main .btwr-assembly-card__image img",
+    ".btwr-report-main .btwr-prose img",
+  ].join(", ");
   let activeMark = null;
   let tooltip = null;
   let modal = null;
@@ -158,11 +165,11 @@
     }
 
     modal = document.createElement("dialog");
-    modal.className = "btwr-chart-modal";
-    modal.setAttribute("aria-label", "Expanded chart");
+    modal.className = "btwr-chart-modal btwr-media-modal";
+    modal.setAttribute("aria-label", "Expanded report media");
     modal.innerHTML = `
       <div class="btwr-chart-modal__panel">
-        <button class="btwr-chart-modal__close" type="button" aria-label="Close expanded chart">
+        <button class="btwr-chart-modal__close" type="button" aria-label="Close expanded media">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M6 6l12 12" />
             <path d="M18 6L6 18" />
@@ -174,10 +181,10 @@
 
     modalContent = modal.querySelector(".btwr-chart-modal__content");
     closeButton = modal.querySelector(".btwr-chart-modal__close");
-    closeButton.addEventListener("click", closeExpandedChart);
+    closeButton.addEventListener("click", closeExpandedMedia);
     modal.addEventListener("click", (event) => {
       if (event.target === modal) {
-        closeExpandedChart();
+        closeExpandedMedia();
       }
     });
     modal.addEventListener("close", () => {
@@ -195,7 +202,7 @@
     return modal;
   }
 
-  function closeExpandedChart() {
+  function closeExpandedMedia() {
     if (!modal) {
       return;
     }
@@ -211,6 +218,7 @@
 
   function openExpandedChart(frame, trigger) {
     const activeModal = ensureModal();
+    activeModal.setAttribute("aria-label", "Expanded chart");
     hideTooltip();
 
     const clone = frame.cloneNode(true);
@@ -218,6 +226,137 @@
     clone.removeAttribute("id");
     clone.setAttribute("data-chart-expanded", "true");
     modalContent.replaceChildren(clone);
+    returnFocusTo = trigger;
+    document.body.classList.add("btwr-chart-modal-open");
+
+    if (typeof activeModal.showModal === "function") {
+      activeModal.showModal();
+    } else {
+      activeModal.setAttribute("open", "");
+    }
+    closeButton.focus();
+  }
+
+  function isImageHref(value) {
+    if (!value) {
+      return false;
+    }
+
+    try {
+      const url = new URL(value, window.location.href);
+      return /\.(avif|gif|jpe?g|png|svg|webp)$/i.test(url.pathname);
+    } catch {
+      return false;
+    }
+  }
+
+  function closestImageLink(image) {
+    const link = image.closest("a");
+    return link?.contains(image) ? link : null;
+  }
+
+  function imageModalSource(image, link) {
+    const explicitSource =
+      link?.getAttribute("data-btwr-full-src") ||
+      image.getAttribute("data-btwr-full-src") ||
+      image.getAttribute("data-btwr-modal-src");
+    if (explicitSource) {
+      return explicitSource;
+    }
+
+    const linkedHref = link?.getAttribute("href");
+    if (isImageHref(linkedHref)) {
+      return linkedHref;
+    }
+
+    return image.currentSrc || image.getAttribute("src") || "";
+  }
+
+  function imageCaption(image, link) {
+    const explicitCaption = link?.getAttribute("data-btwr-caption") || image.getAttribute("data-btwr-caption");
+    if (explicitCaption) {
+      return explicitCaption;
+    }
+
+    const figureCaption = image.closest("figure")?.querySelector("figcaption")?.textContent?.trim();
+    return figureCaption || image.getAttribute("alt") || "";
+  }
+
+  function linkedFile(image, link, modalSource) {
+    const href = link?.getAttribute("href");
+    if (!href || isImageHref(href) || href === modalSource) {
+      return null;
+    }
+
+    return {
+      href,
+      label: link.getAttribute("data-btwr-linked-file-label") || `Open linked file for ${image.getAttribute("alt") || "image"}`,
+    };
+  }
+
+  function findImageTrigger(target) {
+    if (!(target instanceof Element)) {
+      return null;
+    }
+
+    let image = target.closest(imageModalSelector);
+    let link = image instanceof HTMLImageElement ? closestImageLink(image) : null;
+    if (!(image instanceof HTMLImageElement)) {
+      link = target.closest("a");
+      const linkedImage = link?.querySelector(imageModalSelector);
+      image = linkedImage instanceof HTMLImageElement ? linkedImage : null;
+    }
+    if (!(image instanceof HTMLImageElement)) {
+      return null;
+    }
+
+    return {
+      image,
+      link,
+      trigger: link || image,
+    };
+  }
+
+  function openExpandedImage(image, trigger, link = null) {
+    const activeModal = ensureModal();
+    const source = imageModalSource(image, link);
+    if (!source) {
+      return;
+    }
+
+    hideTooltip();
+    const caption = imageCaption(image, link);
+    const extraLink = linkedFile(image, link, source);
+    const figure = document.createElement("figure");
+    figure.className = "btwr-image-modal__figure";
+
+    const expandedImage = document.createElement("img");
+    expandedImage.src = source;
+    expandedImage.alt = image.getAttribute("alt") || "";
+    expandedImage.decoding = "async";
+    figure.appendChild(expandedImage);
+
+    if (caption || extraLink) {
+      const footer = document.createElement("figcaption");
+      if (caption) {
+        const captionText = document.createElement("span");
+        captionText.textContent = caption;
+        footer.appendChild(captionText);
+      }
+      if (extraLink) {
+        const fileLink = document.createElement("a");
+        fileLink.href = extraLink.href;
+        fileLink.target = "_blank";
+        fileLink.rel = "noopener noreferrer";
+        fileLink.textContent = "Open linked file";
+        fileLink.setAttribute("aria-label", extraLink.label);
+        footer.appendChild(fileLink);
+      }
+      figure.appendChild(footer);
+    }
+
+    activeModal.setAttribute("aria-label", caption ? `Expanded image: ${caption}` : "Expanded image");
+    modalContent.replaceChildren(figure);
     returnFocusTo = trigger;
     document.body.classList.add("btwr-chart-modal-open");
 
@@ -252,7 +391,31 @@
     document.querySelectorAll(chartFrameSelector).forEach(addExpandButton);
   }
 
+  function decorateImages() {
+    document.querySelectorAll(imageModalSelector).forEach((image) => {
+      const link = closestImageLink(image);
+      const trigger = link || image;
+      trigger.classList.add("btwr-image-modal-trigger");
+      if (!link) {
+        trigger.setAttribute("role", "button");
+        trigger.setAttribute("tabindex", "0");
+        trigger.setAttribute("aria-label", `Open ${image.getAttribute("alt") || "image"} larger`);
+      }
+    });
+  }
+
   decorateCharts();
+  decorateImages();
+
+  document.addEventListener("click", (event) => {
+    const match = findImageTrigger(event.target);
+    if (!match) {
+      return;
+    }
+
+    event.preventDefault();
+    openExpandedImage(match.image, match.trigger, match.link);
+  });
 
   document.addEventListener("pointerover", (event) => {
     const mark = findMark(event.target);
@@ -293,8 +456,26 @@
     if (event.key === "Escape") {
       hideTooltip();
       if (modal?.open) {
-        closeExpandedChart();
+        closeExpandedMedia();
       }
+      return;
     }
+
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    const match = findImageTrigger(event.target);
+    if (!match) {
+      return;
+    }
+
+    event.preventDefault();
+    openExpandedImage(match.image, match.trigger, match.link);
+  });
+
+  document.addEventListener("astro:page-load", () => {
+    decorateCharts();
+    decorateImages();
   });
 })();

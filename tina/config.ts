@@ -49,6 +49,36 @@ const reportSectionFields: TinaField[] = [
   },
 ];
 
+const summaryFields: TinaField[] = [
+  ...reportSectionFields,
+  {
+    type: "image",
+    name: "hero_image",
+    label: "Hero display image",
+    required: true,
+  },
+  {
+    type: "image",
+    name: "hero_image_full",
+    label: "Hero high-resolution image",
+    required: true,
+  },
+  {
+    type: "string",
+    name: "hero_alt",
+    label: "Hero alt text",
+    required: true,
+    ui: {
+      component: "textarea",
+    },
+  },
+  {
+    type: "string",
+    name: "hero_caption",
+    label: "Hero caption",
+  },
+];
+
 const assemblyFields: TinaField[] = [
   {
     type: "string",
@@ -91,7 +121,13 @@ const assemblyFields: TinaField[] = [
   },
 ];
 
-function fixedMdxSection(label: string, name: string, path: string, include: string): Collection {
+function fixedMdxSection(
+  label: string,
+  name: string,
+  path: string,
+  include: string,
+  fields: TinaField[] = reportSectionFields,
+): Collection {
   return {
     label,
     name,
@@ -103,7 +139,7 @@ function fixedMdxSection(label: string, name: string, path: string, include: str
     ui: {
       allowedActions: lockedSectionActions,
     },
-    fields: reportSectionFields,
+    fields,
   };
 }
 
@@ -122,7 +158,7 @@ export default defineConfig({
   },
   schema: {
     collections: [
-      fixedMdxSection("Executive summary", "summary", "content", "summary"),
+      fixedMdxSection("Executive summary", "summary", "content", "summary", summaryFields),
       fixedMdxSection("Energy model", "energy_model", "content", "energy-model"),
       fixedMdxSection("Model geometry", "energy_model_geometry", "content/energy-model", "model-geometry"),
       fixedMdxSection("Model variants", "energy_model_variants", "content/energy-model", "model-variants"),

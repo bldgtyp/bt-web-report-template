@@ -94,6 +94,10 @@ instead, such as `4322` or `4323`.
 - Edit `project.yaml` for project metadata, publish URL, and local data paths.
 - Edit `content/**/*.mdx` for report narrative.
 - Put client-visible images and diagrams in `public/assets/`.
+- Splash page hero images live at `public/assets/cover/hero.png` for the
+  initial display image and `public/assets/cover/hero-full.png` for the
+  high-resolution modal image. `content/summary.mdx` owns those paths, alt text,
+  and caption. Report images open in an in-page modal instead of navigating away.
 - Treat `data/` as generated PHPP output. Run `btwr scrape <project-path>`.
 - Keep `.bldgtyp/config.local.yaml` local-only for machine-specific notes.
 
