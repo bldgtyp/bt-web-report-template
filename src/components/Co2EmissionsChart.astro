@@ -1,9 +1,10 @@
 ---
-import { DataState, axisGridBackground, cellNumber, cellText, formatValue, linearAxis, variantName } from "@bldgtyp/web-report-kit";
+import { DataState, axisGridBackground, cellNumber, cellText, formatValue, linearAxis } from "@bldgtyp/web-report-kit";
 import type { ReportData } from "@bldgtyp/web-report-kit";
 
 interface Props {
   data: ReportData;
+  subtitle?: string;
   title?: string;
 }
 
@@ -81,7 +82,7 @@ function co2GroupForEndUse(endUse: string): EndUseGroup | null {
   return CO2_GROUP_BY_END_USE.get(chartKey(endUse)) ?? EQUIPMENT_GROUP;
 }
 
-const { data, title = "Annual CO2e emissions" } = Astro.props;
+const { data, subtitle: subtitleProp, title = "Annual CO2e emissions" } = Astro.props;
 const rows = data.energy.filter((row) => cellText(row, "metric_group") === "co2e");
 const sourceUnits = cellText(rows[0] ?? {}, "units") || "tonsCO2e";
 const displayUnits = sourceUnits === "tonsCO2e" ? "tons CO2e / year" : sourceUnits;
@@ -136,8 +137,7 @@ const axis = linearAxis(chartMax);
 const axisStyle = `--btwr-axis-grid: ${axisGridBackground(axis.gridStops)};`;
 const axisLabelStyle = `grid-template-columns: repeat(${axis.ticks.length}, minmax(0, 1fr));`;
 const limitOffset = limitValue !== null && axis.max > 0 ? `${(limitValue / axis.max) * 100}%` : null;
-const recommended = data.variantOrder.find((variant) => variant.recommended);
-const recommendedValue = chartRows.find((row) => row.variantId === recommended?.id)?.total ?? null;
+const subtitle = subtitleProp ?? `Operational CO2e by modeled variant, in ${displayUnits}.`;
 ---
 
 {
@@ -147,9 +147,7 @@ const recommendedValue = chartRows.find((row) => row.variantId === recommended?.
     <figure class="btwr-chart-frame" data-chart="co2e">
       <div class="btwr-chart-frame__header">
         <h3>{title}</h3>
-        <p class="btwr-chart-frame__meta">
-          {recommended ? `${variantName(data.variantOrder, recommended.id)}: ${formatValue(recommendedValue, displayUnits)}` : displayUnits}
-        </p>
+        <p class="btwr-chart-frame__subtitle">{subtitle}</p>
       </div>
       <ul class="btwr-chart-legend" aria-label="CO2e end uses">
         {groups.map((group) => <li><span style={`--btwr-legend-color: ${group.color}`}></span>{group.label}</li>)}

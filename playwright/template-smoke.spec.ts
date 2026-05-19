@@ -65,6 +65,12 @@ test("energy model page renders available PHPP data state", async ({ page }) => 
     await expect(page.locator('[data-chart="site-energy"] .btwr-site-energy-bars__axis-label')).toHaveText("kWh / year");
     await expect(page.getByRole("heading", { name: "Annual CO2e emissions due to operational energy consumption" })).toBeVisible();
     await expect(page.locator('[data-chart="co2e"] [role="img"]')).toBeVisible();
+    await expect(page.locator('[data-chart="co2e"] .btwr-chart-frame__subtitle')).toHaveText(
+      "Operational CO2e by modeled variant, in tons CO2e / year.",
+    );
+    await expect(page.locator('[data-chart="co2e"] .btwr-chart-frame__header')).not.toContainText(
+      "EnerPHit by Component:",
+    );
     await expect(page.locator('[data-chart="co2e"] .btwr-site-energy-bars__axis span')).toHaveText(["0", "2", "4", "6", "8"]);
     await expect(page.locator('[data-chart="co2e"] .btwr-site-energy-bars__axis-label')).toHaveText("tons CO2e / year");
     await expect(page.locator('[data-chart="co2e"] .btwr-chart-legend__limit')).toBeVisible();
