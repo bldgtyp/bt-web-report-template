@@ -400,6 +400,13 @@
 }
 
 .btwr-table {
+  --btwr-table-hover-tint: color-mix(in srgb, var(--btwr-color-accent) 10%, transparent);
+  --btwr-table-hover-bg: linear-gradient(var(--btwr-table-hover-tint), var(--btwr-table-hover-tint)),
+    var(--btwr-color-surface);
+  --btwr-table-recommended-bg: var(--btwr-color-accent-soft);
+  --btwr-table-recommended-hover-bg: linear-gradient(var(--btwr-table-hover-tint), var(--btwr-table-hover-tint)),
+    var(--btwr-table-recommended-bg);
+
   width: 100%;
   min-width: min(56rem, 100%);
   border-collapse: collapse;
@@ -429,6 +436,7 @@
   overflow-wrap: anywhere;
   white-space: normal;
   word-break: normal;
+  transition: background 120ms ease;
 }
 
 .btwr-table thead th {
@@ -468,7 +476,7 @@
 
 .btwr-table tbody tr:hover th,
 .btwr-table tbody tr:hover td {
-  background: var(--btwr-color-accent-soft);
+  background: var(--btwr-table-hover-bg);
 }
 
 .btwr-table .btwr-cell-number {
@@ -490,13 +498,15 @@
 .btwr-table .btwr-row-recommended th,
 .btwr-table .btwr-row-recommended td,
 .btwr-table .btwr-col-recommended {
-  background: var(--btwr-color-accent-soft);
+  background: var(--btwr-table-recommended-bg);
   color: var(--btwr-color-link);
   font-weight: 700;
 }
 
+.btwr-table tbody tr.btwr-row-recommended:hover th,
+.btwr-table tbody tr.btwr-row-recommended:hover td,
 .btwr-table tbody tr:hover .btwr-col-recommended {
-  background: var(--btwr-color-accent-soft);
+  background: var(--btwr-table-recommended-hover-bg);
 }
 
 .btwr-table__title {
