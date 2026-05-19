@@ -1,5 +1,5 @@
 ---
-import Mechanical, { frontmatter as mechanical } from "../../../content/mechanical.mdx";
+import Mechanical from "../../../content/mechanical.mdx";
 import MechanicalPanels from "../../components/MechanicalPanels.astro";
 import ReportSection from "../../components/ReportSection.astro";
 import { reportPages } from "../../data/pages";
@@ -9,7 +9,20 @@ import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 const report = await loadTemplateReportData();
 const page = reportPages.mechanical;
 const sections = {
-  mechanical: { href: "#mechanical", label: "Mechanical", number: "01" },
+  freshAirVentilation: { href: "#fresh-air-ventilation", label: "Fresh-Air Ventilation", number: "01" },
+  freshAirFlowRates: { href: "#fresh-air-flow-rates", label: "Fresh-Air Flow Rates", number: "02" },
+  ventilationSystemBalancing: {
+    href: "#ventilation-system-balancing",
+    label: "Ventilation System Balancing",
+    number: "03",
+  },
+  ventilationSystemPassiveHouseRequirements: {
+    href: "#ventilation-system-passive-house-requirements",
+    label: "Ventilation System Passive House Requirements",
+    number: "04",
+  },
+  appliancesAndVenting: { href: "#appliances-and-venting", label: "Appliances and Venting", number: "05" },
+  buildingMonitoring: { href: "#building-monitoring", label: "Building Monitoring", number: "06" },
 };
 const tocItems = Object.values(sections);
 ---
@@ -22,11 +35,36 @@ const tocItems = Object.values(sections);
   pageLabel={page.label}
 >
   <ReportSection
-    id="mechanical"
+    id="fresh-air-ventilation"
     Content={Mechanical}
-    kicker={sections.mechanical.number}
-    title={mechanical.title}
+    kicker={sections.freshAirVentilation.number}
+    title={sections.freshAirVentilation.label}
+  />
+  <ReportSection
+    id="fresh-air-flow-rates"
+    kicker={sections.freshAirFlowRates.number}
+    title={sections.freshAirFlowRates.label}
   >
     <MechanicalPanels />
   </ReportSection>
+  <ReportSection
+    id="ventilation-system-balancing"
+    kicker={sections.ventilationSystemBalancing.number}
+    title={sections.ventilationSystemBalancing.label}
+  />
+  <ReportSection
+    id="ventilation-system-passive-house-requirements"
+    kicker={sections.ventilationSystemPassiveHouseRequirements.number}
+    title={sections.ventilationSystemPassiveHouseRequirements.label}
+  />
+  <ReportSection
+    id="appliances-and-venting"
+    kicker={sections.appliancesAndVenting.number}
+    title={sections.appliancesAndVenting.label}
+  />
+  <ReportSection
+    id="building-monitoring"
+    kicker={sections.buildingMonitoring.number}
+    title={sections.buildingMonitoring.label}
+  />
 </ProjectReportLayout>

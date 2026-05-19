@@ -238,6 +238,17 @@
   line-height: 1.55;
 }
 
+.btwr-callout--critical {
+  border-left-color: var(--btwr-color-highlight);
+  background: var(--btwr-color-highlight-soft);
+}
+
+.btwr-callout--critical strong,
+.btwr-callout--critical span {
+  color: var(--btwr-color-warning);
+  font-weight: 700;
+}
+
 .btwr-section + .btwr-section {
   margin-top: 0;
 }
