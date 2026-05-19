@@ -414,7 +414,7 @@
 
 .btwr-site-energy-bars__limit {
   position: absolute;
-  inset: 1.2rem calc(7rem + var(--btwr-space-3)) 1.65rem calc(13rem + var(--btwr-space-3));
+  inset: -0.55rem calc(7rem + var(--btwr-space-3)) calc(-0.7rem - 1px) calc(13rem + var(--btwr-space-3));
   z-index: 2;
   pointer-events: none;
 }
@@ -443,7 +443,7 @@
 
 @media (max-width: 720px) {
   .btwr-site-energy-bars__limit {
-    inset: 2.4rem 0 0 0;
+    inset: -0.45rem 0 calc(-0.7rem - 1px) 0;
   }
 
   .btwr-site-energy-bars__limit span {

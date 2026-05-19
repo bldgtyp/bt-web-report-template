@@ -135,7 +135,6 @@ const maxTotal = Math.max(...chartRows.map((row) => row.total), 0);
 const chartMax = Math.max(maxTotal, limitValue ?? 0);
 const axis = linearAxis(chartMax);
 const axisStyle = `--btwr-axis-grid: ${axisGridBackground(axis.gridStops)};`;
-const axisLabelStyle = `grid-template-columns: repeat(${axis.ticks.length}, minmax(0, 1fr));`;
 const limitOffset = limitValue !== null && axis.max > 0 ? `${(limitValue / axis.max) * 100}%` : null;
 const subtitle = subtitleProp ?? `Operational CO2e by modeled variant, in ${displayUnits}.`;
 ---
@@ -164,33 +163,43 @@ const subtitle = subtitleProp ?? `Operational CO2e by modeled variant, in ${disp
         aria-label={`Annual CO2e emissions by variant, ${displayUnits}${limitValue !== null ? `, limit ${formatValue(limitValue, displayUnits)}` : ""}`}
         style={`${axisStyle}${limitOffset ? ` --btwr-limit-offset: ${limitOffset};` : ""}`}
       >
-        {limitOffset ? (
-          <div class="btwr-site-energy-bars__limit" aria-hidden="true">
-            <span>CO2e Limit</span>
-          </div>
-        ) : null}
-        {chartRows.map((row) => (
-          <div class="btwr-site-energy-bars__row">
-            <div class="btwr-site-energy-bars__label">{row.label}</div>
-            <div class="btwr-site-energy-bars__track">
-              {row.segments.map((segment) =>
-                segment.value > 0 ? (
-                  <span
-                    class="btwr-site-energy-bars__segment btwr-chart-mark"
-                    data-btwr-tooltip={`${row.label}\n${segment.label}: ${formatValue(segment.value, displayUnits)}`}
-                    aria-label={`${row.label}, ${segment.label}: ${formatValue(segment.value, displayUnits)}`}
-                    style={`--btwr-segment-color: ${segment.color}; --btwr-segment-width: ${(segment.value / axis.max) * 100}%;`}
-                  >
-                    <span class="btwr-site-energy-bars__sr">{segment.label}: {formatValue(segment.value, displayUnits)}</span>
-                  </span>
-                ) : null,
-              )}
+        <div class="btwr-site-energy-bars__plot">
+          <div class="btwr-site-energy-bars__grid" aria-hidden="true"></div>
+          {limitOffset ? (
+            <div class="btwr-site-energy-bars__limit" aria-hidden="true">
+              <span>CO2e Limit</span>
             </div>
-            <div class="btwr-site-energy-bars__total">{formatValue(row.total, displayUnits)}</div>
-          </div>
-        ))}
-        <div class="btwr-site-energy-bars__axis" aria-hidden="true" style={axisLabelStyle}>
-          {axis.ticks.map((tick) => <span>{formatValue(tick)}</span>)}
+          ) : null}
+          {chartRows.map((row) => (
+            <div class="btwr-site-energy-bars__row">
+              <div class="btwr-site-energy-bars__label">{row.label}</div>
+              <div class="btwr-site-energy-bars__track">
+                {row.segments.map((segment) =>
+                  segment.value > 0 ? (
+                    <span
+                      class="btwr-site-energy-bars__segment btwr-chart-mark"
+                      data-btwr-tooltip={`${row.label}\n${segment.label}: ${formatValue(segment.value, displayUnits)}`}
+                      aria-label={`${row.label}, ${segment.label}: ${formatValue(segment.value, displayUnits)}`}
+                      style={`--btwr-segment-color: ${segment.color}; --btwr-segment-width: ${(segment.value / axis.max) * 100}%;`}
+                    >
+                      <span class="btwr-site-energy-bars__sr">{segment.label}: {formatValue(segment.value, displayUnits)}</span>
+                    </span>
+                  ) : null,
+                )}
+              </div>
+              <div class="btwr-site-energy-bars__total">{formatValue(row.total, displayUnits)}</div>
+            </div>
+          ))}
+        </div>
+        <div class="btwr-site-energy-bars__axis" aria-hidden="true">
+          {axis.ticks.map((tick, index) => (
+            <span
+              class={index === 0 ? "is-first" : index === axis.ticks.length - 1 ? "is-last" : undefined}
+              style={`--btwr-tick-position: ${axis.max > 0 ? (tick / axis.max) * 100 : 0}%;`}
+            >
+              {formatValue(tick)}
+            </span>
+          ))}
         </div>
         <div class="btwr-site-energy-bars__axis-label" aria-hidden="true">{displayUnits}</div>
       </div>
