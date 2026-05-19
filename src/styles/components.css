@@ -1359,31 +1359,6 @@
   color: var(--btwr-color-link);
 }
 
-.btwr-toc__recommendation {
-  margin-top: 2.25rem;
-  padding: var(--btwr-space-4);
-  border: 1px solid var(--btwr-color-border);
-  border-radius: var(--btwr-radius-sm);
-  background: var(--btwr-color-panel);
-}
-
-.btwr-toc__recommendation strong {
-  display: block;
-  margin-top: var(--btwr-space-2);
-  color: var(--btwr-color-heading);
-  font-size: 0.9rem;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.btwr-toc__recommendation span {
-  display: block;
-  margin-top: var(--btwr-space-2);
-  color: var(--btwr-color-muted);
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-
 .btwr-report-footer {
   display: flex;
   justify-content: space-between;
