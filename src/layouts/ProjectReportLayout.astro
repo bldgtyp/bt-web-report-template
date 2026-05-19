@@ -31,7 +31,6 @@ const buildingName = report.project.building_name || projectName;
 const clientName = report.project.client_name || "Client";
 const phase = report.project.phase || "Design analysis";
 const reportDate = report.project.report_date || manifest.generated_at || "Date pending";
-const targetStandard = report.project.target_standard || "Passive House";
 const variantLabel = variants.length === 1 ? "variant" : "variants";
 const title = `${pageLabel} | ${report.project.project_title} | ${phase}`;
 const showHero = currentHref === "/";
@@ -70,12 +69,18 @@ const faviconHref =
             <em>/ design-phase report</em>
           </span>
         </a>
-        <div class="btwr-masthead__project">
-          <span>{clientName}</span>
-          <span>{buildingName}</span>
+        <div class="btwr-masthead__meta" aria-label="Project and report metadata">
+          <span class="btwr-masthead__project">
+            <span>{clientName}</span>
+            <span aria-hidden="true">·</span>
+            <span>{buildingName}</span>
+          </span>
+          <span class="btwr-masthead__date">
+            <span>Report date</span>
+            <time datetime={reportDate}>{reportDate}</time>
+          </span>
         </div>
         <nav class="btwr-masthead__nav" aria-label="Primary report pages">
-          <span>{reportDate}</span>
           {
             reportPageNavItems.map((item) => (
               <a href={item.href} aria-current={item.href === currentHref ? "page" : undefined}>
@@ -107,28 +112,6 @@ const faviconHref =
                 <span>ISOMETRIC RENDER</span>
               </div>
             </div>
-            <dl class="btwr-hero__stats">
-              <div>
-                <dt>Status</dt>
-                <dd>{manifest.status}</dd>
-                <span>data manifest</span>
-              </div>
-              <div>
-                <dt>Variants</dt>
-                <dd>{variants.length || "—"}</dd>
-                <span>{variants.length ? "model options" : "pending scrape"}</span>
-              </div>
-              <div>
-                <dt>Recommended</dt>
-                <dd>{recommended?.name ?? "pending"}</dd>
-                <span>current path</span>
-              </div>
-              <div>
-                <dt>Standard</dt>
-                <dd>{targetStandard}</dd>
-                <span>target basis</span>
-              </div>
-            </dl>
           </div>
         )
       }

@@ -7,8 +7,13 @@ const links = reportPageNavItems.filter((item) => item.href !== "/");
 <nav class="btwr-page-links" aria-label="Report pages">
   {links.map((item) => (
     <a href={item.href}>
-      <span>{item.label}</span>
+      <span class="btwr-page-links__title">{item.label}</span>
       <small>Open section</small>
+      <span class="btwr-page-links__arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M5 12h12m-5-5 5 5-5 5" />
+        </svg>
+      </span>
     </a>
   ))}
 </nav>

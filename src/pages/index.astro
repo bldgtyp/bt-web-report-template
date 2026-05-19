@@ -1,6 +1,5 @@
 ---
 import Summary, { frontmatter as summary } from "../../content/summary.mdx";
-import ProjectOverview from "../components/ProjectOverview.astro";
 import ReportPageLinks from "../components/ReportPageLinks.astro";
 import ReportSection from "../components/ReportSection.astro";
 import { reportPages } from "../data/pages";
@@ -28,10 +27,8 @@ const tocItems = Object.values(sections);
     kicker={sections.summary.number}
     title={summary.title}
     dek={summary.dek}
-    callout_label={summary.callout_label}
-    callout_body={summary.callout_body}
+    show_heading={false}
   >
-    <ProjectOverview />
     <ReportPageLinks />
   </ReportSection>
 </ProjectReportLayout>
