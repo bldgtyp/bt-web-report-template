@@ -82,6 +82,7 @@
   --btwr-space-6: 2rem;
   --btwr-space-7: 3rem;
   --btwr-space-8: 4rem;
+  --btwr-page-gutter: clamp(var(--btwr-space-4), 4vw, var(--btwr-space-5));
 
   --btwr-radius-sm: var(--radius-sm);
   --btwr-radius-md: 3px;

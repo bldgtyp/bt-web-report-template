@@ -119,6 +119,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(18rem, 28.75rem);
   gap: 3.75rem;
+  width: min(calc(100% - (2 * var(--btwr-page-gutter))), var(--btwr-content-max));
   max-width: var(--btwr-content-max);
   margin: 0 auto;
   padding: 3.75rem 0 3.125rem;
@@ -262,6 +263,7 @@
   grid-template-columns: minmax(0, 55rem) 13.75rem;
   gap: 3.75rem;
   align-items: start;
+  width: min(calc(100% - (2 * var(--btwr-page-gutter))), var(--btwr-content-max));
   max-width: var(--btwr-content-max);
   margin: 0 auto;
   padding: 3.75rem 0 0;
@@ -1383,6 +1385,7 @@
   display: flex;
   justify-content: space-between;
   gap: var(--btwr-space-4);
+  width: min(calc(100% - (2 * var(--btwr-page-gutter))), var(--btwr-content-max));
   max-width: var(--btwr-content-max);
   margin: 3.75rem auto 0;
   padding-block: var(--btwr-space-5);
@@ -1399,10 +1402,7 @@
 }
 
 @media (max-width: 1180px) {
-  .btwr-masthead,
-  .btwr-hero,
-  .btwr-report-grid,
-  .btwr-report-footer {
+  .btwr-masthead {
     padding-right: var(--btwr-space-5);
     padding-left: var(--btwr-space-5);
   }

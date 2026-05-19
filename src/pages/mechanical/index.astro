@@ -213,5 +213,79 @@ const tocItems = Object.values(sections);
     id="building-monitoring"
     kicker={sections.buildingMonitoring.number}
     title={sections.buildingMonitoring.label}
-  />
+  >
+    <div class="btwr-prose">
+      <h4>ENVIRONMENTAL MONITORING:</h4>
+      <p>
+        There are several systems available for monitoring temperature, RH, CO2, and other environmental conditions.
+        We strongly recommend installing a system of some form in order to successfully commission the home and
+        correct any issues with indoor comfort over the first year. Environmental monitoring systems are relatively
+        low cost, and we recommend two possible systems: the <strong>Wireless Sensor Tag</strong> by Cao Gadgets LLC,
+        and the <strong>Netatmo</strong> weather station. Both systems upload data to the internet over a wireless
+        network and data can be accessed online. Note that this requires a wireless network to be in operation at the
+        home at all times. Other monitoring systems are available from newer platforms such as <strong>Ecobee</strong>.
+      </p>
+      <p>
+        The Wireless Tag system is less costly, but cannot monitor CO2. For this reason, we would prefer the Netatmo
+        system.
+      </p>
+      <p>More information can be found at:</p>
+      <ul>
+        <li><a href="https://www.ecobee.com/" target="_blank" rel="noopener noreferrer">Ecobee</a></li>
+        <li><a href="https://wirelesstag.net/" target="_blank" rel="noopener noreferrer">WirelessTag</a></li>
+        <li><a href="https://www.netatmo.com/" target="_blank" rel="noopener noreferrer">Netatmo</a></li>
+      </ul>
+      <img
+        src="/assets/mechanical/monitor-netatmo.png"
+        alt="Netatmo environmental monitoring sensors shown with mobile and tablet app dashboards."
+      />
+
+      <h4>ENERGY MONITORING:</h4>
+      <p>
+        To really understand a home's energy use, a branch-circuit monitoring system is the way to go. Monitoring
+        each electrical circuit, especially in the first months of a project's operation, can help identify systems
+        that are working incorrectly and using more energy than they should. For projects with new electrical
+        services, it makes sense to install a load center designed to do just that. A number of manufacturers offer
+        load centers with integrated branch-circuit monitoring that can integrate with other smart controls, such as
+        switching and dimming. Real-time and historical energy-use data are available through the product app.
+      </p>
+      <p>More information can be found at:</p>
+      <ul>
+        <li>
+          <a
+            href="https://leviton.com/products/residential/load-centers/the-leviton-smart-load-center"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Leviton
+          </a>
+        </li>
+        <li><a href="https://www.span.io/" target="_blank" rel="noopener noreferrer">Span</a></li>
+      </ul>
+      <img
+        src="/assets/mechanical/monitor-leviton.jpg"
+        alt="Leviton smart load center app shown with smart breakers and metering modules."
+      />
+      <p>
+        Other options are available for integration with more typical circuit breaker panels. Systems such as the
+        Curb energy monitor, the Emporia Vue, and the eGauge provide customizable, real-time monitoring of electrical
+        usage. The web/app-based interface displays detailed information about the home's energy usage and can help
+        to fine-tune energy conservation measures.
+      </p>
+      <p>More information can be found at:</p>
+      <ul>
+        <li>
+          <a href="https://poweredbyelevation.com/curb-energy-monitoring/" target="_blank" rel="noopener noreferrer">
+            EnergyCurb
+          </a>
+        </li>
+        <li><a href="https://www.emporiaenergy.com/" target="_blank" rel="noopener noreferrer">Emporia Energy</a></li>
+        <li><a href="https://www.egauge.net/" target="_blank" rel="noopener noreferrer">eGauge</a></li>
+      </ul>
+      <img
+        src="/assets/mechanical/monitor-egauge.jpg"
+        alt="Curb energy monitoring dashboard showing real-time electrical load and circuit-level usage history."
+      />
+    </div>
+  </ReportSection>
 </ProjectReportLayout>
