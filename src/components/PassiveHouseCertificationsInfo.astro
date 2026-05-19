@@ -1,0 +1,105 @@
+---
+const certifications = [
+  {
+    title: "PHI Passive House (New Construction)",
+    body: [
+      "The international Passive House Institute pathway for new buildings. Compliance is normally documented in PHPP against space-heating and space-cooling demand or load, primary renewable energy, airtightness, thermal comfort, and moisture-safety criteria.",
+      "Use this as the strictest envelope-first reference target when the design intent is full Passive House performance rather than code-minimum compliance.",
+    ],
+  },
+  {
+    title: "PHI Low Energy Building",
+    body: [
+      "A PHI certification pathway for buildings that are substantially better than conventional construction but do not meet the full Passive House or EnerPHit criteria.",
+      "It is useful as a design benchmark for constrained projects where geometry, existing conditions, or cost make the full PHI target unrealistic, while still keeping the project inside the PHPP documentation framework.",
+    ],
+  },
+  {
+    title: "Phius CORE 2024",
+    body: [
+      "The Phius conservation-first certification path for new construction. Targets are climate-specific and respond to building size, occupancy density, source energy, envelope quality, airtightness, window comfort, and quality-assurance requirements.",
+      "This is often the relevant Phius reference for U.S. multifamily work where whole-building performance, field verification, and certification review are part of the project scope.",
+    ],
+  },
+  {
+    title: "Phius ZERO 2024",
+    body: [
+      "Phius ZERO builds on CORE: first reduce loads through passive and active conservation, then net annual energy use to zero with renewable energy.",
+      "The standard is more restrictive where all-electric operation and renewable-energy procurement are central project goals, including a prohibition on fossil-fueled combustion on site.",
+    ],
+  },
+];
+---
+
+<div class="btwr-ph-certifications">
+  <figure class="btwr-ph-certifications__hero">
+    <svg
+      viewBox="0 0 1440 420"
+      role="img"
+      aria-labelledby="ph-certifications-graphic-title ph-certifications-graphic-desc"
+    >
+      <title id="ph-certifications-graphic-title">Passive House certification concepts</title>
+      <desc id="ph-certifications-graphic-desc">
+        Three abstract house diagrams showing an efficient envelope, solar exposure, and balanced ventilation.
+      </desc>
+      <rect width="1440" height="420" />
+      <g fill="none" stroke-linecap="square" stroke-linejoin="miter">
+        <g transform="translate(95 72)">
+          <path d="M52 258V115L198 0 344 115v143Z" class="house-outline" />
+          <path d="M82 238V128L198 37l116 91v110Z" class="house-shadow" />
+        </g>
+        <g transform="translate(553 72)">
+          <path d="M52 258V115L198 0 344 115v143Z" class="house-outline" />
+          <path d="M52 258h292" class="house-outline" />
+          <path d="M153 231 337 25" class="solar-beam" />
+          <circle cx="384" cy="27" r="37" class="solar-disc" />
+          <path d="M198 0 344 115v46" class="house-shadow" />
+          <path d="M276 41 344 96" class="roof-gap" />
+        </g>
+        <g transform="translate(1012 72)">
+          <path d="M52 258V115L198 0 344 115v143Z" class="house-outline" />
+          <path d="M112 215h94v-42" class="vent-cool" />
+          <path d="M112 215v55" class="vent-cool-line" />
+          <path d="m96 254 16 16 16-16" class="vent-cool-arrow" />
+          <path d="M153 197h187v-70" class="vent-warm" />
+          <path d="m153 197 73-43" class="vent-warm" />
+          <path d="M340 127V72" class="vent-warm-line" />
+          <path d="m324 88 16-16 16 16" class="vent-warm-arrow" />
+        </g>
+      </g>
+    </svg>
+  </figure>
+
+  <div class="btwr-ph-certifications__copy">
+    <p class="btwr-ph-certifications__note">The following is for informational purposes only.</p>
+    <p>
+      Passive House is a high-performance building standard focused on reducing heating, cooling, hot water,
+      lighting, appliance, and source-energy use while improving comfort and enclosure durability.
+    </p>
+    <p>
+      PHI and Phius are separate certification systems. In this design-analysis report, these standards are used as
+      reference targets for comparing model variants; actual certification requires the applicable certifier review,
+      final documentation, construction QA, commissioning, and airtightness testing.
+    </p>
+  </div>
+
+  <div class="btwr-ph-certifications__accordion" aria-label="Passive House certification pathways">
+    {
+      certifications.map((item) => (
+        <details class="btwr-ph-certifications__item">
+          <summary>
+            <span>{item.title}</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </summary>
+          <div class="btwr-ph-certifications__panel">
+            {item.body.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </div>
+        </details>
+      ))
+    }
+  </div>
+</div>

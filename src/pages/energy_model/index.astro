@@ -17,11 +17,11 @@ import PassiveHouseThresholds, {
 } from "../../../content/energy-model/passive-house-thresholds.mdx";
 import SiteEnergy, { frontmatter as siteEnergy } from "../../../content/energy-model/site-energy.mdx";
 import BuildingMetricsTable from "../../components/BuildingMetricsTable.astro";
-import CertificationTable from "../../components/CertificationTable.astro";
 import Co2EmissionsChart from "../../components/Co2EmissionsChart.astro";
 import EnergySummaryTable from "../../components/EnergySummaryTable.astro";
 import EnvelopeInputsByVariantTable from "../../components/EnvelopeInputsByVariantTable.astro";
 import MechanicalInputsByVariantTable from "../../components/MechanicalInputsByVariantTable.astro";
+import PassiveHouseCertificationsInfo from "../../components/PassiveHouseCertificationsInfo.astro";
 import RecommendedGeometryMetrics from "../../components/RecommendedGeometryMetrics.astro";
 import ReportSection from "../../components/ReportSection.astro";
 import { reportPages } from "../../data/pages";
@@ -132,6 +132,6 @@ const tocItems = Object.values(sections);
     title={passiveHouseCertifications.title}
     dek={passiveHouseCertifications.dek}
   >
-    <CertificationTable data={report} caption="Certification result and limit rows" />
+    <PassiveHouseCertificationsInfo />
   </ReportSection>
 </ProjectReportLayout>

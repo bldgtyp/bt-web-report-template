@@ -17,7 +17,7 @@ const { id, kicker, title, dek, Content, callout_label, callout_body, show_headi
 
 <section class="btwr-section" aria-labelledby={id}>
   {show_heading && <SectionHeading id={id} kicker={kicker} title={title} />}
-  <h2 class="btwr-editorial-heading">{dek}</h2>
+  {dek && <h2 class="btwr-editorial-heading">{dek}</h2>}
   <div class="btwr-prose">
     <Content />
   </div>
