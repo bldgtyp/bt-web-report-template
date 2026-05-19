@@ -108,11 +108,6 @@ const rows = metrics.map((metric) => ({
 }));
 const recommendedName = data.variantOrder.find((variant) => variant.recommended)?.name ?? "the recommended variant";
 const hasRows = rows.some((row) => [...row.values.values()].some((value) => value !== "—"));
-const missingRows = rows.flatMap((row) =>
-  data.variantOrder
-    .filter((variant) => row.values.get(variant.id) === "—")
-    .map((variant) => `${row.label}${row.units ? ` (${row.units})` : ""} for ${variant.name}`),
-);
 ---
 
 {
@@ -127,9 +122,6 @@ const missingRows = rows.flatMap((row) =>
             This table lists some of the key output results for each of the variants tested as part of this investigation.
             Values from the recommended variant, {recommendedName}, are highlighted.
           </span>
-          {missingRows.length > 0 && (
-            <em>Missing scraper values to follow up on: {missingRows.join("; ")}.</em>
-          )}
         </caption>
         <thead>
           <tr>

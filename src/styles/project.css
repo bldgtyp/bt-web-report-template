@@ -283,8 +283,8 @@
 }
 
 .btwr-report .btwr-table .btwr-col-recommended {
-  background: var(--btwr-color-highlight-soft);
-  color: var(--btwr-color-warning);
+  background: var(--btwr-color-accent-soft);
+  color: var(--btwr-color-link);
   font-weight: 700;
 }
 
@@ -293,7 +293,7 @@
 }
 
 .btwr-report .btwr-table tbody tr:hover .btwr-col-recommended {
-  background: var(--btwr-color-highlight-soft);
+  background: var(--btwr-color-accent-soft);
 }
 
 .btwr-report .btwr-table .btwr-cell-muted {
@@ -332,7 +332,7 @@
 }
 
 .btwr-report .btwr-table caption em {
-  color: var(--btwr-color-warning);
+  color: var(--btwr-color-link);
   font-size: 0.78rem;
 }
 
@@ -355,7 +355,7 @@
   padding: 0.2rem 0.58rem;
   border-radius: 999px;
   background: var(--btwr-color-surface);
-  color: var(--btwr-color-warning);
+  color: var(--btwr-color-link);
   font-family: var(--btwr-font-label);
   font-size: 0.58rem;
   font-weight: 700;
@@ -370,7 +370,7 @@
   height: 0.28rem;
   margin-right: 0.35rem;
   border-radius: 999px;
-  background: var(--btwr-color-highlight);
+  background: var(--btwr-color-accent);
 }
 
 .btwr-callout {
@@ -755,14 +755,14 @@
 
 .btwr-ph-certifications__table .is-highlighted th,
 .btwr-ph-certifications__table .is-highlighted td {
-  background: var(--btwr-color-highlight-soft);
-  color: var(--btwr-color-warning);
+  background: var(--btwr-color-accent-soft);
+  color: var(--btwr-color-link);
   font-weight: 700;
 }
 
 .btwr-ph-certifications__table .is-highlighted:hover th,
 .btwr-ph-certifications__table .is-highlighted:hover td {
-  background: var(--btwr-color-highlight-soft);
+  background: var(--btwr-color-accent-soft);
 }
 
 .btwr-ph-certifications__panel-note {

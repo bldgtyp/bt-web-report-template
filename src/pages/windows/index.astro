@@ -1,5 +1,10 @@
 ---
-import Windows, { frontmatter as windows } from "../../../content/windows.mdx";
+import SiteShading, { frontmatter as siteShading } from "../../../content/windows/site-shading.mdx";
+import SummerRadiation, { frontmatter as summerRadiation } from "../../../content/windows/summer-radiation.mdx";
+import WindowThermalComfort, {
+  frontmatter as windowThermalComfort,
+} from "../../../content/windows/window-thermal-comfort.mdx";
+import WinterRadiation, { frontmatter as winterRadiation } from "../../../content/windows/winter-radiation.mdx";
 import ReportSection from "../../components/ReportSection.astro";
 import { reportPages } from "../../data/pages";
 import { loadTemplateReportData } from "../../data/report";
@@ -8,7 +13,10 @@ import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 const report = await loadTemplateReportData();
 const page = reportPages.windows;
 const sections = {
-  windows: { href: "#windows", label: "Windows", number: "01" },
+  thermalComfort: { href: "#window-thermal-comfort", label: "Window Thermal Comfort", number: "01" },
+  siteShading: { href: "#site-shading", label: "Site Shading", number: "02" },
+  winterRadiation: { href: "#winter-radiation", label: "Winter Radiation", number: "03" },
+  summerRadiation: { href: "#summer-radiation", label: "Summer Radiation", number: "04" },
 };
 const tocItems = Object.values(sections);
 ---
@@ -20,9 +28,39 @@ const tocItems = Object.values(sections);
   pageKicker={page.kicker}
   pageLabel={page.label}
 >
-  <ReportSection id="windows" Content={Windows} kicker={sections.windows.number} title={windows.title}>
+  <ReportSection
+    id="window-thermal-comfort"
+    Content={WindowThermalComfort}
+    kicker={sections.thermalComfort.number}
+    title={windowThermalComfort.title}
+  >
     <div class="btwr-placeholder-panel">
-      <span>WINDOW SCHEDULE · ORIENTATION · SHGC / U-VALUE COMPARISON</span>
+      <span>WINDOW PACKAGE · INTERIOR SURFACE TEMPERATURE · COMFORT RISK</span>
+    </div>
+  </ReportSection>
+  <ReportSection id="site-shading" Content={SiteShading} kicker={sections.siteShading.number} title={siteShading.title}>
+    <div class="btwr-placeholder-panel">
+      <span>SITE CONTEXT · FIXED SHADING · HORIZON CONDITIONS</span>
+    </div>
+  </ReportSection>
+  <ReportSection
+    id="winter-radiation"
+    Content={WinterRadiation}
+    kicker={sections.winterRadiation.number}
+    title={winterRadiation.title}
+  >
+    <div class="btwr-placeholder-panel">
+      <span>HEATING-SEASON GAINS · ORIENTATION · SHADING LOSSES</span>
+    </div>
+  </ReportSection>
+  <ReportSection
+    id="summer-radiation"
+    Content={SummerRadiation}
+    kicker={sections.summerRadiation.number}
+    title={summerRadiation.title}
+  >
+    <div class="btwr-placeholder-panel">
+      <span>COOLING-SEASON EXPOSURE · SHGC · OVERHEATING RISK</span>
     </div>
   </ReportSection>
 </ProjectReportLayout>

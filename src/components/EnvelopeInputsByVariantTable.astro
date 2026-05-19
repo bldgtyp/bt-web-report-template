@@ -102,7 +102,6 @@ const rows = inputRows.map((input) => ({
   ),
 }));
 const recommendedName = data.variantOrder.find((variant) => variant.recommended)?.name ?? "the recommended variant";
-const missingRows = rows.filter((row) => [...row.values.values()].every((value) => value === "—"));
 const hasRows = rows.some((row) => [...row.values.values()].some((value) => value !== "—"));
 ---
 
@@ -118,7 +117,6 @@ const hasRows = rows.some((row) => [...row.values.values()].some((value) => valu
             This table lists the envelope, window, wall, etc. inputs for each variant tested as part of this investigation.
             Values from the recommended variant, {recommendedName}, are highlighted.
           </span>
-          {missingRows.length > 0 && <em>Missing scraper values to follow up on: {missingRows.map((row) => row.label).join("; ")}.</em>}
         </caption>
         <thead>
           <tr>
