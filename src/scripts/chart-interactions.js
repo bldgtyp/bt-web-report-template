@@ -12,6 +12,7 @@
     ".btwr-hero__figure img",
     ".btwr-report-main .btwr-section-hero img",
     ".btwr-report-main .btwr-geometry-figure img",
+    ".btwr-report-main .btwr-window-image-slot img",
     ".btwr-report-main .btwr-assembly-card__image img",
     ".btwr-report-main .btwr-prose img",
   ].join(", ");

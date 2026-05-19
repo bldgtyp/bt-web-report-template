@@ -79,6 +79,92 @@ const summaryFields: TinaField[] = [
   },
 ];
 
+const siteShadingFields: TinaField[] = [
+  ...reportSectionFields,
+  {
+    type: "image",
+    name: "sun_path_plan_image",
+    label: "Sun path plan display image",
+    required: true,
+  },
+  {
+    type: "image",
+    name: "sun_path_plan_image_full",
+    label: "Sun path plan high-resolution image",
+    required: true,
+  },
+  {
+    type: "string",
+    name: "sun_path_plan_alt",
+    label: "Sun path plan alt text",
+    required: true,
+    ui: {
+      component: "textarea",
+    },
+  },
+  {
+    type: "string",
+    name: "sun_path_plan_caption",
+    label: "Sun path plan caption",
+  },
+  {
+    type: "image",
+    name: "sun_path_iso_image",
+    label: "Sun path axonometric display image",
+    required: true,
+  },
+  {
+    type: "image",
+    name: "sun_path_iso_image_full",
+    label: "Sun path axonometric high-resolution image",
+    required: true,
+  },
+  {
+    type: "string",
+    name: "sun_path_iso_alt",
+    label: "Sun path axonometric alt text",
+    required: true,
+    ui: {
+      component: "textarea",
+    },
+  },
+  {
+    type: "string",
+    name: "sun_path_iso_caption",
+    label: "Sun path axonometric caption",
+  },
+];
+
+const radiationFields: TinaField[] = [
+  ...reportSectionFields,
+  {
+    type: "image",
+    name: "radiation_image",
+    label: "Radiation display image",
+    required: true,
+  },
+  {
+    type: "image",
+    name: "radiation_image_full",
+    label: "Radiation high-resolution image",
+    required: true,
+  },
+  {
+    type: "string",
+    name: "radiation_alt",
+    label: "Radiation image alt text",
+    required: true,
+    ui: {
+      component: "textarea",
+    },
+  },
+  {
+    type: "string",
+    name: "radiation_caption",
+    label: "Radiation image caption",
+  },
+];
+
 const assemblyFields: TinaField[] = [
   {
     type: "string",
@@ -202,6 +288,10 @@ export default defineConfig({
         fields: assemblyFields,
       },
       fixedMdxSection("Windows", "windows", "content", "windows"),
+      fixedMdxSection("Window thermal comfort", "window_thermal_comfort", "content/windows", "window-thermal-comfort"),
+      fixedMdxSection("Site shading", "site_shading", "content/windows", "site-shading", siteShadingFields),
+      fixedMdxSection("Winter radiation", "winter_radiation", "content/windows", "winter-radiation", radiationFields),
+      fixedMdxSection("Summer radiation", "summer_radiation", "content/windows", "summer-radiation", radiationFields),
       fixedMdxSection("Mechanical", "mechanical", "content", "mechanical"),
       fixedMdxSection("Appendix", "appendix", "content", "appendix"),
     ],

@@ -20,6 +20,36 @@ const sections = {
   summerRadiation: { href: "#summer-radiation", label: "Summer Radiation", number: "04" },
 };
 const tocItems = Object.values(sections);
+const imageSize = { width: 1200, height: 927 };
+const siteShadingImages = [
+  {
+    image: siteShading.sun_path_plan_image,
+    imageFull: siteShading.sun_path_plan_image_full,
+    alt: siteShading.sun_path_plan_alt,
+    caption: siteShading.sun_path_plan_caption,
+  },
+  {
+    image: siteShading.sun_path_iso_image,
+    imageFull: siteShading.sun_path_iso_image_full,
+    alt: siteShading.sun_path_iso_alt,
+    caption: siteShading.sun_path_iso_caption,
+  },
+].filter(({ image }) => image);
+
+const radiationImages = {
+  winter: {
+    image: winterRadiation.radiation_image,
+    imageFull: winterRadiation.radiation_image_full,
+    alt: winterRadiation.radiation_alt,
+    caption: winterRadiation.radiation_caption,
+  },
+  summer: {
+    image: summerRadiation.radiation_image,
+    imageFull: summerRadiation.radiation_image_full,
+    alt: summerRadiation.radiation_alt,
+    caption: summerRadiation.radiation_caption,
+  },
+};
 ---
 
 <ProjectReportLayout
@@ -45,8 +75,17 @@ const tocItems = Object.values(sections);
     </figure>
   </ReportSection>
   <ReportSection id="site-shading" Content={SiteShading} kicker={sections.siteShading.number} title={siteShading.title}>
-    <div class="btwr-placeholder-panel">
-      <span>ORIENTATION · SUN-PATH · SITE SHADING CONTEXT</span>
+    <div class="btwr-window-image-grid" aria-label="Site-shading image placeholders">
+      {
+        siteShadingImages.map(({ image, imageFull, alt, caption }) => (
+          <figure class="btwr-window-image-slot">
+            <a href={imageFull ?? image} data-btwr-full-src={imageFull ?? image} data-btwr-caption={caption ?? ""}>
+              <img src={image} width={imageSize.width} height={imageSize.height} alt={alt ?? ""} loading="lazy" />
+            </a>
+            {caption && <figcaption>{caption}</figcaption>}
+          </figure>
+        ))
+      }
     </div>
   </ReportSection>
   <ReportSection
@@ -55,9 +94,22 @@ const tocItems = Object.values(sections);
     kicker={sections.winterRadiation.number}
     title={winterRadiation.title}
   >
-    <div class="btwr-placeholder-panel">
-      <span>WINTER RADIATION · ORIENTATION · SHADING LOSSES</span>
-    </div>
+    <figure class="btwr-window-image-slot btwr-window-image-slot--wide">
+      <a
+        href={radiationImages.winter.imageFull ?? radiationImages.winter.image}
+        data-btwr-full-src={radiationImages.winter.imageFull ?? radiationImages.winter.image}
+        data-btwr-caption={radiationImages.winter.caption ?? ""}
+      >
+        <img
+          src={radiationImages.winter.image}
+          width={imageSize.width}
+          height={imageSize.height}
+          alt={radiationImages.winter.alt ?? ""}
+          loading="lazy"
+        />
+      </a>
+      {radiationImages.winter.caption && <figcaption>{radiationImages.winter.caption}</figcaption>}
+    </figure>
   </ReportSection>
   <ReportSection
     id="summer-radiation"
@@ -65,8 +117,21 @@ const tocItems = Object.values(sections);
     kicker={sections.summerRadiation.number}
     title={summerRadiation.title}
   >
-    <div class="btwr-placeholder-panel">
-      <span>COOLING-SEASON EXPOSURE · SHGC · OVERHEATING RISK</span>
-    </div>
+    <figure class="btwr-window-image-slot btwr-window-image-slot--wide">
+      <a
+        href={radiationImages.summer.imageFull ?? radiationImages.summer.image}
+        data-btwr-full-src={radiationImages.summer.imageFull ?? radiationImages.summer.image}
+        data-btwr-caption={radiationImages.summer.caption ?? ""}
+      >
+        <img
+          src={radiationImages.summer.image}
+          width={imageSize.width}
+          height={imageSize.height}
+          alt={radiationImages.summer.alt ?? ""}
+          loading="lazy"
+        />
+      </a>
+      {radiationImages.summer.caption && <figcaption>{radiationImages.summer.caption}</figcaption>}
+    </figure>
   </ReportSection>
 </ProjectReportLayout>

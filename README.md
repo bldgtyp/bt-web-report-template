@@ -98,6 +98,9 @@ instead, such as `4322` or `4323`.
   initial display image and `public/assets/cover/hero-full.png` for the
   high-resolution modal image. `content/summary.mdx` owns those paths, alt text,
   and caption. Report images open in an in-page modal instead of navigating away.
+- Windows page placeholders live under `public/assets/windows/` with paired
+  display and `*-full.png` modal images. `content/windows/*.mdx` owns those
+  paths, alt text, and captions for project replacement.
 - Treat `data/` as generated PHPP output. Run `btwr scrape <project-path>`.
 - Keep `.bldgtyp/config.local.yaml` local-only for machine-specific notes.
 
