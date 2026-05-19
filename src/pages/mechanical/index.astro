@@ -51,17 +51,164 @@ const tocItems = Object.values(sections);
     id="ventilation-system-balancing"
     kicker={sections.ventilationSystemBalancing.number}
     title={sections.ventilationSystemBalancing.label}
-  />
+  >
+    <div class="btwr-prose">
+      <p>
+        For this building, we recommend that each unit have its own high-performance H/ERV with better than 75%
+        heat recovery. The Zehnder America ComfoAir Q600 ERV would be a good selection and provide excellent
+        indoor air quality while minimizing energy consumption and occupant comfort issues. These units are
+        outfitted with excellent air filtration, MERV 13 by default, which will be critical to ensuring clean and
+        healthy indoor air.
+      </p>
+      <p>
+        The values used in this analysis are based on the room-by-room flow rates found in the Zehnder America /
+        MainStream Corporation system outline, dated March 5, 2025.
+      </p>
+      <p>
+        Zehnder America should also be retained to balance and commission the system after installation. This is
+        critical for proper operation and required for all high-performance buildings. This service will normally
+        come standard with Zehnder America packages, but this should be verified in this case.
+      </p>
+      <h4>SYSTEM BALANCING:</h4>
+      <p>
+        Prior to occupancy, the fresh-air system should be tested and balanced to ensure good air mixing and
+        adequate supply to all living spaces. The HRV vendor should provide this balancing as part of their
+        services.
+      </p>
+    </div>
+    <figure class="btwr-section-hero">
+      <img
+        src="/assets/mechanical/erv-unit.jpg"
+        alt="Wall-mounted Zehnder energy recovery ventilation unit with exposed ducting in a finished interior."
+      />
+    </figure>
+  </ReportSection>
   <ReportSection
     id="ventilation-system-passive-house-requirements"
     kicker={sections.ventilationSystemPassiveHouseRequirements.number}
     title={sections.ventilationSystemPassiveHouseRequirements.label}
-  />
+  >
+    <div class="btwr-prose">
+      <p>
+        In addition to the modeled performance thresholds, in order to certify a building as a Passive House
+        building, projects would have to comply with the following design requirements. Whether the project
+        achieves full Passive House certification or not, the following design guidelines are recommended for all
+        projects:
+      </p>
+      <ul>
+        <li>
+          Total measured fresh-air ventilation supply and exhaust airflows are within 10% of each other. Use the
+          higher number as the basis of the percentage difference.
+        </li>
+        <li>
+          All ventilation air inlets are located at least 10 ft. stretched-string distance from known contamination
+          sources.
+        </li>
+        <li>
+          All ventilation air inlets are located at least 5 ft. from ventilation exhaust outlets; 10 ft. is
+          recommended.
+        </li>
+        <li>
+          Ventilation air comes directly from outdoors, not from adjacent dwelling units, common spaces, garages,
+          crawlspaces, or attics.
+        </li>
+        <li>
+          Outside air passes through a minimum MERV 13 filter prior to distribution, the filter is changed at the
+          end of construction, and the building is ventilated prior to occupancy.
+        </li>
+        <li>
+          The outside-air filter is located to facilitate regular service by the occupant and/or building
+          superintendent.
+        </li>
+        <li>
+          An air-sealed Class 1 vapor retarder shall be installed over all air-permeable insulation, such as
+          fiberglass duct wrap, on ventilation ducts connected to outside.
+        </li>
+        <li>Fresh-air outside-air supply to bedrooms is required in all dwelling units.</li>
+        <li>Measured bathroom exhaust rates meet one of the following: at least 20 cfm continuous or 50 cfm intermittent.</li>
+        <li>
+          Measured kitchen exhaust rates meet one of the following: at least 25 cfm continuous, 100 cfm intermittent
+          for range hoods, or 5 ACH based on kitchen volume.
+        </li>
+        <li>
+          If kitchen exhaust is connected to an ERV/HRV, the register is at least 6 ft. from the cooktop, a MERV 3
+          or washable mesh filter is provided for trapping grease, and a recirculation hood is provided over the
+          range.
+        </li>
+        <li>Total supply and exhaust are within 10% of each other.</li>
+        <li>Net pressure across the envelope is no greater than +/-5 Pa.</li>
+      </ul>
+    </div>
+  </ReportSection>
   <ReportSection
     id="appliances-and-venting"
     kicker={sections.appliancesAndVenting.number}
     title={sections.appliancesAndVenting.label}
-  />
+  >
+    <div class="btwr-prose">
+      <h4>KITCHEN VENTING:</h4>
+      <p>
+        Kitchen venting should be provided at the lowest rate that satisfies regulations. For gas cooking, this flow rate 
+        will be specified by code. For electric cooking, limit exhaust hood airflow to 200-400 cfm maximum through the 
+        selection of an appropriately sized hood. The Home Ventilation Institute (HVI) specifies a minimum of 40 cfm and 
+        recommends 100 cfm per linear foot of range. For effective kitchen venting, sizing and placement of the hood can 
+        be more important than the air flow rate, as sizing and placement effect the capture efficiency of the hood. Hoods 
+        should be as low as practical, extend beyond the range by approximately six inches at the sides and be as deep as 
+        possible without interfering with use of the range.
+      </p>
+      <h4>MAKEUP AIR SYSTEMS:</h4>
+      <p>
+        In order to properly vent any exhaust air appliances (clothes dryers, kitchen hoods, etc..) in an air-tight home, 
+        a dedicated makeup air system may be necessary. This is especially true of homes with combustion appliances (e.g. 
+        wood stoves/fireplaces) located indoors. In this scenario, makeup air from an automatic makeup air fan is used to 
+        balance out the exhausted air.
+      </p>
+      <p>
+        Note that for most cases we do NOT recommend this strategy as it is costly, complicated, and adds considerable 
+        complexity to the envelope construction (insulation, air-sealing) and represents a significant energy penalty to 
+        heat/cool the makeup air.
+      </p>
+      <div class="btwr-callout btwr-callout--critical">
+        <span>
+          Wherever possible, the use of all-electric systems should be considered, and combustion appliances should 
+          be installed only in outdoor locations (porches, decks, etc.).
+        </span>
+      </div>
+      <p>
+        Heating / Cooling of any outdoor makeup air may be needed once it enters the habitable space. Self-closing 
+        (magnetic) dampers should be included on all ducting to prevent air infiltration / exfiltration when the appliances 
+        are not in use. In order not to compromise occupant comfort when makeup air is being supplied to the home, a high 
+        output heating element will need to be sized and installed to heat the incoming volume of air to a comfortable 
+        temperature.
+      </p>
+      <p>
+        There are several good, self-modulating makeup air system (MUAS) and corresponding makeup air heater (MUAH) which 
+        could be a good fit for this project:
+      </p>
+      <ul>
+        <li><a href="https://electromn.com/make-up-air-2/" target="_blank" rel="noopener noreferrer">Electro Industries</a></li>
+        <li><a href="https://www.neptronic.com/cmu/" target="_blank" rel="noopener noreferrer">Neptronic</a></li>
+      </ul>
+      <img
+        src="/assets/mechanical/muas-diagram.png"
+        alt="Diagram showing a makeup air system with ducting and a heating element."
+      />
+      <h4>MAKEUP AIR SYSTEM COMMISSIONING:</h4>
+      <div class="btwr-callout btwr-callout--critical">
+        <span>
+          Proper commissioning and continued maintenance of the makeup air system is critical to the safe operation 
+          of the home, particularly when combustion appliances are present.
+        </span>
+      </div>
+      <p>Several things should be kept in mind when configuring such a system:</p>
+      <ol>
+        <li>Ensure airtightness at all envelope penetrations.</li>
+        <li>All ducting insulated with vapor-closed insulation (min 2”) and vapor-closed tape all joints.</li>
+        <li>Provide no more than 60% of the make-up air at base of range/oven.</li>
+        <li>For Gas cooking, follow all local code requirements and manufacturer's instructions.</li>
+      </ol>
+    </div>
+  </ReportSection>
   <ReportSection
     id="building-monitoring"
     kicker={sections.buildingMonitoring.number}

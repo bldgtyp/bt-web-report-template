@@ -1,5 +1,4 @@
 ---
-import RoomAirflowChart from "../charts/RoomAirflowChart.astro";
 import RoomAirflowTable from "./tables/RoomAirflowTable.astro";
 
 import { loadTemplateReportData } from "../data/report";
@@ -8,6 +7,5 @@ const report = await loadTemplateReportData();
 ---
 
 <div class="btwr-component-stack">
-  <RoomAirflowChart data={report} title="Room airflow balance" />
   <RoomAirflowTable data={report} caption="Room airflow schedule" />
 </div>

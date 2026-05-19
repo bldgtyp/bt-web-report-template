@@ -213,6 +213,13 @@
   font-size: 0.86em;
 }
 
+.btwr-prose img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: var(--btwr-space-5) 0;
+}
+
 .btwr-callout {
   display: grid;
   gap: var(--btwr-space-1);
