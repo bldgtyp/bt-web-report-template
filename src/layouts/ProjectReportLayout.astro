@@ -36,6 +36,7 @@ const variantLabel = variants.length === 1 ? "variant" : "variants";
 const title = `${pageLabel} | ${report.project.project_title} | ${phase}`;
 const showHero = currentHref === "/";
 const showToc = currentHref !== "/";
+const initialTocHref = tocItems[0]?.href;
 const faviconHref =
   'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><path fill="%233E93AE" d="M6 28V12l12-7 12 7v16h-7V16H13v12H6Z"/></svg>';
 ---
@@ -124,14 +125,18 @@ const faviconHref =
       </main>
       {
         showToc && (
-          <aside class="btwr-toc" aria-label="Page contents">
+          <aside class="btwr-toc" data-btwr-page-toc aria-label="Page contents">
             <a class="btwr-toc__skip" href="#btwr-main">Skip to report</a>
             <nav>
               <p>On this page</p>
               <ol>
                 {tocItems.map((item) => (
-                  <li>
-                    <a href={item.href}>
+                  <li class:list={[item.href === initialTocHref && "is-current"]}>
+                    <a
+                      href={item.href}
+                      data-btwr-toc-link
+                      aria-current={item.href === initialTocHref ? "location" : undefined}
+                    >
                       <span>{item.number}</span>
                       {item.label}
                     </a>
@@ -157,6 +162,87 @@ const faviconHref =
         {manifest.schema_version ? ` · schema ${manifest.schema_version}` : ""}
       </p>
     </footer>
+    <script is:inline>
+      (() => {
+        const toc = document.querySelector("[data-btwr-page-toc]");
+        if (!toc) {
+          return;
+        }
+
+        const links = Array.from(toc.querySelectorAll("[data-btwr-toc-link]"));
+        const sections = links
+          .map((link) => {
+            const href = link.getAttribute("href");
+            const id = href?.startsWith("#") ? href.slice(1) : "";
+            const heading = id ? document.getElementById(id) : null;
+            const section = heading?.closest(".btwr-section") ?? heading;
+            return href && section ? { href, link, section } : null;
+          })
+          .filter(Boolean);
+
+        if (sections.length === 0) {
+          return;
+        }
+
+        function setCurrent(href) {
+          for (const item of sections) {
+            const isCurrent = item.href === href;
+            item.link.toggleAttribute("aria-current", isCurrent);
+            if (isCurrent) {
+              item.link.setAttribute("aria-current", "location");
+            }
+            item.link.closest("li")?.classList.toggle("is-current", isCurrent);
+          }
+        }
+
+        function currentSectionHref() {
+          const scrollBottom = window.scrollY + window.innerHeight;
+          const documentHeight = document.documentElement.scrollHeight;
+          if (scrollBottom >= documentHeight - 4) {
+            return sections[sections.length - 1].href;
+          }
+
+          const activationLine = Math.min(window.innerHeight * 0.35, 220);
+          let current = sections[0];
+
+          for (const item of sections) {
+            const rect = item.section.getBoundingClientRect();
+            if (rect.top <= activationLine && rect.bottom > activationLine) {
+              return item.href;
+            }
+            if (rect.top <= activationLine) {
+              current = item;
+            }
+          }
+
+          return current.href;
+        }
+
+        let frame = 0;
+        function updateCurrentSection() {
+          if (frame) {
+            return;
+          }
+
+          frame = window.requestAnimationFrame(() => {
+            frame = 0;
+            setCurrent(currentSectionHref());
+          });
+        }
+
+        for (const item of sections) {
+          item.link.addEventListener("click", () => {
+            setCurrent(item.href);
+            window.setTimeout(updateCurrentSection, 80);
+          });
+        }
+
+        window.addEventListener("scroll", updateCurrentSection, { passive: true });
+        window.addEventListener("resize", updateCurrentSection);
+        window.addEventListener("hashchange", updateCurrentSection);
+        updateCurrentSection();
+      })();
+    </script>
     <script is:inline type="module" set:html={chartInteractionsJs}></script>
   </body>
 </html>

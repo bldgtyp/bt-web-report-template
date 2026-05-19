@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 const reportPages = [
   { path: "/", navLabel: "Summary", heading: "Executive summary" },
@@ -7,6 +8,40 @@ const reportPages = [
   { path: "/windows/", navLabel: "Windows", heading: "Windows" },
   { path: "/mechanical/", navLabel: "Mechanical", heading: "Mechanical" },
 ];
+
+async function stackedBarGeometry(page: Page, chartSelector: string) {
+  return page.locator(chartSelector).first().evaluate((frame) => {
+    const grid = frame.querySelector(".btwr-site-energy-bars__grid");
+    const firstTrack = frame.querySelector(".btwr-site-energy-bars__track");
+    const axis = frame.querySelector(".btwr-site-energy-bars__axis");
+    const firstSegment = frame.querySelector(".btwr-site-energy-bars__segment");
+    if (!grid || !firstTrack || !axis || !firstSegment) {
+      return null;
+    }
+    const gridRect = grid.getBoundingClientRect();
+    const firstTrackRect = firstTrack.getBoundingClientRect();
+    const axisRect = axis.getBoundingClientRect();
+    return {
+      axisTop: axisRect.top,
+      firstTrackTop: firstTrackRect.top,
+      gridBottom: gridRect.bottom,
+      gridTop: gridRect.top,
+      segmentBoxShadow: getComputedStyle(firstSegment).boxShadow,
+      tickAlignmentDeltas: [...axis.querySelectorAll("span")].map((tick) => {
+        const tickRect = tick.getBoundingClientRect();
+        const tickStyle = getComputedStyle(tick);
+        const tickPosition = Number.parseFloat(tickStyle.getPropertyValue("--btwr-tick-position"));
+        const expectedLeft = gridRect.left + gridRect.width * (tickPosition / 100);
+        const anchorLeft = tick.classList.contains("is-first")
+          ? tickRect.left
+          : tick.classList.contains("is-last")
+            ? tickRect.right
+            : tickRect.left + tickRect.width / 2;
+        return Math.abs(anchorLeft - expectedLeft);
+      }),
+    };
+  });
+}
 
 for (const reportPage of reportPages) {
   test(`${reportPage.navLabel} page renders without console errors`, async ({ page }) => {
@@ -43,6 +78,23 @@ for (const reportPage of reportPages) {
     expect(consoleErrors).toEqual([]);
   });
 }
+
+test("page table of contents follows click and scroll position", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/energy_model/");
+
+  const toc = page.locator(".btwr-toc");
+  const currentLink = toc.locator("a[aria-current='location']");
+  await expect(currentLink).toContainText("Model Geometry");
+
+  await toc.getByRole("link", { name: /CO2 Emissions/ }).click();
+  await expect(page).toHaveURL(/#co2-emissions$/);
+  await expect(currentLink).toContainText("CO2 Emissions");
+
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect(currentLink).toContainText("Passive House Certifications");
+  await expect(toc.locator("li.is-current")).toHaveCount(1);
+});
 
 test("energy model page renders available PHPP data state", async ({ page }) => {
   await page.goto("/energy_model/");
@@ -122,4 +174,39 @@ test("template-owned charts also receive expand controls", async ({ page }) => {
   await co2Frame.hover();
   await co2Frame.getByRole("button", { name: "Expand chart" }).click();
   await expect(page.locator('.btwr-chart-modal[open] [data-chart-expanded="true"][data-chart="co2e"]')).toBeVisible();
+});
+
+test("CO2 chart follows the shared stacked-bar chart pattern", async ({ page }) => {
+  await page.setViewportSize({ width: 1100, height: 900 });
+  await page.goto("/energy_model/");
+
+  const hasPendingData = (await page.getByText("CO2 emissions chart pending").count()) > 0;
+  if (hasPendingData) {
+    test.skip(true, "Fixture data is pending, so the CO2 chart is not rendered.");
+  }
+
+  const co2Frame = page.locator('[data-chart="co2e"]').first();
+  await expect(co2Frame.getByRole("heading", { name: "Annual CO2e emissions due to operational energy consumption" })).toBeVisible();
+  await expect(co2Frame.locator(".btwr-chart-frame__subtitle")).toHaveText(
+    "Operational CO2e by modeled variant, in tons CO2e / year.",
+  );
+  await expect(co2Frame.locator(".btwr-chart-legend li")).toHaveText([
+    "Heating",
+    "Cooling",
+    "DHW",
+    "Elec Lights",
+    "Elec Equip",
+    "Pumps / Fans",
+    "CO2e Limit",
+  ]);
+  await expect(co2Frame.locator(".btwr-site-energy-bars__axis span")).toHaveText(["0", "2", "4", "6", "8"]);
+  await expect(co2Frame.locator(".btwr-site-energy-bars__axis-label")).toHaveText("tons CO2e / year");
+
+  const geometry = await stackedBarGeometry(page, '[data-chart="co2e"]');
+  expect(geometry).not.toBeNull();
+  expect(geometry?.gridTop ?? 0).toBeLessThan(geometry?.firstTrackTop ?? 0);
+  expect(geometry?.gridTop ?? 0).toBeGreaterThan((geometry?.firstTrackTop ?? 0) - 16);
+  expect(Math.abs((geometry?.gridBottom ?? 0) - (geometry?.axisTop ?? 0))).toBeLessThanOrEqual(2);
+  expect(Math.max(...(geometry?.tickAlignmentDeltas ?? [0]))).toBeLessThanOrEqual(2);
+  expect(geometry?.segmentBoxShadow ?? "").toContain("inset");
 });
