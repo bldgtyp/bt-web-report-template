@@ -1,0 +1,201 @@
+---
+import { DataState, axisGridBackground, cellNumber, cellText, formatValue, linearAxis, variantName } from "@bldgtyp/web-report-kit";
+import type { ReportData } from "@bldgtyp/web-report-kit";
+
+interface Props {
+  data: ReportData;
+  title?: string;
+}
+
+interface Co2Segment {
+  color: string;
+  label: string;
+  value: number;
+}
+
+interface Co2VariantRow {
+  label: string;
+  segments: Co2Segment[];
+  total: number;
+  variantId: string;
+}
+
+interface EndUseGroup {
+  id: string;
+  label: string;
+  color: string;
+}
+
+const LIMIT_END_USE = "ipcc_limit";
+const CO2_GROUPS = [
+  { id: "heating", label: "Heating", color: "var(--btwr-chart-heating)" },
+  { id: "cooling", label: "Cooling", color: "var(--btwr-chart-cooling)" },
+  { id: "dhw", label: "DHW", color: "var(--btwr-chart-dhw)" },
+  { id: "lighting", label: "Elec Lights", color: "var(--btwr-chart-lighting)" },
+  { id: "equipment", label: "Elec Equip", color: "var(--btwr-chart-equipment)" },
+  { id: "pumps_fans", label: "Pumps / Fans", color: "var(--btwr-chart-pumps)" },
+] satisfies EndUseGroup[];
+
+const [HEATING_GROUP, COOLING_GROUP, DHW_GROUP, LIGHTING_GROUP, EQUIPMENT_GROUP, PUMPS_FANS_GROUP] = CO2_GROUPS;
+const CO2_GROUP_BY_END_USE = new Map<string, EndUseGroup>([
+  ["heating", HEATING_GROUP],
+  ["cooling", COOLING_GROUP],
+  ["dhw", DHW_GROUP],
+  ["domestic_hot_water", DHW_GROUP],
+  ["hot_water", DHW_GROUP],
+  ["phi_lighting", LIGHTING_GROUP],
+  ["phius_int_lighting", LIGHTING_GROUP],
+  ["phius_ext_lighting", LIGHTING_GROUP],
+  ["lighting", LIGHTING_GROUP],
+  ["phi_consumer_elec", EQUIPMENT_GROUP],
+  ["phi_small_appliances", EQUIPMENT_GROUP],
+  ["phius_mel", EQUIPMENT_GROUP],
+  ["dishwashing", EQUIPMENT_GROUP],
+  ["clothes_washing", EQUIPMENT_GROUP],
+  ["clothes_drying", EQUIPMENT_GROUP],
+  ["refrigerator", EQUIPMENT_GROUP],
+  ["cooking", EQUIPMENT_GROUP],
+  ["equipment", EQUIPMENT_GROUP],
+  ["electric_equipment", EQUIPMENT_GROUP],
+  ["electric_vehicles", EQUIPMENT_GROUP],
+  ["ev", EQUIPMENT_GROUP],
+  ["aux_elec", PUMPS_FANS_GROUP],
+  ["pumps", PUMPS_FANS_GROUP],
+  ["fans", PUMPS_FANS_GROUP],
+  ["pumps_fans", PUMPS_FANS_GROUP],
+  ["misc_pumps_fans", PUMPS_FANS_GROUP],
+]);
+
+function chartKey(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function co2GroupForEndUse(endUse: string): EndUseGroup | null {
+  if (chartKey(endUse) === "solar_pv") {
+    return null;
+  }
+  return CO2_GROUP_BY_END_USE.get(chartKey(endUse)) ?? EQUIPMENT_GROUP;
+}
+
+const { data, title = "Annual CO2e emissions" } = Astro.props;
+const rows = data.energy.filter((row) => cellText(row, "metric_group") === "co2e");
+const sourceUnits = cellText(rows[0] ?? {}, "units") || "tonsCO2e";
+const displayUnits = sourceUnits === "tonsCO2e" ? "tons CO2e / year" : sourceUnits;
+const groups = [...CO2_GROUPS];
+const groupedRows = new Map<string, number>();
+const limitRows: number[] = [];
+
+for (const row of rows) {
+  const value = cellNumber(row, "value") ?? 0;
+  const endUse = cellText(row, "end_use");
+  const variantId = cellText(row, "variant_id");
+  const variant = data.variantOrder.find((item) => item.id === variantId);
+
+  if (!variant || value === 0) {
+    continue;
+  }
+
+  if (endUse.trim().toLowerCase() === LIMIT_END_USE) {
+    limitRows.push(value);
+    continue;
+  }
+
+  const group = co2GroupForEndUse(endUse);
+  if (group === null) {
+    continue;
+  }
+
+  const key = `${variantId}:${group.id}`;
+  groupedRows.set(key, (groupedRows.get(key) ?? 0) + value);
+}
+
+const chartRows: Co2VariantRow[] = data.variantOrder
+  .map((variant) => {
+    const segments = groups.map((group) => ({
+      color: group.color,
+      label: group.label,
+      value: groupedRows.get(`${variant.id}:${group.id}`) ?? 0,
+    }));
+    const total = segments.reduce((sum, segment) => sum + segment.value, 0);
+    return {
+      label: variant.name,
+      segments,
+      total,
+      variantId: variant.id,
+    };
+  })
+  .filter((row) => row.total !== 0);
+const limitValue = limitRows.length > 0 ? limitRows[0] : null;
+const maxTotal = Math.max(...chartRows.map((row) => row.total), 0);
+const chartMax = Math.max(maxTotal, limitValue ?? 0);
+const axis = linearAxis(chartMax);
+const axisStyle = `--btwr-axis-grid: ${axisGridBackground(axis.gridStops)};`;
+const axisLabelStyle = `grid-template-columns: repeat(${axis.ticks.length}, minmax(0, 1fr));`;
+const limitOffset = limitValue !== null && axis.max > 0 ? `${(limitValue / axis.max) * 100}%` : null;
+const recommended = data.variantOrder.find((variant) => variant.recommended);
+const recommendedValue = chartRows.find((row) => row.variantId === recommended?.id)?.total ?? null;
+---
+
+{
+  data.manifest.status === "pending" || chartRows.length === 0 ? (
+    <DataState state="pending" title="CO2 emissions chart pending" message="No CO2e rows are available yet." />
+  ) : (
+    <figure class="btwr-chart-frame" data-chart="co2e">
+      <div class="btwr-chart-frame__header">
+        <h3>{title}</h3>
+        <p class="btwr-chart-frame__meta">
+          {recommended ? `${variantName(data.variantOrder, recommended.id)}: ${formatValue(recommendedValue, displayUnits)}` : displayUnits}
+        </p>
+      </div>
+      <ul class="btwr-chart-legend" aria-label="CO2e end uses">
+        {groups.map((group) => <li><span style={`--btwr-legend-color: ${group.color}`}></span>{group.label}</li>)}
+        {limitValue !== null ? (
+          <li class="btwr-chart-legend__limit">
+            <span></span>
+            CO2e Limit
+          </li>
+        ) : null}
+      </ul>
+      <div
+        class="btwr-site-energy-bars btwr-site-energy-bars--limit"
+        role="img"
+        aria-label={`Annual CO2e emissions by variant, ${displayUnits}${limitValue !== null ? `, limit ${formatValue(limitValue, displayUnits)}` : ""}`}
+        style={`${axisStyle}${limitOffset ? ` --btwr-limit-offset: ${limitOffset};` : ""}`}
+      >
+        {limitOffset ? (
+          <div class="btwr-site-energy-bars__limit" aria-hidden="true">
+            <span>CO2e Limit</span>
+          </div>
+        ) : null}
+        {chartRows.map((row) => (
+          <div class="btwr-site-energy-bars__row">
+            <div class="btwr-site-energy-bars__label">{row.label}</div>
+            <div class="btwr-site-energy-bars__track">
+              {row.segments.map((segment) =>
+                segment.value > 0 ? (
+                  <span
+                    class="btwr-site-energy-bars__segment btwr-chart-mark"
+                    data-btwr-tooltip={`${row.label}\n${segment.label}: ${formatValue(segment.value, displayUnits)}`}
+                    aria-label={`${row.label}, ${segment.label}: ${formatValue(segment.value, displayUnits)}`}
+                    style={`--btwr-segment-color: ${segment.color}; --btwr-segment-width: ${(segment.value / axis.max) * 100}%;`}
+                  >
+                    <span class="btwr-site-energy-bars__sr">{segment.label}: {formatValue(segment.value, displayUnits)}</span>
+                  </span>
+                ) : null,
+              )}
+            </div>
+            <div class="btwr-site-energy-bars__total">{formatValue(row.total, displayUnits)}</div>
+          </div>
+        ))}
+        <div class="btwr-site-energy-bars__axis" aria-hidden="true" style={axisLabelStyle}>
+          {axis.ticks.map((tick) => <span>{formatValue(tick)}</span>)}
+        </div>
+        <div class="btwr-site-energy-bars__axis-label" aria-hidden="true">{displayUnits}</div>
+      </div>
+    </figure>
+  )
+}

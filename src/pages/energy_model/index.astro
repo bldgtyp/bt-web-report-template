@@ -18,6 +18,7 @@ import PassiveHouseThresholds, {
 import SiteEnergy, { frontmatter as siteEnergy } from "../../../content/energy-model/site-energy.mdx";
 import BuildingMetricsTable from "../../components/BuildingMetricsTable.astro";
 import CertificationTable from "../../components/CertificationTable.astro";
+import Co2EmissionsChart from "../../components/Co2EmissionsChart.astro";
 import EnergySummaryTable from "../../components/EnergySummaryTable.astro";
 import EnvelopeInputsByVariantTable from "../../components/EnvelopeInputsByVariantTable.astro";
 import MechanicalInputsByVariantTable from "../../components/MechanicalInputsByVariantTable.astro";
@@ -99,8 +100,8 @@ const tocItems = Object.values(sections);
     title={co2Emissions.title}
     dek={co2Emissions.dek}
   >
-    <div class="btwr-placeholder-panel">
-      <span>CO2 EMISSIONS · OPERATIONAL CARBON · GRID FACTORS</span>
+    <div class="btwr-component-stack">
+      <Co2EmissionsChart data={report} title="Annual CO2e emissions due to operational energy consumption" />
     </div>
   </ReportSection>
 

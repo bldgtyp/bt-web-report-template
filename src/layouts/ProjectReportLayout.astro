@@ -6,6 +6,7 @@ import tokensCss from "@bldgtyp/web-report-kit/tokens.css?raw";
 
 import { reportPageNavItems } from "../data/pages";
 import type { TemplateReportData } from "../data/report";
+import chartInteractionsJs from "@bldgtyp/web-report-kit/scripts/chart-interactions.js?raw";
 import projectCss from "../styles/project.css?raw";
 
 interface TocItem {
@@ -156,5 +157,6 @@ const faviconHref =
         {manifest.schema_version ? ` · schema ${manifest.schema_version}` : ""}
       </p>
     </footer>
+    <script is:inline type="module" set:html={chartInteractionsJs}></script>
   </body>
 </html>
