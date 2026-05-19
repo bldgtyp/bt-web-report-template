@@ -17,6 +17,7 @@ const { id, kicker, title, Content, callout_label, callout_body, show_heading = 
 <section class="btwr-section" aria-labelledby={id}>
   {show_heading && <SectionHeading id={id} kicker={kicker} title={title} />}
   {!show_heading && <h2 id={id} class="btwr-section-heading__standalone">{title}</h2>}
+  <slot name="before-content" />
   <div class="btwr-prose">
     <Content />
   </div>

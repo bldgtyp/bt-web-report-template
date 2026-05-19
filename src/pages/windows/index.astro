@@ -9,6 +9,7 @@ import ReportSection from "../../components/ReportSection.astro";
 import { reportPages } from "../../data/pages";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
+import windowThermalComfortDiagram from "../../assets/windows/window-tc-diagram.png";
 
 const report = await loadTemplateReportData();
 const page = reportPages.windows;
@@ -34,9 +35,14 @@ const tocItems = Object.values(sections);
     kicker={sections.thermalComfort.number}
     title={windowThermalComfort.title}
   >
-    <div class="btwr-placeholder-panel">
-      <span>WINDOW PACKAGE · INTERIOR SURFACE TEMPERATURE · COMFORT RISK</span>
-    </div>
+    <figure class="btwr-section-hero" slot="before-content">
+      <img
+        src={windowThermalComfortDiagram.src}
+        width={windowThermalComfortDiagram.width}
+        height={windowThermalComfortDiagram.height}
+        alt="Thermal comfort diagram comparing higher radiant losses at double glazing with lower radiant losses at triple glazing."
+      />
+    </figure>
   </ReportSection>
   <ReportSection id="site-shading" Content={SiteShading} kicker={sections.siteShading.number} title={siteShading.title}>
     <div class="btwr-placeholder-panel">

@@ -217,6 +217,7 @@
 }
 
 .btwr-report .btwr-table {
+  min-width: 56rem;
   table-layout: fixed;
   color: var(--btwr-color-text);
   font-size: 0.9rem;
@@ -465,6 +466,16 @@
 .btwr-geometry-figure img {
   display: block;
   width: min(100%, 52rem);
+  height: auto;
+}
+
+.btwr-section-hero {
+  margin: var(--btwr-space-5) 0 var(--btwr-space-6);
+}
+
+.btwr-section-hero img {
+  display: block;
+  width: 100%;
   height: auto;
 }
 
