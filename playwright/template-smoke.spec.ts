@@ -72,6 +72,36 @@ test("energy model page renders available PHPP data state", async ({ page }) => 
   }
 });
 
+test("stacked-bar axis thins tick labels when the axis track is narrow", async ({ page }) => {
+  await page.setViewportSize({ width: 1100, height: 900 });
+  await page.goto("/energy_model/");
+
+  const hasPendingData = (await page.getByText("Site energy chart pending").count()) > 0;
+  if (hasPendingData) {
+    test.skip(true, "Fixture data is pending, so no chart axis is rendered.");
+  }
+
+  const tickMetrics = await page.locator('[data-chart="site-energy"] .btwr-site-energy-bars__axis span').evaluateAll((ticks) =>
+    ticks.map((tick) => {
+      const rect = tick.getBoundingClientRect();
+      const style = getComputedStyle(tick);
+      return {
+        left: rect.left,
+        right: rect.right,
+        text: tick.textContent?.trim() ?? "",
+        visible: style.display !== "none" && style.visibility !== "hidden",
+      };
+    }),
+  );
+  const visibleTicks = tickMetrics.filter((tick) => tick.visible);
+
+  expect(visibleTicks.map((tick) => tick.text)).toEqual(["0", "10,000", "20,000"]);
+  expect(visibleTicks.length).toBeLessThan(tickMetrics.length);
+  for (let index = 1; index < visibleTicks.length; index += 1) {
+    expect(visibleTicks[index].left).toBeGreaterThanOrEqual(visibleTicks[index - 1].right);
+  }
+});
+
 test("template-owned charts also receive expand controls", async ({ page }) => {
   await page.goto("/energy_model/");
 
