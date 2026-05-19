@@ -373,16 +373,6 @@
   background: var(--btwr-color-highlight);
 }
 
-.btwr-editorial-heading {
-  max-width: 42rem;
-  margin: 0 0 var(--btwr-space-4);
-  color: var(--btwr-color-heading);
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  line-height: 1.15;
-}
-
 .btwr-callout {
   display: grid;
   gap: var(--btwr-space-1);
@@ -863,10 +853,6 @@
 
   .btwr-page-links a:last-child {
     border-bottom: 0;
-  }
-
-  .btwr-editorial-heading {
-    font-size: 1.55rem;
   }
 
   .btwr-placeholder-chart__bars {

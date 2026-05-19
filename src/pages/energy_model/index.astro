@@ -58,7 +58,6 @@ const tocItems = Object.values(sections);
     Content={ModelGeometry}
     kicker={sections.modelGeometry.number}
     title={modelGeometry.title}
-    dek={modelGeometry.dek}
   >
     <figure class="btwr-geometry-figure">
       <img src="/assets/model-geometry/iso-dimensions.png" alt="Isometric building geometry diagram with dimension annotations." />
@@ -71,7 +70,6 @@ const tocItems = Object.values(sections);
     Content={ModelVariants}
     kicker={sections.modelVariants.number}
     title={modelVariants.title}
-    dek={modelVariants.dek}
   >
     <div class="btwr-component-stack">
       <EnergySummaryTable data={report} caption="Key results by variant" />
@@ -86,7 +84,6 @@ const tocItems = Object.values(sections);
     Content={SiteEnergy}
     kicker={sections.siteEnergy.number}
     title={siteEnergy.title}
-    dek={siteEnergy.dek}
   >
     <div class="btwr-component-stack">
       <SiteEnergyChart data={report} title="Annual site energy" />
@@ -98,7 +95,6 @@ const tocItems = Object.values(sections);
     Content={Co2Emissions}
     kicker={sections.co2Emissions.number}
     title={co2Emissions.title}
-    dek={co2Emissions.dek}
   >
     <div class="btwr-component-stack">
       <Co2EmissionsChart data={report} title="Annual CO2e emissions due to operational energy consumption" />
@@ -110,7 +106,6 @@ const tocItems = Object.values(sections);
     Content={PassiveHouseThresholds}
     kicker={sections.passiveHouseThresholds.number}
     title={passiveHouseThresholds.title}
-    dek={passiveHouseThresholds.dek}
   >
     <CertificationChart data={report} title="Passive House thresholds" />
   </ReportSection>
@@ -120,7 +115,6 @@ const tocItems = Object.values(sections);
     Content={ClimateData}
     kicker={sections.climateData.number}
     title={climateData.title}
-    dek={climateData.dek}
   >
     <ClimateMonthlyChart data={report} title="Monthly climate profile" />
   </ReportSection>
@@ -130,7 +124,6 @@ const tocItems = Object.values(sections);
     Content={PassiveHouseCertifications}
     kicker={sections.passiveHouseCertifications.number}
     title={passiveHouseCertifications.title}
-    dek={passiveHouseCertifications.dek}
   >
     <PassiveHouseCertificationsInfo />
   </ReportSection>
