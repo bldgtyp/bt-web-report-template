@@ -3,7 +3,6 @@ import {
   CertificationChart,
   ClimateMonthlyChart,
   SiteEnergyChart,
-  SourceEnergyChart,
 } from "@bldgtyp/web-report-kit";
 
 import ClimateData, { frontmatter as climateData } from "../../../content/energy-model/climate-data.mdx";
@@ -90,7 +89,6 @@ const tocItems = Object.values(sections);
   >
     <div class="btwr-component-stack">
       <SiteEnergyChart data={report} title="Annual site energy" />
-      <SourceEnergyChart data={report} title="Source energy comparison" />
     </div>
   </ReportSection>
 
