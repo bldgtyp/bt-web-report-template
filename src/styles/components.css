@@ -450,6 +450,7 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   line-height: 1.35;
+  overflow-wrap: normal;
   text-transform: uppercase;
 }
 
@@ -465,6 +466,7 @@
   font-size: 0.88rem;
   font-weight: 650;
   line-height: 1.35;
+  overflow-wrap: normal;
 }
 
 .btwr-table tbody tr:last-child th,
@@ -560,6 +562,7 @@
   letter-spacing: 0.12em;
   line-height: 1;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .btwr-recommended-tag::before {
@@ -1237,7 +1240,7 @@
   }
 
   .btwr-table {
-    min-width: 44rem;
+    min-width: 50rem;
   }
 
   .btwr-site-energy-bars__row {
@@ -1416,6 +1419,20 @@
     justify-content: start;
     overflow-x: auto;
   }
+
+  .btwr-report-grid {
+    grid-template-columns: 1fr;
+    gap: var(--btwr-space-6);
+    padding-top: var(--btwr-space-6);
+  }
+
+  .btwr-report-main {
+    gap: var(--btwr-space-8);
+  }
+
+  .btwr-toc {
+    display: none;
+  }
 }
 
 @media (max-width: 860px) {
@@ -1441,8 +1458,7 @@
     padding-bottom: var(--btwr-space-6);
   }
 
-  .btwr-hero__stats,
-  .btwr-report-grid {
+  .btwr-hero__stats {
     grid-template-columns: 1fr;
   }
 
@@ -1461,20 +1477,6 @@
 
   .btwr-hero__stats div:last-child {
     border-bottom: 0;
-  }
-
-  .btwr-report-grid {
-    gap: var(--btwr-space-6);
-    padding-top: var(--btwr-space-6);
-  }
-
-  .btwr-report-main {
-    gap: var(--btwr-space-8);
-  }
-
-  .btwr-toc {
-    position: static;
-    order: -1;
   }
 
   .btwr-report-footer {
