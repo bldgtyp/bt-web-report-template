@@ -229,6 +229,7 @@
 
 .btwr-report .btwr-table thead th {
   background: var(--btwr-color-surface);
+  border-bottom: 1px solid var(--btwr-color-border);
   color: var(--btwr-color-subtle);
   font-family: var(--btwr-font-label);
   font-size: 0.68rem;
@@ -236,6 +237,10 @@
   letter-spacing: 0.12em;
   line-height: 1.35;
   text-transform: uppercase;
+}
+
+.btwr-report .btwr-table thead tr:last-child th {
+  border-bottom: 1px solid var(--btwr-color-border);
 }
 
 .btwr-report .btwr-table thead th:first-child,
