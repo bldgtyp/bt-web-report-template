@@ -617,7 +617,7 @@
 
 .btwr-ph-certifications__panel {
   display: grid;
-  gap: var(--btwr-space-3);
+  gap: var(--btwr-space-4);
   padding: 0 1.25rem 1.25rem;
   border-top: 1px solid var(--btwr-color-border);
 }
@@ -627,6 +627,146 @@
   color: var(--btwr-color-text);
   font-size: 0.94rem;
   line-height: 1.65;
+}
+
+.btwr-ph-certifications__limits {
+  display: grid;
+  grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr);
+  gap: var(--btwr-space-4);
+  align-items: start;
+}
+
+.btwr-ph-certifications__mark {
+  display: grid;
+  min-height: 8.7rem;
+  place-items: center;
+  align-content: center;
+  padding: 0.65rem;
+  border: 0;
+  background: #ffffff;
+  box-shadow: 0 0.7rem 1.4rem rgba(37, 44, 54, 0.12);
+}
+
+.btwr-ph-certifications__mark img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.btwr-ph-certifications__mark--phi-passive {
+  min-height: 9.25rem;
+  padding: 0;
+  box-shadow: 0 0.7rem 1.4rem rgba(37, 44, 54, 0.12);
+}
+
+.btwr-ph-certifications__mark--phi-leb {
+  min-height: 2.25rem;
+  padding: 0;
+  box-shadow: 0 0.45rem 0.9rem rgba(37, 44, 54, 0.16);
+}
+
+.btwr-ph-certifications__mark--phius-core,
+.btwr-ph-certifications__mark--phius-zero {
+  min-height: 9.6rem;
+}
+
+.btwr-ph-certifications__table {
+  width: 100%;
+  border: 1px solid var(--btwr-color-border);
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--btwr-color-surface);
+  color: var(--btwr-color-text);
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
+  table-layout: fixed;
+}
+
+.btwr-report .btwr-ph-certifications__table caption {
+  padding: 1rem 1.1rem 0.85rem;
+  border-bottom: 1px solid var(--btwr-color-border);
+  color: var(--btwr-color-heading);
+  text-align: left;
+}
+
+.btwr-report .btwr-ph-certifications__table .btwr-table__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.btwr-ph-certifications__table th,
+.btwr-ph-certifications__table td {
+  width: 50%;
+  padding: 0.72rem 0.95rem;
+  border-bottom: 1px solid var(--btwr-color-border);
+  color: var(--btwr-color-text);
+  font-size: 0.84rem;
+  line-height: 1.35;
+  vertical-align: middle;
+}
+
+.btwr-ph-certifications__table th {
+  text-align: left;
+}
+
+.btwr-ph-certifications__table td {
+  border-left: 1px solid var(--btwr-color-border);
+  color: var(--btwr-color-heading);
+  font-weight: 650;
+  text-align: right;
+}
+
+.btwr-ph-certifications__table tr:last-child th,
+.btwr-ph-certifications__table tr:last-child td {
+  border-bottom: 0;
+}
+
+.btwr-report .btwr-ph-certifications__table .btwr-ph-certifications__table-heading th {
+  padding: 0.68rem 0.95rem;
+  border-bottom: 1px solid var(--btwr-color-border);
+  background: var(--btwr-color-surface);
+  color: var(--btwr-color-subtle);
+  font-family: var(--btwr-font-label);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.35;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.btwr-ph-certifications__table-heading + tr th,
+.btwr-ph-certifications__table-heading + tr td {
+  border-top: 0;
+}
+
+.btwr-ph-certifications__table tbody tr:not(.btwr-ph-certifications__table-heading) {
+  transition: background-color 120ms ease;
+}
+
+.btwr-ph-certifications__table tbody tr:not(.btwr-ph-certifications__table-heading):hover th,
+.btwr-ph-certifications__table tbody tr:not(.btwr-ph-certifications__table-heading):hover td {
+  background: var(--btwr-color-accent-soft);
+}
+
+.btwr-ph-certifications__table .is-highlighted th,
+.btwr-ph-certifications__table .is-highlighted td {
+  background: var(--btwr-color-highlight-soft);
+  color: var(--btwr-color-warning);
+  font-weight: 700;
+}
+
+.btwr-ph-certifications__table .is-highlighted:hover th,
+.btwr-ph-certifications__table .is-highlighted:hover td {
+  background: var(--btwr-color-highlight-soft);
+}
+
+.btwr-ph-certifications__panel-note {
+  max-width: 48rem;
 }
 
 .btwr-geometry-metrics {
@@ -837,6 +977,36 @@
 
   .btwr-geometry-metrics .btwr-metric-card:last-child {
     border-bottom: 0;
+  }
+
+  .btwr-ph-certifications__limits {
+    grid-template-columns: 1fr;
+  }
+
+  .btwr-ph-certifications__mark {
+    width: min(100%, 11rem);
+    min-height: 7.2rem;
+    justify-self: start;
+  }
+
+  .btwr-ph-certifications__mark--phi-leb {
+    width: min(100%, 11.5rem);
+    min-height: 2.25rem;
+  }
+
+  .btwr-ph-certifications__table {
+    font-size: 0.72rem;
+  }
+
+  .btwr-ph-certifications__table caption,
+  .btwr-ph-certifications__table-heading th {
+    padding: 0.7rem 0.55rem;
+  }
+
+  .btwr-ph-certifications__table th,
+  .btwr-ph-certifications__table td {
+    padding: 0.48rem 0.5rem;
+    overflow-wrap: anywhere;
   }
 
   .btwr-info-tooltip {
