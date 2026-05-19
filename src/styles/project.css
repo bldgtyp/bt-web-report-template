@@ -645,6 +645,7 @@
   grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr);
   gap: var(--btwr-space-4);
   align-items: start;
+  min-width: 0;
 }
 
 .btwr-ph-certifications__mark {
@@ -683,8 +684,9 @@
   min-height: 9.6rem;
 }
 
-.btwr-ph-certifications__table {
+.btwr-report .btwr-ph-certifications__table {
   width: 100%;
+  min-width: 0;
   border: 1px solid var(--btwr-color-border);
   border-collapse: separate;
   border-spacing: 0;
