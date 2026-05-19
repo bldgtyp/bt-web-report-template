@@ -9,10 +9,11 @@ import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.envelope;
-const tocItems = [
-  { href: "#envelope-overview", label: "Envelope overview" },
-  { href: "#assemblies", label: "Assemblies" },
-];
+const sections = {
+  envelopeOverview: { href: "#envelope-overview", label: "Envelope overview", number: "01" },
+  assemblies: { href: "#assemblies", label: "Assemblies", number: "02" },
+};
+const tocItems = Object.values(sections);
 ---
 
 <ProjectReportLayout
@@ -25,13 +26,13 @@ const tocItems = [
   <ReportSection
     id="envelope-overview"
     Content={EnvelopeOverview}
-    kicker={envelopeOverview.kicker}
+    kicker={sections.envelopeOverview.number}
     title={envelopeOverview.title}
     dek={envelopeOverview.dek}
   >
     <EnvelopePanels />
   </ReportSection>
-  <ReportSection id="assemblies" Content={Assemblies} kicker={assemblies.kicker} title={assemblies.title} dek={assemblies.dek}>
+  <ReportSection id="assemblies" Content={Assemblies} kicker={sections.assemblies.number} title={assemblies.title} dek={assemblies.dek}>
     <div class="btwr-placeholder-panel">
       <span>ASSEMBLY DIAGRAMS · DETAILS · THERMAL BRIDGE REFERENCES</span>
     </div>

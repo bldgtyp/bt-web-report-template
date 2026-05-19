@@ -9,7 +9,10 @@ import ProjectReportLayout from "../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.summary;
-const tocItems = [{ href: "#summary", label: "Executive summary" }];
+const sections = {
+  summary: { href: "#summary", label: "Executive summary", number: "01" },
+};
+const tocItems = Object.values(sections);
 ---
 
 <ProjectReportLayout
@@ -22,7 +25,7 @@ const tocItems = [{ href: "#summary", label: "Executive summary" }];
   <ReportSection
     id="summary"
     Content={Summary}
-    kicker={summary.kicker}
+    kicker={sections.summary.number}
     title={summary.title}
     dek={summary.dek}
     callout_label={summary.callout_label}

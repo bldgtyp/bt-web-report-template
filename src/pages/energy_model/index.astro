@@ -10,10 +10,11 @@ import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.energyModel;
-const tocItems = [
-  { href: "#energy-model", label: "Energy model" },
-  { href: "#model-data", label: "Model data" },
-];
+const sections = {
+  energyModel: { href: "#energy-model", label: "Energy model", number: "01" },
+  modelData: { href: "#model-data", label: "Model data", number: "02" },
+};
+const tocItems = Object.values(sections);
 ---
 
 <ProjectReportLayout
@@ -26,13 +27,13 @@ const tocItems = [
   <ReportSection
     id="energy-model"
     Content={EnergyModel}
-    kicker={energyModel.kicker}
+    kicker={sections.energyModel.number}
     title={energyModel.title}
     dek={energyModel.dek}
   >
     <EnergyModelPanels />
   </ReportSection>
-  <ReportSection id="model-data" Content={Appendix} kicker={appendix.kicker} title="Model data" dek={appendix.dek}>
+  <ReportSection id="model-data" Content={Appendix} kicker={sections.modelData.number} title="Model data" dek={appendix.dek}>
     <VariantSummaryTable />
   </ReportSection>
 </ProjectReportLayout>

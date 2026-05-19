@@ -11,6 +11,7 @@ import projectCss from "../styles/project.css?raw";
 interface TocItem {
   href: string;
   label: string;
+  number: string;
 }
 
 interface Props {
@@ -144,10 +145,10 @@ const faviconHref =
             <nav>
               <p>On this page</p>
               <ol>
-                {tocItems.map((item, index) => (
+                {tocItems.map((item) => (
                   <li>
                     <a href={item.href}>
-                      <span>{String(index).padStart(2, "0")}</span>
+                      <span>{item.number}</span>
                       {item.label}
                     </a>
                   </li>

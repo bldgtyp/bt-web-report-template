@@ -7,7 +7,10 @@ import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.windows;
-const tocItems = [{ href: "#windows", label: "Windows" }];
+const sections = {
+  windows: { href: "#windows", label: "Windows", number: "01" },
+};
+const tocItems = Object.values(sections);
 ---
 
 <ProjectReportLayout
@@ -17,7 +20,7 @@ const tocItems = [{ href: "#windows", label: "Windows" }];
   pageKicker={page.kicker}
   pageLabel={page.label}
 >
-  <ReportSection id="windows" Content={Windows} kicker={windows.kicker} title={windows.title} dek={windows.dek}>
+  <ReportSection id="windows" Content={Windows} kicker={sections.windows.number} title={windows.title} dek={windows.dek}>
     <div class="btwr-placeholder-panel">
       <span>WINDOW SCHEDULE · ORIENTATION · SHGC / U-VALUE COMPARISON</span>
     </div>
