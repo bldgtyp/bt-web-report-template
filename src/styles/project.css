@@ -1,3 +1,17 @@
+.btwr-report .btwr-hero {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin-right: 0;
+  margin-left: 0;
+  padding-right: max(var(--btwr-space-5), calc((100% - var(--btwr-content-max)) / 2));
+  padding-left: max(var(--btwr-space-5), calc((100% - var(--btwr-content-max)) / 2));
+}
+
+.btwr-report .btwr-report-grid--full {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .btwr-project-meta {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));

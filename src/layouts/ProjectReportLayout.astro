@@ -31,10 +31,10 @@ const clientName = report.project.client_name || "Client";
 const phase = report.project.phase || "Design analysis";
 const reportDate = report.project.report_date || manifest.generated_at || "Date pending";
 const targetStandard = report.project.target_standard || "Passive House";
-const location = [report.project.building.city, report.project.building.state].filter(Boolean).join(", ");
-const locationChip = [location, report.project.building.climate_zone].filter(Boolean).join(" · ");
 const variantLabel = variants.length === 1 ? "variant" : "variants";
 const title = `${pageLabel} | ${report.project.project_title} | ${phase}`;
+const showHero = currentHref === "/";
+const showToc = currentHref !== "/";
 const faviconHref =
   'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><path fill="%233E93AE" d="M6 28V12l12-7 12 7v16h-7V16H13v12H6Z"/></svg>';
 ---
@@ -85,82 +85,83 @@ const faviconHref =
         </nav>
       </div>
 
-      <div class="btwr-hero">
-        <div class="btwr-hero__copy">
-          <p class="btwr-report-header__eyebrow">{pageKicker} · {pageLabel} · {phase}</p>
-          <h1>{projectName}</h1>
-          <p class="btwr-hero__lede">
-            {
-              variants.length > 0
-                ? `${variants.length} ${variantLabel} tested. ${
-                    recommended ? `${recommended.name} is the current recommended path.` : "The recommended path is pending."
-                  }`
-                : "Project metadata is ready. PHPP-derived model data will populate this report after the scrape runs."
-            }
-          </p>
-          <div class="btwr-hero__chips" aria-label="Report metadata">
-            <span>v1 · {reportDate}</span>
-            <span>{targetStandard}</span>
-            {locationChip && <span>{locationChip}</span>}
+      {
+        showHero && (
+          <div class="btwr-hero">
+            <div class="btwr-hero__copy">
+              <p class="btwr-report-header__eyebrow">
+                {pageKicker} · {pageLabel} · {phase}
+              </p>
+              <h1>{projectName}</h1>
+              <p class="btwr-hero__lede">
+                {variants.length > 0
+                  ? `${variants.length} ${variantLabel} tested. ${
+                      recommended ? `${recommended.name} is the current recommended path.` : "The recommended path is pending."
+                    }`
+                  : "Project metadata is ready. PHPP-derived model data will populate this report after the scrape runs."}
+              </p>
+            </div>
+            <div class="btwr-hero__figure" aria-hidden="true">
+              <div class="btwr-placeholder-iso">
+                <span>ISOMETRIC RENDER</span>
+              </div>
+            </div>
+            <dl class="btwr-hero__stats">
+              <div>
+                <dt>Status</dt>
+                <dd>{manifest.status}</dd>
+                <span>data manifest</span>
+              </div>
+              <div>
+                <dt>Variants</dt>
+                <dd>{variants.length || "—"}</dd>
+                <span>{variants.length ? "model options" : "pending scrape"}</span>
+              </div>
+              <div>
+                <dt>Recommended</dt>
+                <dd>{recommended?.name ?? "pending"}</dd>
+                <span>current path</span>
+              </div>
+              <div>
+                <dt>Standard</dt>
+                <dd>{targetStandard}</dd>
+                <span>target basis</span>
+              </div>
+            </dl>
           </div>
-        </div>
-        <div class="btwr-hero__figure" aria-hidden="true">
-          <div class="btwr-placeholder-iso">
-            <span>ISOMETRIC RENDER</span>
-          </div>
-        </div>
-        <dl class="btwr-hero__stats">
-          <div>
-            <dt>Status</dt>
-            <dd>{manifest.status}</dd>
-            <span>data manifest</span>
-          </div>
-          <div>
-            <dt>Variants</dt>
-            <dd>{variants.length || "—"}</dd>
-            <span>{variants.length ? "model options" : "pending scrape"}</span>
-          </div>
-          <div>
-            <dt>Recommended</dt>
-            <dd>{recommended?.name ?? "pending"}</dd>
-            <span>current path</span>
-          </div>
-          <div>
-            <dt>Standard</dt>
-            <dd>{targetStandard}</dd>
-            <span>target basis</span>
-          </div>
-        </dl>
-      </div>
+        )
+      }
     </header>
 
-    <div class="btwr-report-grid">
+    <div class:list={["btwr-report-grid", !showToc && "btwr-report-grid--full"]}>
       <main id="btwr-main" class="btwr-report-main">
         <slot />
       </main>
-      <aside class="btwr-toc" aria-label="Page contents">
-        <a class="btwr-toc__skip" href="#btwr-main">Skip to report</a>
-        <nav>
-          <p>On this page</p>
-          <ol>
-            {
-              tocItems.map((item, index) => (
-                <li>
-                  <a href={item.href}>
-                    <span>{String(index).padStart(2, "0")}</span>
-                    {item.label}
-                  </a>
-                </li>
-              ))
-            }
-          </ol>
-        </nav>
-        <div class="btwr-toc__recommendation">
-          <p>Recommendation</p>
-          <strong>{recommended?.name ?? "Pending"}</strong>
-          <span>{recommended ? "Current preferred model variant." : "Set by manifest after PHPP scrape."}</span>
-        </div>
-      </aside>
+      {
+        showToc && (
+          <aside class="btwr-toc" aria-label="Page contents">
+            <a class="btwr-toc__skip" href="#btwr-main">Skip to report</a>
+            <nav>
+              <p>On this page</p>
+              <ol>
+                {tocItems.map((item, index) => (
+                  <li>
+                    <a href={item.href}>
+                      <span>{String(index).padStart(2, "0")}</span>
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+            <div class="btwr-toc__recommendation">
+              <p>Recommendation</p>
+              <strong>{recommended?.name ?? "Pending"}</strong>
+              <span>{recommended ? "Current preferred model variant." : "Set by manifest after PHPP scrape."}</span>
+            </div>
+          </aside>
+        )
+      }
     </div>
 
     <footer class="btwr-report-footer">
