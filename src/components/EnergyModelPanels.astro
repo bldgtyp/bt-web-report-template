@@ -1,14 +1,14 @@
 ---
 import {
   CertificationChart,
-  CertificationTable,
   ClimateMonthlyChart,
   DemandBreakdownChart,
-  EnergySummaryTable,
   SiteEnergyChart,
   SourceEnergyChart,
 } from "@bldgtyp/web-report-kit";
 
+import CertificationTable from "./CertificationTable.astro";
+import EnergySummaryTable from "./EnergySummaryTable.astro";
 import { loadTemplateReportData } from "../data/report";
 
 const report = await loadTemplateReportData();

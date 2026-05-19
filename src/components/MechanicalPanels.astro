@@ -1,7 +1,8 @@
 ---
-import { RoomAirflowChart, RoomAirflowTable } from "@bldgtyp/web-report-kit";
+import { RoomAirflowChart } from "@bldgtyp/web-report-kit";
 
 import { loadTemplateReportData } from "../data/report";
+import RoomAirflowTable from "./RoomAirflowTable.astro";
 
 const report = await loadTemplateReportData();
 ---

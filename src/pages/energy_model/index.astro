@@ -1,9 +1,29 @@
 ---
-import Appendix, { frontmatter as appendix } from "../../../content/appendix.mdx";
-import EnergyModel, { frontmatter as energyModel } from "../../../content/energy-model.mdx";
-import EnergyModelPanels from "../../components/EnergyModelPanels.astro";
+import {
+  CertificationChart,
+  ClimateMonthlyChart,
+  SiteEnergyChart,
+  SourceEnergyChart,
+} from "@bldgtyp/web-report-kit";
+
+import ClimateData, { frontmatter as climateData } from "../../../content/energy-model/climate-data.mdx";
+import Co2Emissions, { frontmatter as co2Emissions } from "../../../content/energy-model/co2-emissions.mdx";
+import ModelGeometry, { frontmatter as modelGeometry } from "../../../content/energy-model/model-geometry.mdx";
+import ModelVariants, { frontmatter as modelVariants } from "../../../content/energy-model/model-variants.mdx";
+import PassiveHouseCertifications, {
+  frontmatter as passiveHouseCertifications,
+} from "../../../content/energy-model/passive-house-certifications.mdx";
+import PassiveHouseThresholds, {
+  frontmatter as passiveHouseThresholds,
+} from "../../../content/energy-model/passive-house-thresholds.mdx";
+import SiteEnergy, { frontmatter as siteEnergy } from "../../../content/energy-model/site-energy.mdx";
+import BuildingMetricsTable from "../../components/BuildingMetricsTable.astro";
+import CertificationTable from "../../components/CertificationTable.astro";
+import EnergySummaryTable from "../../components/EnergySummaryTable.astro";
+import EnvelopeInputsByVariantTable from "../../components/EnvelopeInputsByVariantTable.astro";
+import MechanicalInputsByVariantTable from "../../components/MechanicalInputsByVariantTable.astro";
+import RecommendedGeometryMetrics from "../../components/RecommendedGeometryMetrics.astro";
 import ReportSection from "../../components/ReportSection.astro";
-import VariantSummaryTable from "../../components/VariantSummaryTable.astro";
 import { reportPages } from "../../data/pages";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
@@ -11,8 +31,17 @@ import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 const report = await loadTemplateReportData();
 const page = reportPages.energyModel;
 const sections = {
-  energyModel: { href: "#energy-model", label: "Energy model", number: "01" },
-  modelData: { href: "#model-data", label: "Model data", number: "02" },
+  modelGeometry: { href: "#model-geometry", label: "Model Geometry", number: "01" },
+  modelVariants: { href: "#model-variants", label: "Model Variants", number: "02" },
+  siteEnergy: { href: "#site-energy", label: "Site Energy", number: "03" },
+  co2Emissions: { href: "#co2-emissions", label: "CO2 Emissions", number: "04" },
+  passiveHouseThresholds: { href: "#passive-house-thresholds", label: "Passive House Thresholds", number: "05" },
+  climateData: { href: "#climate-data", label: "Climate Data", number: "06" },
+  passiveHouseCertifications: {
+    href: "#passive-house-certifications",
+    label: "Passive House Certifications",
+    number: "07",
+  },
 };
 const tocItems = Object.values(sections);
 ---
@@ -25,15 +54,85 @@ const tocItems = Object.values(sections);
   pageLabel={page.label}
 >
   <ReportSection
-    id="energy-model"
-    Content={EnergyModel}
-    kicker={sections.energyModel.number}
-    title={energyModel.title}
-    dek={energyModel.dek}
+    id="model-geometry"
+    Content={ModelGeometry}
+    kicker={sections.modelGeometry.number}
+    title={modelGeometry.title}
+    dek={modelGeometry.dek}
   >
-    <EnergyModelPanels />
+    <figure class="btwr-geometry-figure">
+      <img src="/assets/model-geometry/iso-dimensions.png" alt="Isometric building geometry diagram with dimension annotations." />
+    </figure>
+    <RecommendedGeometryMetrics data={report} />
   </ReportSection>
-  <ReportSection id="model-data" Content={Appendix} kicker={sections.modelData.number} title="Model data" dek={appendix.dek}>
-    <VariantSummaryTable />
+
+  <ReportSection
+    id="model-variants"
+    Content={ModelVariants}
+    kicker={sections.modelVariants.number}
+    title={modelVariants.title}
+    dek={modelVariants.dek}
+  >
+    <div class="btwr-component-stack">
+      <EnergySummaryTable data={report} caption="Key results by variant" />
+      <BuildingMetricsTable data={report} caption="Geometry metrics by variant" />
+      <EnvelopeInputsByVariantTable data={report} />
+      <MechanicalInputsByVariantTable data={report} />
+    </div>
+  </ReportSection>
+
+  <ReportSection
+    id="site-energy"
+    Content={SiteEnergy}
+    kicker={sections.siteEnergy.number}
+    title={siteEnergy.title}
+    dek={siteEnergy.dek}
+  >
+    <div class="btwr-component-stack">
+      <SiteEnergyChart data={report} title="Annual site energy" />
+      <SourceEnergyChart data={report} title="Source energy comparison" />
+    </div>
+  </ReportSection>
+
+  <ReportSection
+    id="co2-emissions"
+    Content={Co2Emissions}
+    kicker={sections.co2Emissions.number}
+    title={co2Emissions.title}
+    dek={co2Emissions.dek}
+  >
+    <div class="btwr-placeholder-panel">
+      <span>CO2 EMISSIONS · OPERATIONAL CARBON · GRID FACTORS</span>
+    </div>
+  </ReportSection>
+
+  <ReportSection
+    id="passive-house-thresholds"
+    Content={PassiveHouseThresholds}
+    kicker={sections.passiveHouseThresholds.number}
+    title={passiveHouseThresholds.title}
+    dek={passiveHouseThresholds.dek}
+  >
+    <CertificationChart data={report} title="Passive House thresholds" />
+  </ReportSection>
+
+  <ReportSection
+    id="climate-data"
+    Content={ClimateData}
+    kicker={sections.climateData.number}
+    title={climateData.title}
+    dek={climateData.dek}
+  >
+    <ClimateMonthlyChart data={report} title="Monthly climate profile" />
+  </ReportSection>
+
+  <ReportSection
+    id="passive-house-certifications"
+    Content={PassiveHouseCertifications}
+    kicker={sections.passiveHouseCertifications.number}
+    title={passiveHouseCertifications.title}
+    dek={passiveHouseCertifications.dek}
+  >
+    <CertificationTable data={report} caption="Certification result and limit rows" />
   </ReportSection>
 </ProjectReportLayout>

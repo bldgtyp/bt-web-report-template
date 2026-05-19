@@ -1,0 +1,163 @@
+---
+import { DataState, cellNumber, cellText, formatCell, formatValue } from "@bldgtyp/web-report-kit";
+
+import type { TemplateReportData } from "../data/report";
+
+interface Props {
+  data: TemplateReportData;
+  caption?: string;
+}
+
+type CsvSource = "variants" | "certification";
+
+interface SummaryMetric {
+  label: string;
+  units: string;
+  source: CsvSource;
+  fieldId?: string;
+  metric?: string;
+  role?: string;
+}
+
+const { data, caption = "Key Results By Variant" } = Astro.props;
+const metrics: SummaryMetric[] = [
+  {
+    label: "Certification Compliant?",
+    units: "",
+    source: "variants",
+    fieldId: "certification_compliant.certification_compliant_2",
+  },
+  {
+    label: "Total Primary Energy",
+    units: "kWh/yr",
+    source: "variants",
+    fieldId: "report_inputs.total_primary_energy",
+  },
+  {
+    label: "Total Site Energy",
+    units: "kWh/yr",
+    source: "variants",
+    fieldId: "report_inputs.total_site_energy",
+  },
+  {
+    label: "Heat Demand",
+    units: "kWh/yr",
+    source: "certification",
+    metric: "heat_demand",
+    role: "result",
+  },
+  {
+    label: "Heat Demand",
+    units: "kWh/m2",
+    source: "variants",
+    fieldId: "certification_results.heat_demand",
+  },
+  {
+    label: "Cooling Demand",
+    units: "kWh/yr",
+    source: "certification",
+    metric: "sensible_cooling_demand",
+    role: "result",
+  },
+  {
+    label: "Total Cooling Demand",
+    units: "kWh/m2",
+    source: "variants",
+    fieldId: "certification_results.total_cooling_demand",
+  },
+  {
+    label: "Peak Heat Load",
+    units: "Btuh",
+    source: "variants",
+    fieldId: "peak_loads.peak_heat_load",
+  },
+  {
+    label: "Peak Sensible Cooling Load",
+    units: "Btuh",
+    source: "variants",
+    fieldId: "peak_loads.peak_sensible_cooling_load",
+  },
+  {
+    label: "Peak Latent Cooling Load",
+    units: "Btuh",
+    source: "variants",
+    fieldId: "peak_loads.peak_latent_cooling_load",
+  },
+];
+
+function valueFor(metric: SummaryMetric, variantId: string): string {
+  if (metric.source === "variants") {
+    const row = data.variants.find(
+      (candidate) => cellText(candidate, "field_id") === metric.fieldId && cellText(candidate, "variant_id") === variantId,
+    );
+    return row ? formatCell(row.value) : "—";
+  }
+
+  const row = data.certification.find(
+    (candidate) =>
+      cellText(candidate, "metric") === metric.metric &&
+      cellText(candidate, "role") === metric.role &&
+      cellText(candidate, "variant_id") === variantId,
+  );
+  return formatValue(cellNumber(row ?? {}, "value"));
+}
+
+const rows = metrics.map((metric) => ({
+  ...metric,
+  values: new Map(data.variantOrder.map((variant) => [variant.id, valueFor(metric, variant.id)])),
+}));
+const recommendedName = data.variantOrder.find((variant) => variant.recommended)?.name ?? "the recommended variant";
+const hasRows = rows.some((row) => [...row.values.values()].some((value) => value !== "—"));
+const missingRows = rows.flatMap((row) =>
+  data.variantOrder
+    .filter((variant) => row.values.get(variant.id) === "—")
+    .map((variant) => `${row.label}${row.units ? ` (${row.units})` : ""} for ${variant.name}`),
+);
+---
+
+{
+  data.manifest.status === "pending" || !hasRows ? (
+    <DataState state="pending" title="Energy table pending" message="No energy summary rows are available yet." />
+  ) : (
+    <div class="btwr-table-wrap">
+      <table class="btwr-table btwr-energy-summary-table" data-table="energy-summary">
+        <caption>
+          <strong class="btwr-table__title">{caption}</strong>
+          <span class="btwr-table__subtitle">
+            This table lists some of the key output results for each of the variants tested as part of this investigation.
+            Values from the recommended variant, {recommendedName}, are highlighted.
+          </span>
+          {missingRows.length > 0 && (
+            <em>Missing scraper values to follow up on: {missingRows.join("; ")}.</em>
+          )}
+        </caption>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            {data.variantOrder.map((variant) => (
+              <th class={variant.recommended ? "btwr-col-recommended" : undefined}>
+                {variant.recommended && <span class="btwr-recommended-tag">Recommended</span>}
+                {variant.name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              <th>
+                <span>{row.label}</span>
+                {row.units && <small class="btwr-table__metric-unit">{row.units}</small>}
+              </th>
+              {data.variantOrder.map((variant) => (
+                <td class={`btwr-cell-number ${variant.recommended ? "btwr-col-recommended" : ""}`}>
+                  {row.values.get(variant.id)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

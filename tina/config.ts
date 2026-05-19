@@ -82,6 +82,23 @@ export default defineConfig({
     collections: [
       fixedMdxSection("Executive summary", "summary", "content", "summary"),
       fixedMdxSection("Energy model", "energy_model", "content", "energy-model"),
+      fixedMdxSection("Model geometry", "energy_model_geometry", "content/energy-model", "model-geometry"),
+      fixedMdxSection("Model variants", "energy_model_variants", "content/energy-model", "model-variants"),
+      fixedMdxSection("Site energy", "energy_model_site_energy", "content/energy-model", "site-energy"),
+      fixedMdxSection("CO2 emissions", "energy_model_co2_emissions", "content/energy-model", "co2-emissions"),
+      fixedMdxSection(
+        "Passive House thresholds",
+        "energy_model_passive_house_thresholds",
+        "content/energy-model",
+        "passive-house-thresholds",
+      ),
+      fixedMdxSection("Climate data", "energy_model_climate_data", "content/energy-model", "climate-data"),
+      fixedMdxSection(
+        "Passive House certifications",
+        "energy_model_passive_house_certifications",
+        "content/energy-model",
+        "passive-house-certifications",
+      ),
       fixedMdxSection("Envelope overview", "envelope_overview", "content/envelope", "overview"),
       fixedMdxSection("Assemblies", "assemblies", "content/envelope", "assemblies"),
       fixedMdxSection("Windows", "windows", "content", "windows"),

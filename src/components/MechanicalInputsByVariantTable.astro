@@ -1,0 +1,112 @@
+---
+import { DataState, cellNumber, cellText, formatCell, formatValue, type CsvRow } from "@bldgtyp/web-report-kit";
+
+import type { TemplateReportData } from "../data/report";
+
+interface Props {
+  data: TemplateReportData;
+  caption?: string;
+}
+
+interface InputRow {
+  label: string;
+  units: string;
+  fieldId: string;
+  format?: "percent" | "plain";
+}
+
+const { data, caption = "Mechanical System Inputs By Variant" } = Astro.props;
+const inputRows: InputRow[] = [
+  { label: "Ventilation System", units: "", fieldId: "systems.ventilation_system" },
+  { label: "Ventilation Unit HR Efficiency", units: "%", fieldId: "systems.ventilation_unit_hr_efficiency", format: "percent" },
+  { label: "Ventilation Unit ER Efficiency", units: "%", fieldId: "systems.ventilation_unit_er_efficiency", format: "percent" },
+  { label: "System HR Efficiency", units: "%", fieldId: "systems.system_hr_efficiency", format: "percent" },
+  { label: "Cold Air Duct Length (ea)", units: "ft", fieldId: "report_inputs.cold_air_duct_length_ea" },
+  {
+    label: "Cold Air Duct Insulation Thickness",
+    units: "inches",
+    fieldId: "report_inputs.cold_air_duct_insulation_thickness",
+  },
+  { label: "Heating System", units: "", fieldId: "systems.heating_system" },
+  { label: "Cooling System", units: "", fieldId: "systems.cooling_system" },
+  { label: "DHW System", units: "", fieldId: "systems.dhw_system" },
+];
+
+function rowFor(fieldId: string, variantId: string) {
+  return data.variants.find(
+    (candidate) => cellText(candidate, "field_id") === fieldId && cellText(candidate, "variant_id") === variantId,
+  );
+}
+
+function formatInputValue(row: CsvRow | undefined, format: InputRow["format"]): string {
+  if (!row) {
+    return "—";
+  }
+
+  const numeric = cellNumber(row, "value");
+  if (numeric === null) {
+    const value = formatCell(row.value);
+    return value === "—" ? "0 %" : value;
+  }
+
+  if (format === "percent") {
+    return `${formatValue(numeric * 100)} %`;
+  }
+  return formatValue(numeric);
+}
+
+const rows = inputRows.map((input) => ({
+  ...input,
+  values: new Map(
+    data.variantOrder.map((variant) => [variant.id, formatInputValue(rowFor(input.fieldId, variant.id), input.format)]),
+  ),
+}));
+const recommendedName = data.variantOrder.find((variant) => variant.recommended)?.name ?? "the recommended variant";
+const missingRows = rows.filter((row) => [...row.values.values()].every((value) => value === "—"));
+const hasRows = rows.some((row) => [...row.values.values()].some((value) => value !== "—"));
+---
+
+{
+  data.manifest.status === "pending" || !hasRows ? (
+    <DataState state="pending" title="Mechanical inputs pending" message="No matching mechanical system rows are available yet." />
+  ) : (
+    <div class="btwr-table-wrap">
+      <table class="btwr-table btwr-variant-inputs-table" data-table="mechanical-inputs">
+        <caption>
+          <strong class="btwr-table__title">{caption}</strong>
+          <span class="btwr-table__subtitle">
+            This table lists the various mechanical system inputs for each variant tested as part of this investigation.
+            Values from the recommended variant, {recommendedName}, are highlighted.
+          </span>
+          {missingRows.length > 0 && <em>Missing scraper values to follow up on: {missingRows.map((row) => row.label).join("; ")}.</em>}
+        </caption>
+        <thead>
+          <tr>
+            <th>Datatype</th>
+            {data.variantOrder.map((variant) => (
+              <th class={variant.recommended ? "btwr-col-recommended" : undefined}>
+                {variant.recommended && <span class="btwr-recommended-tag">Recommended</span>}
+                {variant.name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              <th>
+                <span>{row.label}</span>
+                {row.units && <small class="btwr-table__metric-unit">{row.units}</small>}
+              </th>
+              {data.variantOrder.map((variant) => (
+                <td class={`btwr-cell-number ${variant.recommended ? "btwr-col-recommended" : ""}`}>
+                  {row.values.get(variant.id)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

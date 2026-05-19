@@ -1,0 +1,68 @@
+---
+import { DataState, MetricCard, cellNumber, cellText, formatValue, recommendedVariant } from "@bldgtyp/web-report-kit";
+
+import type { TemplateReportData } from "../data/report";
+
+interface Props {
+  data: TemplateReportData;
+}
+
+const { data } = Astro.props;
+const recommended = recommendedVariant(data.variantOrder);
+const recommendedId = recommended?.id ?? data.variantOrder[0]?.id;
+
+function metricValue(metric: string): number | null {
+  const row = data.buildingMetrics.find(
+    (candidate) => cellText(candidate, "metric") === metric && cellText(candidate, "variant_id") === recommendedId,
+  );
+  return cellNumber(row ?? {}, "value");
+}
+
+function metricUnits(metric: string): string {
+  const row = data.buildingMetrics.find((candidate) => cellText(candidate, "metric") === metric);
+  return cellText(row ?? {}, "units");
+}
+
+const tfa = metricValue("treated_floor_area");
+const envelopeArea = metricValue("building_envelope_area");
+const windowAreaMetrics = [
+  "window_area_north",
+  "window_area_east",
+  "window_area_south",
+  "window_area_west",
+  "window_area_horizontal",
+];
+const totalWindowArea = windowAreaMetrics.reduce((sum, metric) => {
+  const value = metricValue(metric);
+  return value === null ? sum : sum + value;
+}, 0);
+const areaUnits = metricUnits("treated_floor_area") || metricUnits("building_envelope_area");
+const hasMetrics = tfa !== null || envelopeArea !== null || totalWindowArea > 0;
+---
+
+{
+  !recommendedId || !hasMetrics ? (
+    <DataState state="pending" title="Geometry summary pending" message="Recommended-variant geometry metrics are not available yet." />
+  ) : (
+    <div class="btwr-geometry-metrics" aria-label={`Recommended geometry metrics for ${recommended?.name ?? recommendedId}`}>
+      <div class="btwr-geometry-metrics__with-info">
+        <MetricCard label="TFA" value={formatValue(tfa)} units={areaUnits} note="Treated floor area" />
+        <span class="btwr-info-badge" tabindex="0" aria-describedby="tfa-info-tooltip">i</span>
+        <span id="tfa-info-tooltip" class="btwr-info-tooltip" role="tooltip">
+          <span>
+            1. For any/all PHI energy model results, interior 'treated' floor areas (TFA) are used for these cases. These
+            areas are based on the European Standard for Residential Floor areas. For more info and details as to which
+            areas are included and which are excluded, see the standard DIN #277.
+          </span>
+          <span>
+            2. For any/all Phius energy model results, interior conditioned floor areas (iCFA) are used for these cases.
+            These areas are based on the Phius CORE 2021 rules, and more information can be found in the Phius rules
+            document.
+          </span>
+        </span>
+      </div>
+      <MetricCard label="Envelope Area" value={formatValue(envelopeArea)} units={areaUnits} note="Thermal envelope area" />
+      <MetricCard label="Total Window Area" value={formatValue(totalWindowArea)} units={areaUnits} note="All orientations combined" />
+    </div>
+  )
+}

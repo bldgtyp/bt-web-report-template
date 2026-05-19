@@ -1,0 +1,152 @@
+---
+import { DataState, cellNumber, cellText, formatCell, formatValue, type CsvRow } from "@bldgtyp/web-report-kit";
+
+import type { TemplateReportData } from "../data/report";
+
+interface Props {
+  data: TemplateReportData;
+  caption?: string;
+}
+
+interface InputRow {
+  label: string;
+  units: string;
+  fieldId: string;
+  format?: "r-value" | "u-value" | "percent-increase" | "plain";
+}
+
+const { data, caption = "Envelope Inputs By Variant" } = Astro.props;
+
+const fixedEnvelopeFieldIds = new Set([
+  "envelope.thermal_bridge_allowance_increase",
+  "envelope.volumetric_air_leakage_rate_n50",
+  "envelope.envelope_air_leakage_rate_q50",
+  "envelope.window_u_value",
+  "envelope.window_shgc",
+]);
+const assemblyRowsByFieldId = new Map<string, InputRow>();
+for (const row of data.variants) {
+  const section = cellText(row, "section");
+  const fieldId = cellText(row, "field_id");
+  if (section !== "envelope" || fixedEnvelopeFieldIds.has(fieldId) || assemblyRowsByFieldId.has(fieldId)) {
+    continue;
+  }
+
+  assemblyRowsByFieldId.set(fieldId, {
+    label: cellText(row, "datatype") || cellText(row, "phpp_label") || fieldId,
+    units: cellText(row, "units"),
+    fieldId,
+    format: "r-value",
+  });
+}
+
+const inputRows: InputRow[] = [
+  ...assemblyRowsByFieldId.values(),
+  {
+    label: "Thermal Bridge Allowance (% increase)",
+    units: "% Increase",
+    fieldId: "envelope.thermal_bridge_allowance_increase",
+    format: "percent-increase",
+  },
+  {
+    label: "Volumetric Air Leakage Rate (n50)",
+    units: "ACH@50",
+    fieldId: "envelope.volumetric_air_leakage_rate_n50",
+  },
+  {
+    label: "Envelope Air Leakage Rate (q50)",
+    units: "cfm/ft2",
+    fieldId: "report_inputs.envelope_air_leakage_rate_q50",
+  },
+  {
+    label: "Window U-value (Installed)",
+    units: "Btu/hr-ft2-F",
+    fieldId: "envelope.window_u_value",
+    format: "u-value",
+  },
+  { label: "Window SHGC", units: "-", fieldId: "envelope.window_shgc" },
+];
+
+function rowFor(fieldId: string, variantId: string) {
+  return data.variants.find(
+    (candidate) => cellText(candidate, "field_id") === fieldId && cellText(candidate, "variant_id") === variantId,
+  );
+}
+
+function formatInputValue(row: CsvRow | undefined, format: InputRow["format"]): string {
+  if (!row) {
+    return "—";
+  }
+
+  const numeric = cellNumber(row, "value");
+  if (numeric === null) {
+    return formatCell(row.value);
+  }
+
+  if (format === "r-value") {
+    return `R-${formatValue(numeric)}`;
+  }
+  if (format === "u-value") {
+    return `U-${formatValue(numeric)}`;
+  }
+  if (format === "percent-increase") {
+    return `+${formatValue(numeric * 100)} %`;
+  }
+  return formatValue(numeric);
+}
+
+const rows = inputRows.map((input) => ({
+  ...input,
+  values: new Map(
+    data.variantOrder.map((variant) => [variant.id, formatInputValue(rowFor(input.fieldId, variant.id), input.format)]),
+  ),
+}));
+const recommendedName = data.variantOrder.find((variant) => variant.recommended)?.name ?? "the recommended variant";
+const missingRows = rows.filter((row) => [...row.values.values()].every((value) => value === "—"));
+const hasRows = rows.some((row) => [...row.values.values()].some((value) => value !== "—"));
+---
+
+{
+  data.manifest.status === "pending" || !hasRows ? (
+    <DataState state="pending" title="Envelope inputs pending" message="No matching variant input rows are available yet." />
+  ) : (
+    <div class="btwr-table-wrap">
+      <table class="btwr-table btwr-variant-inputs-table" data-table="variant-inputs">
+        <caption>
+          <strong class="btwr-table__title">{caption}</strong>
+          <span class="btwr-table__subtitle">
+            This table lists the envelope, window, wall, etc. inputs for each variant tested as part of this investigation.
+            Values from the recommended variant, {recommendedName}, are highlighted.
+          </span>
+          {missingRows.length > 0 && <em>Missing scraper values to follow up on: {missingRows.map((row) => row.label).join("; ")}.</em>}
+        </caption>
+        <thead>
+          <tr>
+            <th>Datatype</th>
+            {data.variantOrder.map((variant) => (
+              <th class={variant.recommended ? "btwr-col-recommended" : undefined}>
+                {variant.recommended && <span class="btwr-recommended-tag">Recommended</span>}
+                {variant.name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              <th>
+                <span>{row.label}</span>
+                <small class="btwr-table__metric-unit">{row.units}</small>
+              </th>
+              {data.variantOrder.map((variant) => (
+                <td class={`btwr-cell-number ${variant.recommended ? "btwr-col-recommended" : ""}`}>
+                  {row.values.get(variant.id)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
