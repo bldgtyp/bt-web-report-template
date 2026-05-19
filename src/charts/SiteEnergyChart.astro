@@ -1,8 +1,8 @@
 ---
-import DataState from "./DataState.astro";
-import { axisGridBackground, linearAxis } from "../charts/chart-axis";
-import { cellNumber, cellText, formatValue, siteEnergyGroupForEndUse, siteEnergyGroups } from "../data/rows";
+import DataState from "../components/DataState.astro";
 import type { ReportData } from "../data/report-loader";
+import { cellNumber, cellText, formatValue, siteEnergyGroupForEndUse, siteEnergyGroups } from "../data/rows";
+import { axisGridBackground, linearAxis } from "./chart-axis";
 
 interface Props {
   data: ReportData;
@@ -10,54 +10,42 @@ interface Props {
   title?: string;
 }
 
-interface Co2Segment {
+interface SiteEnergySegment {
   color: string;
   label: string;
   value: number;
 }
 
-interface Co2VariantRow {
+interface SiteEnergyVariantRow {
   label: string;
-  segments: Co2Segment[];
+  segments: SiteEnergySegment[];
   total: number;
   variantId: string;
 }
 
-const LIMIT_END_USE = "ipcc_limit";
-
-const { data, subtitle: subtitleProp, title = "Annual CO2e emissions" } = Astro.props;
-const rows = data.energy.filter((row) => cellText(row, "metric_group") === "co2e");
-const sourceUnits = cellText(rows[0] ?? {}, "units") || "tonsCO2e";
-const displayUnits = sourceUnits === "tonsCO2e" ? "tons CO2e / year" : sourceUnits;
+const { data, subtitle: subtitleProp, title = "Site energy by variant" } = Astro.props;
+const rows = data.energy.filter((row) => cellText(row, "metric_group") === "site_energy");
+const sourceUnits = cellText(rows[0] ?? {}, "units") || "kWh";
+const displayUnits = sourceUnits === "kWh" ? "kWh / year" : sourceUnits;
 const groups = siteEnergyGroups();
 const groupedRows = new Map<string, number>();
-const limitRows: number[] = [];
 
 for (const row of rows) {
   const value = cellNumber(row, "value") ?? 0;
-  const endUse = cellText(row, "end_use");
+  const group = siteEnergyGroupForEndUse(cellText(row, "end_use"));
+  if (group === null || value === 0) {
+    continue;
+  }
   const variantId = cellText(row, "variant_id");
   const variant = data.variantOrder.find((item) => item.id === variantId);
-
-  if (!variant || value === 0) {
+  if (!variant) {
     continue;
   }
-
-  if (endUse.trim().toLowerCase() === LIMIT_END_USE) {
-    limitRows.push(value);
-    continue;
-  }
-
-  const group = siteEnergyGroupForEndUse(endUse);
-  if (group === null) {
-    continue;
-  }
-
   const key = `${variantId}:${group.id}`;
   groupedRows.set(key, (groupedRows.get(key) ?? 0) + value);
 }
 
-const chartRows: Co2VariantRow[] = data.variantOrder
+const chartRows: SiteEnergyVariantRow[] = data.variantOrder
   .map((variant) => {
     const segments = groups.map((group) => ({
       color: group.color,
@@ -73,46 +61,27 @@ const chartRows: Co2VariantRow[] = data.variantOrder
     };
   })
   .filter((row) => row.total !== 0);
-const limitValue = limitRows.length > 0 ? limitRows[0] : null;
 const maxTotal = Math.max(...chartRows.map((row) => row.total), 0);
-const chartMax = Math.max(maxTotal, limitValue ?? 0);
-const axis = linearAxis(chartMax);
+const axis = linearAxis(maxTotal);
 const axisStyle = `--btwr-axis-grid: ${axisGridBackground(axis.gridStops)};`;
-const limitOffset = limitValue !== null && axis.max > 0 ? `${(limitValue / axis.max) * 100}%` : null;
-const subtitle = subtitleProp ?? `Operational CO2e by modeled variant, in ${displayUnits}.`;
+const subtitle = subtitleProp ?? `Annual site energy end uses by modeled variant, in ${displayUnits}.`;
 ---
 
 {
   data.manifest.status === "pending" || chartRows.length === 0 ? (
-    <DataState state="pending" title="CO2 emissions chart pending" message="No CO2e rows are available yet." />
+    <DataState state="pending" title="Site energy chart pending" message="No site-energy rows are available yet." />
   ) : (
-    <figure class="btwr-chart-frame" data-chart="co2e">
+    <figure class="btwr-chart-frame" data-chart="site-energy">
       <div class="btwr-chart-frame__header">
         <h3>{title}</h3>
         <p class="btwr-chart-frame__subtitle">{subtitle}</p>
       </div>
-      <ul class="btwr-chart-legend" aria-label="CO2e end uses">
+      <ul class="btwr-chart-legend" aria-label="Site energy end uses">
         {groups.map((group) => <li><span style={`--btwr-legend-color: ${group.color}`}></span>{group.label}</li>)}
-        {limitValue !== null ? (
-          <li class="btwr-chart-legend__limit">
-            <span></span>
-            CO2e Limit
-          </li>
-        ) : null}
       </ul>
-      <div
-        class="btwr-site-energy-bars btwr-site-energy-bars--limit"
-        role="img"
-        aria-label={`Annual CO2e emissions by variant, ${displayUnits}${limitValue !== null ? `, limit ${formatValue(limitValue, displayUnits)}` : ""}`}
-        style={`${axisStyle}${limitOffset ? ` --btwr-limit-offset: ${limitOffset};` : ""}`}
-      >
+      <div class="btwr-site-energy-bars" role="img" aria-label={`Annual site energy by variant, ${displayUnits}`} style={axisStyle}>
         <div class="btwr-site-energy-bars__plot">
           <div class="btwr-site-energy-bars__grid" aria-hidden="true"></div>
-          {limitOffset ? (
-            <div class="btwr-site-energy-bars__limit" aria-hidden="true">
-              <span>CO2e Limit</span>
-            </div>
-          ) : null}
           {chartRows.map((row) => (
             <div class="btwr-site-energy-bars__row">
               <div class="btwr-site-energy-bars__label">{row.label}</div>
@@ -130,7 +99,7 @@ const subtitle = subtitleProp ?? `Operational CO2e by modeled variant, in ${disp
                   ) : null,
                 )}
               </div>
-              <div class="btwr-site-energy-bars__total">{formatValue(row.total, displayUnits)}</div>
+              <div class="btwr-site-energy-bars__total">{formatValue(row.total, sourceUnits)}</div>
             </div>
           ))}
         </div>

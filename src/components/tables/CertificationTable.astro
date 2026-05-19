@@ -1,0 +1,81 @@
+---
+import DataState from "../DataState.astro";
+import type { ReportData } from "../../data/report-loader";
+import { cellNumber, cellText, formatValue, labelize } from "../../data/rows";
+
+interface Props {
+  data: ReportData;
+  caption?: string;
+  captionSubtitle?: string;
+}
+
+const {
+  data,
+  caption = "Certification result and limit rows",
+  captionSubtitle = "This table lists certification result values against the applicable limits for each variant. Values from the recommended variant are highlighted.",
+} = Astro.props;
+const metrics = [...new Set(data.certification.map((row) => cellText(row, "metric")).filter(Boolean))];
+const rows = metrics.map((metric) => {
+  const metricRows = data.certification.filter((row) => cellText(row, "metric") === metric);
+  const units = cellText(metricRows[0] ?? {}, "units");
+  const sourceLabel = cellText(metricRows.find((row) => cellText(row, "role") === "result") ?? {}, "source_label");
+  const values = new Map(
+    data.variantOrder.map((variant) => {
+      const result = metricRows.find(
+        (row) => cellText(row, "variant_id") === variant.id && cellText(row, "role") === "result",
+      );
+      const limit = metricRows.find(
+        (row) => cellText(row, "variant_id") === variant.id && cellText(row, "role") === "limit",
+      );
+      return [variant.id, { result: cellNumber(result ?? {}, "value"), limit: cellNumber(limit ?? {}, "value") }];
+    }),
+  );
+  return { metric, units, sourceLabel, values };
+});
+---
+
+{
+  data.manifest.status === "pending" || rows.length === 0 ? (
+    <DataState state="pending" title="Certification table pending" message="No certification rows are available yet." />
+  ) : (
+    <div class="btwr-table-wrap">
+      <table class="btwr-table" data-table="certification">
+        <caption>
+          <strong class="btwr-table__title">{caption}</strong>
+          <span class="btwr-table__subtitle">{captionSubtitle}</span>
+        </caption>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            {data.variantOrder.map((variant) => (
+              <th class={variant.recommended ? "btwr-col-recommended" : undefined}>
+                {variant.recommended && <span class="btwr-recommended-tag">Recommended</span>}
+                {variant.name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              <th>
+                {row.sourceLabel || labelize(row.metric)}
+                {row.units && <small class="btwr-table__metric-unit">{row.units}</small>}
+                <span class="btwr-cell-muted">{row.metric}</span>
+              </th>
+              {data.variantOrder.map((variant) => {
+                const value = row.values.get(variant.id);
+                return (
+                  <td class={`btwr-cell-number ${variant.recommended ? "btwr-col-recommended" : ""}`}>
+                    {formatValue(value?.result ?? null)}
+                    <span class="btwr-cell-muted">limit {formatValue(value?.limit ?? null)}</span>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

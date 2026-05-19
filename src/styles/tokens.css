@@ -1,0 +1,89 @@
+:root {
+  color-scheme: light;
+
+  /* BLDGTYP branding v1.1.0 aliases. Keep kit components on btwr-prefixed tokens. */
+  --accent: #3e93ae;
+  --accent-light: #d6ebf1;
+  --accent-dark: #2d6b80;
+  --highlight: #e23489;
+  --highlight-light: #fce8f1;
+  --highlight-dark: #c42977;
+  --highlight-darker: #931d57;
+  --bg-page: #fcfcfc;
+  --bg-card: #ffffff;
+  --bg-elev: #fafafa;
+  --bg-section-alt: #f8f9fa;
+  --text-primary: #111111;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --border-subtle: #e5e7eb;
+  --border-card: #e5e7eb;
+  --border-strong: #c9cbd0;
+  --font-primary: "Outfit", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  --radius-sm: 3px;
+  --transition-base: 0.3s ease;
+
+  --btwr-color-page: var(--bg-page);
+  --btwr-color-surface: var(--bg-card);
+  --btwr-color-panel: var(--bg-section-alt);
+  --btwr-color-nav: var(--bg-elev);
+  --btwr-color-heading: var(--text-primary);
+  --btwr-color-text: var(--text-primary);
+  --btwr-color-muted: var(--text-secondary);
+  --btwr-color-subtle: var(--text-muted);
+  --btwr-color-border: var(--border-subtle);
+  --btwr-color-border-strong: var(--border-strong);
+  --btwr-color-link: var(--accent-dark);
+  --btwr-color-accent: var(--accent);
+  --btwr-color-accent-soft: var(--accent-light);
+  --btwr-color-highlight: var(--highlight);
+  --btwr-color-highlight-soft: var(--highlight-light);
+  --btwr-color-success: var(--accent-dark);
+  --btwr-color-warning: var(--highlight-dark);
+  --btwr-color-danger: var(--highlight-darker);
+
+  --btwr-chart-heating: #c44536;
+  --btwr-chart-cooling: #3c7cb4;
+  --btwr-chart-dhw: #db8447;
+  --btwr-chart-lighting: #e5c04a;
+  --btwr-chart-equipment: #5c5780;
+  --btwr-chart-pumps: #6e8f7d;
+  --btwr-chart-renewable: #3f8f5c;
+  --btwr-chart-other: #5f6470;
+
+  --btwr-chart-variant-1: #111111;
+  --btwr-chart-variant-2: #343940;
+  --btwr-chart-variant-3: #4b525c;
+  --btwr-chart-variant-4: #626b76;
+  --btwr-chart-variant-5: #7b838e;
+  --btwr-chart-variant-6: #949ca6;
+  --btwr-chart-variant-7: #adb4bd;
+  --btwr-chart-variant-8: #c7ccd3;
+  --btwr-chart-recommended: var(--highlight);
+  --btwr-chart-grid: var(--border-subtle);
+
+  --btwr-font-body: var(--font-primary);
+  --btwr-font-label: var(--font-mono);
+  --btwr-type-label: 0.72rem;
+  --btwr-type-small: 0.86rem;
+  --btwr-type-body: 1rem;
+  --btwr-type-h1: 3.5rem;
+  --btwr-type-h2: 1.9rem;
+  --btwr-type-metric: 2rem;
+  --btwr-line-body: 1.7;
+  --btwr-line-heading: 1.15;
+
+  --btwr-space-1: 0.25rem;
+  --btwr-space-2: 0.5rem;
+  --btwr-space-3: 0.75rem;
+  --btwr-space-4: 1rem;
+  --btwr-space-5: 1.5rem;
+  --btwr-space-6: 2rem;
+  --btwr-space-7: 3rem;
+  --btwr-space-8: 4rem;
+
+  --btwr-radius-sm: var(--radius-sm);
+  --btwr-radius-md: 3px;
+  --btwr-content-max: 73.75rem;
+}

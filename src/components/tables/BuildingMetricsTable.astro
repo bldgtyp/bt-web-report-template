@@ -1,0 +1,83 @@
+---
+import DataState from "../DataState.astro";
+import type { ReportData } from "../../data/report-loader";
+import { cellNumber, cellText, formatValue, labelize } from "../../data/rows";
+
+interface Props {
+  data: ReportData;
+  metrics?: string[];
+  caption?: string;
+  captionSubtitle?: string;
+}
+
+const {
+  data,
+  metrics = [
+    "treated_floor_area",
+    "building_envelope_area",
+    "interior_net_volume",
+    "gross_volume",
+    "envelope_area_to_tfa",
+    "window_area_north",
+    "window_area_south",
+    "window_area_west",
+  ],
+  caption = "Building metrics by variant",
+  captionSubtitle = "This table lists model geometry metrics for each variant tested as part of this investigation. Values from the recommended variant are highlighted.",
+} = Astro.props;
+const rows = metrics
+  .map((metric) => {
+    const metricRows = data.buildingMetrics.filter((row) => cellText(row, "metric") === metric);
+    const units = cellText(metricRows[0] ?? {}, "units");
+    const sourceLabel = cellText(metricRows[0] ?? {}, "source_label");
+    const values = new Map(
+      data.variantOrder.map((variant) => {
+        const row = metricRows.find((candidate) => cellText(candidate, "variant_id") === variant.id);
+        return [variant.id, cellNumber(row ?? {}, "value")];
+      }),
+    );
+    return { metric, units, sourceLabel, values };
+  })
+  .filter((row) => [...row.values.values()].some((value) => value !== null));
+---
+
+{
+  data.manifest.status === "pending" || rows.length === 0 ? (
+    <DataState state="pending" title="Building metrics pending" message="No building-metrics rows are available yet." />
+  ) : (
+    <div class="btwr-table-wrap">
+      <table class="btwr-table" data-table="building-metrics">
+        <caption>
+          <strong class="btwr-table__title">{caption}</strong>
+          <span class="btwr-table__subtitle">{captionSubtitle}</span>
+        </caption>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            {data.variantOrder.map((variant) => (
+              <th class={variant.recommended ? "btwr-col-recommended" : undefined}>
+                {variant.recommended && <span class="btwr-recommended-tag">Recommended</span>}
+                {variant.name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              <th>
+                {row.sourceLabel || labelize(row.metric)}
+                {row.units && <small class="btwr-table__metric-unit">{row.units}</small>}
+              </th>
+              {data.variantOrder.map((variant) => (
+                <td class={`btwr-cell-number ${variant.recommended ? "btwr-col-recommended" : ""}`}>
+                  {formatValue(row.values.get(variant.id) ?? null)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

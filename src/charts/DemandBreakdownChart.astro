@@ -1,0 +1,76 @@
+---
+import DataState from "../components/DataState.astro";
+import type { ReportData } from "../data/report-loader";
+import { cellNumber, cellText, labelize } from "../data/rows";
+import { barChart, type PlotSeriesDatum } from "./plot";
+
+interface Props {
+  data: ReportData;
+  demandType?: "heating" | "cooling";
+  subtitle?: string;
+  title?: string;
+  variantId?: string;
+}
+
+const { data, demandType = "heating", subtitle: subtitleProp, title = "Demand breakdown", variantId } = Astro.props;
+const activeVariant = variantId ?? data.variantOrder.find((variant) => variant.recommended)?.id ?? data.variantOrder[0]?.id;
+const activeVariantName = data.variantOrder.find((variant) => variant.id === activeVariant)?.name ?? "selected variant";
+const excludedItems = new Set(["heating_demand", "cooling_demand", "total_cooling_demand"]);
+const rows = data.demandDetail
+  .filter((row) => cellText(row, "variant_id") === activeVariant && cellText(row, "demand_type") === demandType)
+  .filter((row) => !excludedItems.has(cellText(row, "item")));
+const sortedRows = [...rows]
+  .map((row) => ({
+    row,
+    magnitude: Math.abs(cellNumber(row, "value") ?? 0),
+  }))
+  .sort((a, b) => b.magnitude - a.magnitude)
+  .slice(0, 10);
+const chartRows: PlotSeriesDatum[] = sortedRows
+  .map(({ row }) => {
+    const contribution = cellText(row, "contribution_type");
+    const value = cellNumber(row, "value");
+    const units = cellText(row, "units") || "kWh";
+    return {
+      label: labelize(cellText(row, "item")),
+      series: labelize(contribution),
+      units,
+      value: value === null ? 0 : contribution === "gain" ? -Math.abs(value) : Math.abs(value),
+    };
+  })
+  .filter((row) => row.value !== 0);
+const units = cellText(rows[0] ?? {}, "units") || "kWh";
+const lossColor = demandType === "cooling" ? "var(--btwr-chart-cooling)" : "var(--btwr-chart-heating)";
+const legendItems = [
+  { label: "Loss", color: lossColor },
+  { label: "Gain", color: "var(--btwr-chart-lighting)" },
+];
+const subtitle =
+  subtitleProp ?? `${labelize(demandType)} losses and gains for ${activeVariantName}; largest non-zero contributors shown.`;
+const svg =
+  chartRows.length > 0
+    ? await barChart(chartRows, {
+        yLabel: `${labelize(demandType)} contribution (${units})`,
+        colorDomain: legendItems.map((item) => item.label),
+        colorRange: legendItems.map((item) => item.color),
+        units,
+      })
+    : "";
+---
+
+{
+  data.manifest.status === "pending" || chartRows.length === 0 ? (
+    <DataState state="pending" title="Demand breakdown pending" message={`No ${demandType} demand-detail rows are available yet.`} />
+  ) : (
+    <figure class="btwr-chart-frame" data-chart="demand-breakdown">
+      <div class="btwr-chart-frame__header">
+        <h3>{title}</h3>
+        <p class="btwr-chart-frame__subtitle">{subtitle}</p>
+      </div>
+      <ul class="btwr-chart-legend" aria-label="Demand contribution series">
+        {legendItems.map((item) => <li><span style={`--btwr-legend-color: ${item.color}`}></span>{item.label}</li>)}
+      </ul>
+      <div class="btwr-chart-frame__plot" set:html={svg} />
+    </figure>
+  )
+}

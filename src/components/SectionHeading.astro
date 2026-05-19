@@ -1,0 +1,16 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  kicker?: string;
+}
+
+const { id, title, kicker } = Astro.props;
+---
+
+<header class="btwr-section-heading" id={id}>
+  <div class="btwr-section-heading__divider">
+    {kicker && <p class="btwr-section-heading__kicker">{kicker}</p>}
+  </div>
+  <h2>{title}</h2>
+</header>

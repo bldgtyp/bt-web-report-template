@@ -1,0 +1,65 @@
+---
+import DataState from "../components/DataState.astro";
+import type { ReportData } from "../data/report-loader";
+import { cellNumber, cellText, labelize } from "../data/rows";
+import { lineChart, type PlotSeriesDatum } from "./plot";
+
+interface Props {
+  data: ReportData;
+  subtitle?: string;
+  title?: string;
+}
+
+const { data, subtitle: subtitleProp, title = "Monthly climate profile" } = Astro.props;
+const monthOrder = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+const metricLabels = new Map([
+  ["exterior_temperature", "Exterior temp"],
+  ["dew_point_temperature", "Dew point"],
+  ["sky_temperature", "Sky temp"],
+]);
+const rows = data.climateMonthly
+  .filter((row) => metricLabels.has(cellText(row, "metric")))
+  .sort((a, b) => monthOrder.indexOf(cellText(a, "month")) - monthOrder.indexOf(cellText(b, "month")));
+const units = cellText(rows[0] ?? {}, "units") || "degF";
+const legendItems = [
+  { label: "Exterior temp", color: "var(--btwr-chart-cooling)" },
+  { label: "Dew point", color: "var(--btwr-chart-dhw)" },
+  { label: "Sky temp", color: "var(--btwr-chart-other)" },
+];
+const chartRows: PlotSeriesDatum[] = rows
+  .map((row) => ({
+    label: labelize(cellText(row, "month")).slice(0, 3),
+    series: metricLabels.get(cellText(row, "metric")) ?? cellText(row, "metric"),
+    units,
+    value: cellNumber(row, "value") ?? 0,
+  }))
+  .filter((row) => row.value !== 0);
+const subtitle = subtitleProp ?? `Monthly PHPP climate temperatures, in ${units}.`;
+const svg =
+  chartRows.length > 0
+    ? await lineChart(chartRows, {
+        yLabel: `Temperature (${units})`,
+        colorDomain: legendItems.map((item) => item.label),
+        colorRange: legendItems.map((item) => item.color),
+        xDomain: monthOrder.map((month) => labelize(month).slice(0, 3)),
+        units,
+      })
+    : "";
+---
+
+{
+  data.manifest.status === "pending" || chartRows.length === 0 ? (
+    <DataState state="pending" title="Climate chart pending" message="No monthly climate rows are available yet." />
+  ) : (
+    <figure class="btwr-chart-frame" data-chart="climate-monthly">
+      <div class="btwr-chart-frame__header">
+        <h3>{title}</h3>
+        <p class="btwr-chart-frame__subtitle">{subtitle}</p>
+      </div>
+      <ul class="btwr-chart-legend" aria-label="Climate chart series">
+        {legendItems.map((item) => <li><span style={`--btwr-legend-color: ${item.color}`}></span>{item.label}</li>)}
+      </ul>
+      <div class="btwr-chart-frame__plot" set:html={svg} />
+    </figure>
+  )
+}

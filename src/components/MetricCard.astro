@@ -1,0 +1,19 @@
+---
+interface Props {
+  label: string;
+  value: string | number;
+  units?: string;
+  note?: string;
+}
+
+const { label, value, units, note } = Astro.props;
+---
+
+<article class="btwr-metric-card">
+  <p class="btwr-metric-card__label">{label}</p>
+  <p class="btwr-metric-card__value">
+    <span>{value}</span>
+    {units && <small>{units}</small>}
+  </p>
+  {note && <p class="btwr-metric-card__note">{note}</p>}
+</article>

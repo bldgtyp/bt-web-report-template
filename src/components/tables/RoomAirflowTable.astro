@@ -1,0 +1,71 @@
+---
+import DataState from "../DataState.astro";
+import type { ReportData } from "../../data/report-loader";
+import { cellNumber, cellText, formatValue } from "../../data/rows";
+
+interface Props {
+  data: ReportData;
+  caption?: string;
+  captionSubtitle?: string;
+  limit?: number;
+}
+
+const {
+  data,
+  caption = "Room airflow schedule",
+  captionSubtitle = "This table lists room-level ventilation airflow values from the PHPP ventilation schedule.",
+  limit = 18,
+} = Astro.props;
+const rows = data.roomAirflows.filter((row) => cellText(row, "row_type") === "room").slice(0, limit);
+const totals = data.roomAirflows.find((row) => cellText(row, "row_type") === "total");
+---
+
+{
+  data.manifest.status === "pending" || rows.length === 0 ? (
+    <DataState state="pending" title="Room airflow table pending" message="No room-airflow rows are available yet." />
+  ) : (
+    <div class="btwr-table-wrap">
+      <table class="btwr-table" data-table="room-airflows">
+        <caption>
+          <strong class="btwr-table__title">{caption}</strong>
+          <span class="btwr-table__subtitle">{captionSubtitle}</span>
+        </caption>
+        <thead>
+          <tr>
+            <th>Room</th>
+            <th class="btwr-cell-number">Area<small class="btwr-table__metric-unit">ft2</small></th>
+            <th class="btwr-cell-number">Volume<small class="btwr-table__metric-unit">ft3</small></th>
+            <th class="btwr-cell-number">Supply high<small class="btwr-table__metric-unit">cfm</small></th>
+            <th class="btwr-cell-number">Extract high<small class="btwr-table__metric-unit">cfm</small></th>
+            <th class="btwr-cell-number">Supply med<small class="btwr-table__metric-unit">cfm</small></th>
+            <th class="btwr-cell-number">Extract med<small class="btwr-table__metric-unit">cfm</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              <th>{cellText(row, "room_name")}</th>
+              <td class="btwr-cell-number">{formatValue(cellNumber(row, "room_area_ft2"), "ft2")}</td>
+              <td class="btwr-cell-number">{formatValue(cellNumber(row, "room_volume_ft3"), "ft3")}</td>
+              <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_sup_high_cfm"), "cfm")}</td>
+              <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_eta_high_cfm"), "cfm")}</td>
+              <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_sup_med_cfm"), "cfm")}</td>
+              <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_eta_med_cfm"), "cfm")}</td>
+            </tr>
+          ))}
+          {totals && (
+            <tr>
+              <th>Total</th>
+              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "room_area_ft2"), "ft2")}</td>
+              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "room_volume_ft3"), "ft3")}</td>
+              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "v_sup_high_cfm"), "cfm")}</td>
+              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "v_eta_high_cfm"), "cfm")}</td>
+              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "v_sup_med_cfm"), "cfm")}</td>
+              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "v_eta_med_cfm"), "cfm")}</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}

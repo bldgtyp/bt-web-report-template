@@ -1,12 +1,10 @@
 ---
-import {
-  CertificationChart,
-  CertificationTable,
-  ClimateMonthlyChart,
-  DemandBreakdownChart,
-  SiteEnergyChart,
-  SourceEnergyChart,
-} from "@bldgtyp/web-report-kit";
+import CertificationChart from "../charts/CertificationChart.astro";
+import CertificationTable from "./tables/CertificationTable.astro";
+import ClimateMonthlyChart from "../charts/ClimateMonthlyChart.astro";
+import DemandBreakdownChart from "../charts/DemandBreakdownChart.astro";
+import SiteEnergyChart from "../charts/SiteEnergyChart.astro";
+import SourceEnergyChart from "../charts/SourceEnergyChart.astro";
 
 import KeyResultsTable from "./KeyResultsTable.astro";
 import { loadTemplateReportData } from "../data/report";

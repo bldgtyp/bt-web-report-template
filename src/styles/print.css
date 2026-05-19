@@ -1,0 +1,74 @@
+@media print {
+  @page {
+    margin: 0.6in;
+  }
+
+  .btwr-report {
+    background: #fff;
+    color: #111;
+  }
+
+  .btwr-report-grid {
+    display: block;
+  }
+
+  .btwr-toc {
+    display: none;
+  }
+
+  .btwr-masthead,
+  .btwr-hero,
+  .btwr-hero__stats div,
+  .btwr-metric-card,
+  .btwr-table-wrap {
+    border-color: #bbb;
+  }
+
+  .btwr-report-main,
+  .btwr-report-header,
+  .btwr-report-footer {
+    max-width: none;
+    padding-inline: 0;
+  }
+
+  .btwr-masthead {
+    position: static;
+    display: none;
+  }
+
+  .btwr-hero {
+    display: block;
+    padding-block: 0.25in;
+    background-image: none;
+  }
+
+  .btwr-hero__figure {
+    display: none;
+  }
+
+  .btwr-section,
+  .btwr-metric-card,
+  .btwr-table-wrap,
+  .btwr-data-state,
+  .btwr-chart-frame {
+    break-inside: avoid;
+  }
+
+  .btwr-table thead {
+    display: table-header-group;
+  }
+
+  .btwr-chart-frame__plot {
+    overflow: visible;
+  }
+
+  .btwr-chart-frame svg {
+    max-width: 100%;
+  }
+
+  .btwr-chart-tooltip,
+  .btwr-chart-expand,
+  .btwr-chart-modal {
+    display: none !important;
+  }
+}

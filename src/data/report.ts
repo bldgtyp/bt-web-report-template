@@ -1,4 +1,4 @@
-import { loadReportData, type ReportData } from "@bldgtyp/web-report-kit";
+import { loadReportData, type ReportData } from "./report-loader";
 
 import { loadProjectConfig, manifestProject, projectDataDir, type ProjectConfig } from "./project";
 

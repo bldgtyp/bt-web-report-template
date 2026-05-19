@@ -1,0 +1,14 @@
+---
+interface Props {
+  state?: "empty" | "pending" | "error";
+  title: string;
+  message?: string;
+}
+
+const { state = "empty", title, message } = Astro.props;
+---
+
+<div class={`btwr-data-state btwr-data-state--${state}`} role={state === "error" ? "alert" : "status"}>
+  <strong>{title}</strong>
+  {message && <p>{message}</p>}
+</div>

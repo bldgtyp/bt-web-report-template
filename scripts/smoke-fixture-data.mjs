@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(scriptDir, "..");
 const dataDir = join(projectRoot, "data");
-const fixtureDir = resolve(projectRoot, "../bt-web-report-kit/src/showcase/data/vandam");
+const fixtureDir = resolve(projectRoot, "../test-files/phpp/2606-Vandam-St/scrape-output");
 const backupParent = await mkdtemp(join(tmpdir(), "btwr-template-data-"));
 const backupDataDir = join(backupParent, "data");
 

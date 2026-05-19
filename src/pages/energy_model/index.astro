@@ -1,10 +1,8 @@
 ---
-import {
-  BuildingMetricsTable,
-  CertificationChart,
-  ClimateMonthlyChart,
-  SiteEnergyChart,
-} from "@bldgtyp/web-report-kit";
+import BuildingMetricsTable from "../../components/tables/BuildingMetricsTable.astro";
+import CertificationChart from "../../charts/CertificationChart.astro";
+import ClimateMonthlyChart from "../../charts/ClimateMonthlyChart.astro";
+import SiteEnergyChart from "../../charts/SiteEnergyChart.astro";
 
 import ClimateData, { frontmatter as climateData } from "../../../content/energy-model/climate-data.mdx";
 import Co2Emissions, { frontmatter as co2Emissions } from "../../../content/energy-model/co2-emissions.mdx";

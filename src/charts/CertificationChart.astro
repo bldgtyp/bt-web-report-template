@@ -1,0 +1,214 @@
+---
+import DataState from "../components/DataState.astro";
+import type { ReportData } from "../data/report-loader";
+import { cellNumber, cellText, formatValue } from "../data/rows";
+import { axisGridBackground, linearAxis } from "./chart-axis";
+
+interface Props {
+  data: ReportData;
+  subtitle?: string;
+  title?: string;
+  variantId?: string;
+}
+
+const { data, subtitle: subtitleProp, title = "Certification results vs limits", variantId } = Astro.props;
+const variants = variantId ? data.variantOrder.filter((variant) => variant.id === variantId) : data.variantOrder;
+const nonzeroMetricLimits = (metricId: string): number[] =>
+  data.certification
+    .filter((row) => cellText(row, "metric") === metricId && cellText(row, "role") === "limit")
+    .map((row) => cellNumber(row, "value") ?? 0)
+    .filter((value) => value > 0);
+
+const inferredPeakHeatLoadLimit = (() => {
+  const heatDemandLimits = nonzeroMetricLimits("heat_demand");
+  if (heatDemandLimits.length === 0) {
+    return null;
+  }
+  return (Math.min(...heatDemandLimits) / 15) * 10;
+})();
+
+const thresholdMetrics = [
+  {
+    color: "var(--btwr-chart-heating)",
+    id: "heat_demand",
+    targetMode: "chart",
+    title: "Annual Heating Energy Demand",
+    targetLabel: "PH-Limit",
+  },
+  {
+    color: "var(--btwr-chart-cooling)",
+    id: "total_cooling_demand",
+    targetMode: "chart",
+    title: "Annual Total Cooling Energy Demand",
+    targetLabel: "PH-Limit",
+  },
+  {
+    color: "var(--btwr-chart-heating)",
+    fallbackLimit: inferredPeakHeatLoadLimit,
+    id: "peak_heat_load",
+    targetMode: "chart",
+    title: "Peak Heating Load",
+    targetLabel: "PH-Limit",
+  },
+  {
+    color: "var(--btwr-chart-cooling)",
+    id: "peak_cooling_load",
+    targetMode: "row",
+    title: "Peak Sensible Cooling Load",
+    targetLabel: "PH-Limit",
+  },
+];
+
+const chartRows = thresholdMetrics
+  .map((metric) => {
+    const variantRows = variants
+      .map((variant) => {
+        const resultRow = data.certification.find(
+          (candidate) =>
+            cellText(candidate, "variant_id") === variant.id &&
+            cellText(candidate, "metric") === metric.id &&
+            cellText(candidate, "role") === "result",
+        );
+        const limitRow = data.certification.find(
+          (candidate) =>
+            cellText(candidate, "variant_id") === variant.id &&
+            cellText(candidate, "metric") === metric.id &&
+            cellText(candidate, "role") === "limit",
+        );
+        const result = resultRow ? cellNumber(resultRow, "value") : null;
+        const rawLimit = limitRow ? cellNumber(limitRow, "value") : null;
+        const limit = rawLimit !== null && rawLimit > 0 ? rawLimit : (metric.fallbackLimit ?? rawLimit);
+
+        return {
+          label: variant.name,
+          limit,
+          result,
+          units: cellText(resultRow ?? limitRow ?? {}, "units"),
+          variantId: variant.id,
+        };
+      })
+      .filter((row) => row.result !== null || row.limit !== null);
+    const maxValue = Math.max(...variantRows.flatMap((row) => [row.result ?? 0, row.limit ?? 0]), 0);
+    const axis = linearAxis(maxValue * 1.12, 3);
+    const ticks = axis.max > 0 ? [0, axis.max / 2, axis.max] : axis.ticks;
+    const units = variantRows.find((row) => row.units)?.units ?? "";
+    const chartLimit =
+      metric.targetMode === "chart"
+        ? variantRows.find((row) => row.limit !== null && row.limit > 0)?.limit ?? null
+        : null;
+    const chartLimitOffset = chartLimit !== null && chartLimit > 0 && axis.max > 0 ? `${(chartLimit / axis.max) * 100}%` : null;
+    const plottedRows = variantRows.map((row) => ({
+      ...row,
+      limitOffset:
+        metric.targetMode === "row" && row.limit !== null && row.limit > 0 && axis.max > 0
+          ? `${(row.limit / axis.max) * 100}%`
+          : null,
+      resultWidth: row.result !== null && axis.max > 0 ? `${(row.result / axis.max) * 100}%` : null,
+    }));
+    const firstLimitIndex = plottedRows.findIndex((row) => row.limitOffset !== null);
+
+    return {
+      ...metric,
+      axis,
+      axisStyle: `--btwr-axis-grid: ${axisGridBackground(ticks.slice(1, -1).map((tick) => `${(tick / axis.max) * 100}%`))};`,
+      chartLimitOffset,
+      ticks,
+      units,
+      variantRows: plottedRows.map((row, index) => ({
+        ...row,
+        showLimitLabel: index === firstLimitIndex,
+      })),
+    };
+  })
+  .filter((row) => row.variantRows.length > 0);
+
+const subtitle = subtitleProp ?? (variantId ? "Selected variant shown against target." : "Modeled variants shown in PHPP order.");
+---
+
+{
+  data.manifest.status === "pending" || chartRows.length === 0 ? (
+    <DataState state="pending" title="Certification chart pending" message="No result/limit certification rows are available yet." />
+  ) : (
+    <div class="btwr-certification-thresholds" data-chart-group="certification-thresholds">
+      <div class="btwr-chart-frame__header">
+        <h3>{title}</h3>
+        <p class="btwr-chart-frame__subtitle">{subtitle}</p>
+      </div>
+      <div class="btwr-threshold-grid">
+        {chartRows.map((row) => (
+          <figure class="btwr-chart-frame btwr-chart-frame--compact btwr-threshold-card" data-chart={`certification-${row.id}`}>
+            <div class="btwr-chart-frame__header">
+              <h3>{row.title}</h3>
+              <p class="btwr-chart-frame__subtitle">{row.units ? `Values in ${row.units}.` : "Values by modeled variant."}</p>
+            </div>
+            <div
+              class="btwr-threshold-bars"
+              role="img"
+              aria-label={`${row.title} by variant${row.units ? `, ${row.units}` : ""}`}
+              style={`${row.axisStyle} --btwr-threshold-color: ${row.color};`}
+            >
+              <div class="btwr-threshold-bars__plot">
+                <div class="btwr-threshold-bars__grid" aria-hidden="true"></div>
+                {row.chartLimitOffset ? (
+                  <div
+                    class="btwr-threshold-bars__chart-limit"
+                    aria-hidden="true"
+                    style={`--btwr-limit-offset: ${row.chartLimitOffset};`}
+                  >
+                    <span>{row.targetLabel}</span>
+                  </div>
+                ) : null}
+                {row.variantRows.map((variantRow) => (
+                  <div class="btwr-threshold-bars__row">
+                    <div class="btwr-threshold-bars__label">{variantRow.label}</div>
+                    <div class="btwr-threshold-bars__track">
+                      {variantRow.limitOffset ? (
+                        <span
+                          class="btwr-threshold-bars__limit"
+                          aria-hidden="true"
+                          style={`--btwr-limit-offset: ${variantRow.limitOffset};`}
+                        >
+                          {variantRow.showLimitLabel ? <span>{row.targetLabel}</span> : null}
+                        </span>
+                      ) : null}
+                      {variantRow.resultWidth ? (
+                        <span
+                          class="btwr-threshold-bars__segment btwr-chart-mark"
+                          data-btwr-tooltip={`${variantRow.label}\n${row.title}: ${formatValue(variantRow.result, row.units)}${
+                            variantRow.limit !== null && variantRow.limit > 0
+                              ? `\nLimit: ${formatValue(variantRow.limit, row.units)}`
+                              : ""
+                          }`}
+                          aria-label={`${variantRow.label}, ${row.title}: ${formatValue(variantRow.result, row.units)}${
+                            variantRow.limit !== null && variantRow.limit > 0
+                              ? `, limit ${formatValue(variantRow.limit, row.units)}`
+                              : ""
+                          }`}
+                          style={`--btwr-segment-width: ${variantRow.resultWidth};`}
+                        >
+                          <span class="btwr-site-energy-bars__sr">{formatValue(variantRow.result, row.units)}</span>
+                        </span>
+                      ) : null}
+                      <span class="btwr-threshold-bars__total">{formatValue(variantRow.result, row.units)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div class="btwr-threshold-bars__axis" aria-hidden="true">
+                {row.ticks.map((tick, index) => (
+                  <span
+                    class={index === 0 ? "is-first" : index === row.ticks.length - 1 ? "is-last" : undefined}
+                    style={`--btwr-tick-position: ${row.axis.max > 0 ? (tick / row.axis.max) * 100 : 0}%;`}
+                  >
+                    {formatValue(tick)}
+                  </span>
+                ))}
+              </div>
+              <div class="btwr-threshold-bars__axis-label" aria-hidden="true">{row.units}</div>
+            </div>
+          </figure>
+        ))}
+      </div>
+    </div>
+  )
+}
