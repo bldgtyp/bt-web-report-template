@@ -231,6 +231,40 @@ const assemblyFields: TinaField[] = [
   },
 ];
 
+const mechanicalPlanFields: TinaField[] = [
+  {
+    type: "string",
+    name: "title",
+    label: "Plan title",
+    required: true,
+  },
+  {
+    type: "number",
+    name: "order",
+    label: "Sort order",
+    required: true,
+  },
+  {
+    type: "image",
+    name: "image",
+    label: "Display image",
+    required: true,
+  },
+  {
+    type: "image",
+    name: "pdf",
+    label: "Linked PDF",
+    required: true,
+  },
+  {
+    type: "rich-text",
+    name: "body",
+    label: "Additional content",
+    isBody: true,
+    templates: [varTemplate],
+  },
+];
+
 function fixedMdxSection(
   label: string,
   name: string,
@@ -317,6 +351,20 @@ export default defineConfig({
       fixedMdxSection("Winter radiation", "winter_radiation", "content/windows", "winter-radiation", radiationFields),
       fixedMdxSection("Summer radiation", "summer_radiation", "content/windows", "summer-radiation", radiationFields),
       fixedMdxSection("Mechanical", "mechanical", "content", "mechanical"),
+      {
+        label: "Mechanical plans",
+        name: "mechanical_plans",
+        path: "content/mechanical/plans",
+        format: "mdx" as const,
+        ui: {
+          allowedActions: {
+            create: true,
+            delete: true,
+            createNestedFolder: false,
+          },
+        },
+        fields: mechanicalPlanFields,
+      },
       fixedMdxSection("Appendix", "appendix", "content", "appendix"),
     ],
   },

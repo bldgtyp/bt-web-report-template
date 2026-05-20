@@ -32,3 +32,11 @@ Windows image slots:
   `windows/radiation/summer-full.png` are the high-resolution modal images.
 - `content/windows/*.mdx` controls the displayed paths, modal paths, alt text,
   and captions.
+
+Mechanical plan slots:
+
+- `mechanical/plans/<slug>.png` is the web-display image for a Rhino-exported
+  mechanical plan PDF.
+- `mechanical/plans/<slug>.pdf` is the linked full-resolution drawing.
+- `content/mechanical/plans/<slug>.mdx` controls the title, sort order, display
+  image path, and linked PDF path.

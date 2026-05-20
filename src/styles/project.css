@@ -912,6 +912,59 @@
   margin-top: var(--btwr-space-2);
 }
 
+.btwr-mechanical-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--btwr-space-4);
+  margin-top: var(--btwr-space-6);
+}
+
+.btwr-mechanical-plan-card {
+  display: grid;
+  gap: var(--btwr-space-3);
+  padding: var(--btwr-space-3);
+  border: 1px solid var(--btwr-color-border);
+  border-radius: var(--btwr-radius-sm);
+  background: var(--btwr-color-surface);
+  box-shadow: 0 0.35rem 0.9rem rgba(48, 52, 58, 0.08);
+}
+
+.btwr-mechanical-plan-card h3 {
+  margin: 0;
+  color: var(--btwr-color-heading);
+  font-size: 0.96rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.btwr-mechanical-plan-card h3 a {
+  color: inherit;
+  text-decoration-color: var(--btwr-color-border-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+.btwr-mechanical-plan-card__image {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 11 / 8.5;
+  border: 1px solid var(--btwr-color-border);
+  background: var(--btwr-color-panel);
+}
+
+.btwr-mechanical-plan-card__image:focus-visible,
+.btwr-mechanical-plan-card h3 a:focus-visible {
+  outline: 2px solid var(--btwr-color-accent);
+  outline-offset: 3px;
+}
+
+.btwr-mechanical-plan-card__image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .btwr-airtightness-chart {
   margin: var(--btwr-space-6) 0;
 }
@@ -1083,6 +1136,10 @@
 
   .btwr-assembly-card__image {
     max-width: 14rem;
+  }
+
+  .btwr-mechanical-plan-grid {
+    grid-template-columns: 1fr;
   }
 
   .btwr-geometry-metrics__with-info,

@@ -1,0 +1,50 @@
+---
+interface MechanicalPlanFrontmatter {
+  title: string;
+  order?: number;
+  image?: string;
+  pdf?: string;
+}
+
+interface MechanicalPlanModule {
+  frontmatter: MechanicalPlanFrontmatter;
+}
+
+const planModules = import.meta.glob<MechanicalPlanModule>("../../content/mechanical/plans/*.mdx", { eager: true });
+const plans = Object.entries(planModules)
+  .map(([path, module]) => ({
+    ...module.frontmatter,
+    slug: path.split("/").pop()?.replace(/\.mdx$/, "") ?? module.frontmatter.title,
+  }))
+  .filter((plan) => plan.title && plan.image)
+  .sort((left, right) => (left.order ?? 999) - (right.order ?? 999) || left.title.localeCompare(right.title));
+---
+
+{
+  plans.length > 0 ? (
+    <div class="btwr-mechanical-plan-grid" aria-label="Mechanical plan drawings">
+      {plans.map((plan) => (
+        <article class="btwr-mechanical-plan-card">
+          <h3>
+            {plan.pdf ? (
+              <a href={plan.pdf} target="_blank" rel="noopener noreferrer">
+                {plan.title}
+              </a>
+            ) : (
+              plan.title
+            )}
+          </h3>
+          <a
+            class="btwr-mechanical-plan-card__image"
+            href={plan.pdf ?? plan.image}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open ${plan.title} mechanical plan`}
+          >
+            <img src={plan.image} alt={`${plan.title} mechanical plan`} loading="lazy" />
+          </a>
+        </article>
+      ))}
+    </div>
+  ) : null
+}

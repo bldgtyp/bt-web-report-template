@@ -1,5 +1,6 @@
 ---
 import Mechanical from "../../../content/mechanical.mdx";
+import MechanicalPlanCards from "../../components/MechanicalPlanCards.astro";
 import MechanicalPanels from "../../components/MechanicalPanels.astro";
 import ReportSection from "../../components/ReportSection.astro";
 import { reportPages } from "../../data/pages";
@@ -46,6 +47,7 @@ const tocItems = Object.values(sections);
     title={sections.freshAirFlowRates.label}
   >
     <MechanicalPanels />
+    <MechanicalPlanCards />
   </ReportSection>
   <ReportSection
     id="ventilation-system-balancing"
