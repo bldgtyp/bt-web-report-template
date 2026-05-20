@@ -1,3 +1,4 @@
+import { listVarKeyOptions } from "@bldgtyp/web-report-schemas";
 import { defineConfig, type Collection, type Template, type TinaField } from "tinacms";
 
 const lockedSectionActions = {
@@ -6,72 +7,12 @@ const lockedSectionActions = {
   createNestedFolder: false,
 };
 
-// Options for the <Var> rich-text shortcode. Keys mirror dot-paths into
-// project.yaml (validated by bt-web-report-schemas). Adding a new field to
-// the Pydantic schema also requires adding it here so editors can pick it.
-// TODO: generate this list from @bldgtyp/web-report-schemas/project.schema.json
-// so the two can never drift.
-const VAR_KEY_OPTIONS: { value: string; label: string }[] = [
-  // Top-level project facts
-  { value: "client_name", label: "Client name" },
-  { value: "building_name", label: "Building name" },
-  { value: "project_title", label: "Project title" },
-  { value: "phase", label: "Phase" },
-  { value: "report_date", label: "Report date" },
-  { value: "prepared_by", label: "Prepared by" },
-  { value: "contact_email", label: "Contact email" },
-  { value: "target_standard", label: "Target standard" },
-  { value: "certification_program", label: "Certification program" },
-  { value: "certification_path", label: "Certification path" },
-  // Building
-  { value: "building.address", label: "Building > Address" },
-  { value: "building.city", label: "Building > City" },
-  { value: "building.state", label: "Building > State" },
-  { value: "building.climate_zone", label: "Building > Climate zone" },
-  { value: "building.building_type", label: "Building > Building type" },
-  // Narrative > Certification
-  { value: "narrative.certification.target", label: "Certification > Target" },
-  { value: "narrative.certification.ph_ach_limit", label: "Certification > PH ACH50 limit" },
-  { value: "narrative.certification.phi_lcd_limit", label: "Certification > PHI latent cooling demand limit" },
-  { value: "narrative.certification.enph_hd_limit", label: "Certification > EnerPHit heating demand limit" },
-  { value: "narrative.certification.enph_per_limit", label: "Certification > EnerPHit PER limit" },
-  { value: "narrative.certification.enph_bg_limit", label: "Certification > EnerPHit below-grade R-value limit" },
-  { value: "narrative.certification.enph_ag_ext_limit", label: "Certification > EnerPHit above-grade ext. R-value limit" },
-  { value: "narrative.certification.enph_ag_int_limit", label: "Certification > EnerPHit above-grade int. R-value limit" },
-  { value: "narrative.certification.enph_uw_limit", label: "Certification > EnerPHit window U-installed limit" },
-  { value: "narrative.certification.phius_hd_limit", label: "Certification > Phius heating demand limit" },
-  { value: "narrative.certification.phius_cd_limit", label: "Certification > Phius cooling demand limit" },
-  { value: "narrative.certification.phius_hl_limit", label: "Certification > Phius heating load limit" },
-  { value: "narrative.certification.phius_cl_limit", label: "Certification > Phius cooling load limit" },
-  { value: "narrative.certification.phius_nse_limit", label: "Certification > Phius net source energy limit" },
-  { value: "narrative.certification.phius_cfm50_limit", label: "Certification > Phius CFM50 limit" },
-  // Narrative > Climate
-  { value: "narrative.climate.weather_station_name", label: "Climate > Weather station name" },
-  { value: "narrative.climate.weather_station_url", label: "Climate > Weather station URL" },
-  { value: "narrative.climate.state_name", label: "Climate > State name" },
-  { value: "narrative.climate.state_name_abbreviation", label: "Climate > State abbreviation" },
-  { value: "narrative.climate.ashrae_location_name", label: "Climate > ASHRAE location" },
-  { value: "narrative.climate.ashrae_design_temps", label: "Climate > ASHRAE design temps" },
-  // Narrative > Energy code
-  { value: "narrative.energy_code.name", label: "Energy code > Name" },
-  { value: "narrative.energy_code.zone", label: "Energy code > Zone" },
-  { value: "narrative.energy_code.link", label: "Energy code > Link" },
-  { value: "narrative.energy_code.u_val_link", label: "Energy code > U-value link" },
-  { value: "narrative.energy_code.ach_link", label: "Energy code > ACH link" },
-  { value: "narrative.energy_code.ach_limit", label: "Energy code > ACH limit" },
-  { value: "narrative.energy_code.window_min_u_value", label: "Energy code > Window min U-value" },
-  // Narrative > CO2
-  { value: "narrative.co2.subregion_name", label: "CO2 > Subregion name" },
-  { value: "narrative.co2.occupancy", label: "CO2 > Occupancy" },
-  { value: "narrative.co2.target_tons", label: "CO2 > Target tons" },
-  // Narrative > Windows
-  { value: "narrative.windows.ph_window_u_value", label: "Windows > PH window U-value" },
-  { value: "narrative.windows.ph_window_r_value", label: "Windows > PH window R-value" },
-  // Narrative > Mechanical / ERV
-  { value: "narrative.mechanical.erv.manufacturer_name", label: "ERV > Manufacturer" },
-  { value: "narrative.mechanical.erv.type_name", label: "ERV > Type" },
-  { value: "narrative.mechanical.erv.link", label: "ERV > Link" },
-];
+// <Var> dropdown options are derived from the generated JSON Schema so a
+// field added to the Pydantic Project model automatically becomes available
+// to editors. "Narrative" is flattened out of labels because editors don't
+// distinguish narrative.* from top-level project.* — both are just project
+// values to them.
+const VAR_KEY_OPTIONS = listVarKeyOptions({ stripLabelSegments: ["Narrative"] });
 
 const varTemplate: Template = {
   name: "Var",
