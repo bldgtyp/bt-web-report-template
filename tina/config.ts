@@ -303,7 +303,6 @@ export default defineConfig({
   schema: {
     collections: [
       fixedMdxSection("Executive summary", "summary", "content", "summary", summaryFields),
-      fixedMdxSection("Energy model", "energy_model", "content", "energy-model"),
       fixedMdxSection("Model geometry", "energy_model_geometry", "content/energy-model", "model-geometry"),
       fixedMdxSection("Model variants", "energy_model_variants", "content/energy-model", "model-variants"),
       fixedMdxSection("Site energy", "energy_model_site_energy", "content/energy-model", "site-energy"),
@@ -321,15 +320,8 @@ export default defineConfig({
         "content/energy-model",
         "passive-house-certifications",
       ),
-      fixedMdxSection("Envelope overview", "envelope_overview", "content/envelope", "overview"),
       fixedMdxSection("Recommended assemblies intro", "assemblies", "content/envelope", "assemblies"),
       fixedMdxSection("Building airtightness intro", "airtightness", "content/envelope", "airtightness"),
-      fixedMdxSection(
-        "Building airtightness notes",
-        "airtightness_notes",
-        "content/envelope",
-        "airtightness-notes",
-      ),
       fixedMdxSection("AeroBarrier", "aerobarrier", "content/envelope", "aerobarrier"),
       {
         label: "Recommended assemblies",
@@ -345,12 +337,31 @@ export default defineConfig({
         },
         fields: assemblyFields,
       },
-      fixedMdxSection("Windows", "windows", "content", "windows"),
       fixedMdxSection("Window thermal comfort", "window_thermal_comfort", "content/windows", "window-thermal-comfort"),
       fixedMdxSection("Site shading", "site_shading", "content/windows", "site-shading", siteShadingFields),
       fixedMdxSection("Winter radiation", "winter_radiation", "content/windows", "winter-radiation", radiationFields),
       fixedMdxSection("Summer radiation", "summer_radiation", "content/windows", "summer-radiation", radiationFields),
-      fixedMdxSection("Mechanical", "mechanical", "content", "mechanical"),
+      fixedMdxSection(
+        "Fresh-air ventilation",
+        "mechanical_fresh_air_ventilation",
+        "content/mechanical",
+        "fresh-air-ventilation",
+      ),
+      fixedMdxSection("Fresh-air flow rates", "mechanical_fresh_air_flow_rates", "content/mechanical", "fresh-air-flow-rates"),
+      fixedMdxSection(
+        "Ventilation system balancing",
+        "mechanical_ventilation_system_balancing",
+        "content/mechanical",
+        "ventilation-system-balancing",
+      ),
+      fixedMdxSection(
+        "Passive House ventilation requirements",
+        "mechanical_passive_house_ventilation_requirements",
+        "content/mechanical",
+        "passive-house-ventilation-requirements",
+      ),
+      fixedMdxSection("Appliances and venting", "mechanical_appliances_and_venting", "content/mechanical", "appliances-and-venting"),
+      fixedMdxSection("Building monitoring", "mechanical_building_monitoring", "content/mechanical", "building-monitoring"),
       {
         label: "Mechanical plans",
         name: "mechanical_plans",

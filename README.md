@@ -94,7 +94,10 @@ instead, such as `4322` or `4323`.
 - Edit `project.yaml` for project metadata, publish URL, local data paths,
   and the `narrative:` block of prose-facing values that MDX references via
   the `<Var>` shortcode (see [Project variables and `<Var>`](#project-variables-and-var) below).
-- Edit `content/**/*.mdx` for report narrative.
+- Edit `content/**/*.mdx` for report narrative. Each rendered report section
+  has one MDX file that owns its title, section number, editorial heading, and
+  prose; Astro routes only compose those sections with charts, tables, cards,
+  and other data-driven components.
 - Put client-visible images and diagrams in `public/assets/`.
 - Splash page hero images live at `public/assets/cover/hero.png` for the
   initial display image and `public/assets/cover/hero-full.png` for the

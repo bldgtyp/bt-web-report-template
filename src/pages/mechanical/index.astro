@@ -1,5 +1,20 @@
 ---
-import Mechanical from "../../../content/mechanical.mdx";
+import AppliancesAndVenting, {
+  frontmatter as appliancesAndVenting,
+} from "../../../content/mechanical/appliances-and-venting.mdx";
+import BuildingMonitoring, { frontmatter as buildingMonitoring } from "../../../content/mechanical/building-monitoring.mdx";
+import FreshAirFlowRates, {
+  frontmatter as freshAirFlowRates,
+} from "../../../content/mechanical/fresh-air-flow-rates.mdx";
+import FreshAirVentilation, {
+  frontmatter as freshAirVentilation,
+} from "../../../content/mechanical/fresh-air-ventilation.mdx";
+import PassiveHouseVentilationRequirements, {
+  frontmatter as passiveHouseVentilationRequirements,
+} from "../../../content/mechanical/passive-house-ventilation-requirements.mdx";
+import VentilationSystemBalancing, {
+  frontmatter as ventilationSystemBalancing,
+} from "../../../content/mechanical/ventilation-system-balancing.mdx";
 import MechanicalPlanCards from "../../components/MechanicalPlanCards.astro";
 import MechanicalPanels from "../../components/MechanicalPanels.astro";
 import ReportSection from "../../components/ReportSection.astro";
@@ -9,23 +24,18 @@ import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.mechanical;
-const sections = {
-  freshAirVentilation: { href: "#fresh-air-ventilation", label: "Fresh-Air Ventilation", number: "01" },
-  freshAirFlowRates: { href: "#fresh-air-flow-rates", label: "Fresh-Air Flow Rates", number: "02" },
-  ventilationSystemBalancing: {
-    href: "#ventilation-system-balancing",
-    label: "Ventilation System Balancing",
-    number: "03",
-  },
-  ventilationSystemPassiveHouseRequirements: {
+const tocItems = [
+  { href: "#fresh-air-ventilation", label: freshAirVentilation.title, number: freshAirVentilation.kicker },
+  { href: "#fresh-air-flow-rates", label: freshAirFlowRates.title, number: freshAirFlowRates.kicker },
+  { href: "#ventilation-system-balancing", label: ventilationSystemBalancing.title, number: ventilationSystemBalancing.kicker },
+  {
     href: "#ventilation-system-passive-house-requirements",
-    label: "Ventilation System Passive House Requirements",
-    number: "04",
+    label: passiveHouseVentilationRequirements.title,
+    number: passiveHouseVentilationRequirements.kicker,
   },
-  appliancesAndVenting: { href: "#appliances-and-venting", label: "Appliances and Venting", number: "05" },
-  buildingMonitoring: { href: "#building-monitoring", label: "Building Monitoring", number: "06" },
-};
-const tocItems = Object.values(sections);
+  { href: "#appliances-and-venting", label: appliancesAndVenting.title, number: appliancesAndVenting.kicker },
+  { href: "#building-monitoring", label: buildingMonitoring.title, number: buildingMonitoring.kicker },
+];
 ---
 
 <ProjectReportLayout
@@ -37,257 +47,41 @@ const tocItems = Object.values(sections);
 >
   <ReportSection
     id="fresh-air-ventilation"
-    Content={Mechanical}
-    kicker={sections.freshAirVentilation.number}
-    title={sections.freshAirVentilation.label}
+    Content={FreshAirVentilation}
+    kicker={freshAirVentilation.kicker}
+    title={freshAirVentilation.title}
   />
   <ReportSection
     id="fresh-air-flow-rates"
-    kicker={sections.freshAirFlowRates.number}
-    title={sections.freshAirFlowRates.label}
+    Content={FreshAirFlowRates}
+    kicker={freshAirFlowRates.kicker}
+    title={freshAirFlowRates.title}
   >
     <MechanicalPanels />
     <MechanicalPlanCards />
   </ReportSection>
   <ReportSection
     id="ventilation-system-balancing"
-    kicker={sections.ventilationSystemBalancing.number}
-    title={sections.ventilationSystemBalancing.label}
-  >
-    <div class="btwr-prose">
-      <p>
-        For this building, we recommend that each unit have its own high-performance H/ERV with better than 75%
-        heat recovery. The Zehnder America ComfoAir Q600 ERV would be a good selection and provide excellent
-        indoor air quality while minimizing energy consumption and occupant comfort issues. These units are
-        outfitted with excellent air filtration, MERV 13 by default, which will be critical to ensuring clean and
-        healthy indoor air.
-      </p>
-      <p>
-        The values used in this analysis are based on the room-by-room flow rates found in the Zehnder America /
-        MainStream Corporation system outline, dated March 5, 2025.
-      </p>
-      <p>
-        Zehnder America should also be retained to balance and commission the system after installation. This is
-        critical for proper operation and required for all high-performance buildings. This service will normally
-        come standard with Zehnder America packages, but this should be verified in this case.
-      </p>
-      <h4>SYSTEM BALANCING:</h4>
-      <p>
-        Prior to occupancy, the fresh-air system should be tested and balanced to ensure good air mixing and
-        adequate supply to all living spaces. The HRV vendor should provide this balancing as part of their
-        services.
-      </p>
-    </div>
-    <figure class="btwr-section-hero">
-      <img
-        src="/assets/mechanical/erv-unit.jpg"
-        alt="Wall-mounted Zehnder energy recovery ventilation unit with exposed ducting in a finished interior."
-      />
-    </figure>
-  </ReportSection>
+    Content={VentilationSystemBalancing}
+    kicker={ventilationSystemBalancing.kicker}
+    title={ventilationSystemBalancing.title}
+  />
   <ReportSection
     id="ventilation-system-passive-house-requirements"
-    kicker={sections.ventilationSystemPassiveHouseRequirements.number}
-    title={sections.ventilationSystemPassiveHouseRequirements.label}
-  >
-    <div class="btwr-prose">
-      <p>
-        In addition to the modeled performance thresholds, in order to certify a building as a Passive House
-        building, projects would have to comply with the following design requirements. Whether the project
-        achieves full Passive House certification or not, the following design guidelines are recommended for all
-        projects:
-      </p>
-      <ul>
-        <li>
-          Total measured fresh-air ventilation supply and exhaust airflows are within 10% of each other. Use the
-          higher number as the basis of the percentage difference.
-        </li>
-        <li>
-          All ventilation air inlets are located at least 10 ft. stretched-string distance from known contamination
-          sources.
-        </li>
-        <li>
-          All ventilation air inlets are located at least 5 ft. from ventilation exhaust outlets; 10 ft. is
-          recommended.
-        </li>
-        <li>
-          Ventilation air comes directly from outdoors, not from adjacent dwelling units, common spaces, garages,
-          crawlspaces, or attics.
-        </li>
-        <li>
-          Outside air passes through a minimum MERV 13 filter prior to distribution, the filter is changed at the
-          end of construction, and the building is ventilated prior to occupancy.
-        </li>
-        <li>
-          The outside-air filter is located to facilitate regular service by the occupant and/or building
-          superintendent.
-        </li>
-        <li>
-          An air-sealed Class 1 vapor retarder shall be installed over all air-permeable insulation, such as
-          fiberglass duct wrap, on ventilation ducts connected to outside.
-        </li>
-        <li>Fresh-air outside-air supply to bedrooms is required in all dwelling units.</li>
-        <li>Measured bathroom exhaust rates meet one of the following: at least 20 cfm continuous or 50 cfm intermittent.</li>
-        <li>
-          Measured kitchen exhaust rates meet one of the following: at least 25 cfm continuous, 100 cfm intermittent
-          for range hoods, or 5 ACH based on kitchen volume.
-        </li>
-        <li>
-          If kitchen exhaust is connected to an ERV/HRV, the register is at least 6 ft. from the cooktop, a MERV 3
-          or washable mesh filter is provided for trapping grease, and a recirculation hood is provided over the
-          range.
-        </li>
-        <li>Total supply and exhaust are within 10% of each other.</li>
-        <li>Net pressure across the envelope is no greater than +/-5 Pa.</li>
-      </ul>
-    </div>
-  </ReportSection>
+    Content={PassiveHouseVentilationRequirements}
+    kicker={passiveHouseVentilationRequirements.kicker}
+    title={passiveHouseVentilationRequirements.title}
+  />
   <ReportSection
     id="appliances-and-venting"
-    kicker={sections.appliancesAndVenting.number}
-    title={sections.appliancesAndVenting.label}
-  >
-    <div class="btwr-prose">
-      <h4>KITCHEN VENTING:</h4>
-      <p>
-        Kitchen venting should be provided at the lowest rate that satisfies regulations. For gas cooking, this flow rate 
-        will be specified by code. For electric cooking, limit exhaust hood airflow to 200-400 cfm maximum through the 
-        selection of an appropriately sized hood. The Home Ventilation Institute (HVI) specifies a minimum of 40 cfm and 
-        recommends 100 cfm per linear foot of range. For effective kitchen venting, sizing and placement of the hood can 
-        be more important than the air flow rate, as sizing and placement effect the capture efficiency of the hood. Hoods 
-        should be as low as practical, extend beyond the range by approximately six inches at the sides and be as deep as 
-        possible without interfering with use of the range.
-      </p>
-      <h4>MAKEUP AIR SYSTEMS:</h4>
-      <p>
-        In order to properly vent any exhaust air appliances (clothes dryers, kitchen hoods, etc..) in an air-tight home, 
-        a dedicated makeup air system may be necessary. This is especially true of homes with combustion appliances (e.g. 
-        wood stoves/fireplaces) located indoors. In this scenario, makeup air from an automatic makeup air fan is used to 
-        balance out the exhausted air.
-      </p>
-      <p>
-        Note that for most cases we do NOT recommend this strategy as it is costly, complicated, and adds considerable 
-        complexity to the envelope construction (insulation, air-sealing) and represents a significant energy penalty to 
-        heat/cool the makeup air.
-      </p>
-      <div class="btwr-callout btwr-callout--critical">
-        <span>
-          Wherever possible, the use of all-electric systems should be considered, and combustion appliances should 
-          be installed only in outdoor locations (porches, decks, etc.).
-        </span>
-      </div>
-      <p>
-        Heating / Cooling of any outdoor makeup air may be needed once it enters the habitable space. Self-closing 
-        (magnetic) dampers should be included on all ducting to prevent air infiltration / exfiltration when the appliances 
-        are not in use. In order not to compromise occupant comfort when makeup air is being supplied to the home, a high 
-        output heating element will need to be sized and installed to heat the incoming volume of air to a comfortable 
-        temperature.
-      </p>
-      <p>
-        There are several good, self-modulating makeup air system (MUAS) and corresponding makeup air heater (MUAH) which 
-        could be a good fit for this project:
-      </p>
-      <ul>
-        <li><a href="https://electromn.com/make-up-air-2/" target="_blank" rel="noopener noreferrer">Electro Industries</a></li>
-        <li><a href="https://www.neptronic.com/cmu/" target="_blank" rel="noopener noreferrer">Neptronic</a></li>
-      </ul>
-      <img
-        src="/assets/mechanical/muas-diagram.png"
-        alt="Diagram showing a makeup air system with ducting and a heating element."
-      />
-      <h4>MAKEUP AIR SYSTEM COMMISSIONING:</h4>
-      <div class="btwr-callout btwr-callout--critical">
-        <span>
-          Proper commissioning and continued maintenance of the makeup air system is critical to the safe operation 
-          of the home, particularly when combustion appliances are present.
-        </span>
-      </div>
-      <p>Several things should be kept in mind when configuring such a system:</p>
-      <ol>
-        <li>Ensure airtightness at all envelope penetrations.</li>
-        <li>All ducting insulated with vapor-closed insulation (min 2”) and vapor-closed tape all joints.</li>
-        <li>Provide no more than 60% of the make-up air at base of range/oven.</li>
-        <li>For Gas cooking, follow all local code requirements and manufacturer's instructions.</li>
-      </ol>
-    </div>
-  </ReportSection>
+    Content={AppliancesAndVenting}
+    kicker={appliancesAndVenting.kicker}
+    title={appliancesAndVenting.title}
+  />
   <ReportSection
     id="building-monitoring"
-    kicker={sections.buildingMonitoring.number}
-    title={sections.buildingMonitoring.label}
-  >
-    <div class="btwr-prose">
-      <h4>ENVIRONMENTAL MONITORING:</h4>
-      <p>
-        There are several systems available for monitoring temperature, RH, CO2, and other environmental conditions.
-        We strongly recommend installing a system of some form in order to successfully commission the home and
-        correct any issues with indoor comfort over the first year. Environmental monitoring systems are relatively
-        low cost, and we recommend two possible systems: the <strong>Wireless Sensor Tag</strong> by Cao Gadgets LLC,
-        and the <strong>Netatmo</strong> weather station. Both systems upload data to the internet over a wireless
-        network and data can be accessed online. Note that this requires a wireless network to be in operation at the
-        home at all times. Other monitoring systems are available from newer platforms such as <strong>Ecobee</strong>.
-      </p>
-      <p>
-        The Wireless Tag system is less costly, but cannot monitor CO2. For this reason, we would prefer the Netatmo
-        system.
-      </p>
-      <p>More information can be found at:</p>
-      <ul>
-        <li><a href="https://www.ecobee.com/" target="_blank" rel="noopener noreferrer">Ecobee</a></li>
-        <li><a href="https://wirelesstag.net/" target="_blank" rel="noopener noreferrer">WirelessTag</a></li>
-        <li><a href="https://www.netatmo.com/" target="_blank" rel="noopener noreferrer">Netatmo</a></li>
-      </ul>
-      <img
-        src="/assets/mechanical/monitor-netatmo.png"
-        alt="Netatmo environmental monitoring sensors shown with mobile and tablet app dashboards."
-      />
-
-      <h4>ENERGY MONITORING:</h4>
-      <p>
-        To really understand a home's energy use, a branch-circuit monitoring system is the way to go. Monitoring
-        each electrical circuit, especially in the first months of a project's operation, can help identify systems
-        that are working incorrectly and using more energy than they should. For projects with new electrical
-        services, it makes sense to install a load center designed to do just that. A number of manufacturers offer
-        load centers with integrated branch-circuit monitoring that can integrate with other smart controls, such as
-        switching and dimming. Real-time and historical energy-use data are available through the product app.
-      </p>
-      <p>More information can be found at:</p>
-      <ul>
-        <li>
-          <a
-            href="https://leviton.com/products/residential/load-centers/the-leviton-smart-load-center"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Leviton
-          </a>
-        </li>
-        <li><a href="https://www.span.io/" target="_blank" rel="noopener noreferrer">Span</a></li>
-      </ul>
-      <img
-        src="/assets/mechanical/monitor-leviton.jpg"
-        alt="Leviton smart load center app shown with smart breakers and metering modules."
-      />
-      <p>
-        Other options are available for integration with more typical circuit breaker panels. Systems such as the
-        Curb energy monitor, the Emporia Vue, and the eGauge provide customizable, real-time monitoring of electrical
-        usage. The web/app-based interface displays detailed information about the home's energy usage and can help
-        to fine-tune energy conservation measures.
-      </p>
-      <p>More information can be found at:</p>
-      <ul>
-        <li>
-          <a href="https://poweredbyelevation.com/curb-energy-monitoring/" target="_blank" rel="noopener noreferrer">
-            EnergyCurb
-          </a>
-        </li>
-        <li><a href="https://www.emporiaenergy.com/" target="_blank" rel="noopener noreferrer">Emporia Energy</a></li>
-        <li><a href="https://www.egauge.net/" target="_blank" rel="noopener noreferrer">eGauge</a></li>
-      </ul>
-      <img
-        src="/assets/mechanical/monitor-egauge.jpg"
-        alt="Curb energy monitoring dashboard showing real-time electrical load and circuit-level usage history."
-      />
-    </div>
-  </ReportSection>
+    Content={BuildingMonitoring}
+    kicker={buildingMonitoring.kicker}
+    title={buildingMonitoring.title}
+  />
 </ProjectReportLayout>

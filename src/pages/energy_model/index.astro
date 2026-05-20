@@ -28,20 +28,15 @@ import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.energyModel;
-const sections = {
-  modelGeometry: { href: "#model-geometry", label: "Model Geometry", number: "01" },
-  modelVariants: { href: "#model-variants", label: "Model Variants", number: "02" },
-  siteEnergy: { href: "#site-energy", label: "Site Energy", number: "03" },
-  co2Emissions: { href: "#co2-emissions", label: "CO2 Emissions", number: "04" },
-  passiveHouseThresholds: { href: "#passive-house-thresholds", label: "Passive House Thresholds", number: "05" },
-  climateData: { href: "#climate-data", label: "Climate Data", number: "06" },
-  passiveHouseCertifications: {
-    href: "#passive-house-certifications",
-    label: "Passive House Certifications",
-    number: "07",
-  },
-};
-const tocItems = Object.values(sections);
+const tocItems = [
+  { href: "#model-geometry", label: modelGeometry.title, number: modelGeometry.kicker },
+  { href: "#model-variants", label: modelVariants.title, number: modelVariants.kicker },
+  { href: "#site-energy", label: siteEnergy.title, number: siteEnergy.kicker },
+  { href: "#co2-emissions", label: co2Emissions.title, number: co2Emissions.kicker },
+  { href: "#passive-house-thresholds", label: passiveHouseThresholds.title, number: passiveHouseThresholds.kicker },
+  { href: "#climate-data", label: climateData.title, number: climateData.kicker },
+  { href: "#passive-house-certifications", label: passiveHouseCertifications.title, number: passiveHouseCertifications.kicker },
+];
 ---
 
 <ProjectReportLayout
@@ -54,7 +49,7 @@ const tocItems = Object.values(sections);
   <ReportSection
     id="model-geometry"
     Content={ModelGeometry}
-    kicker={sections.modelGeometry.number}
+    kicker={modelGeometry.kicker}
     title={modelGeometry.title}
   >
     <figure class="btwr-geometry-figure">
@@ -77,7 +72,7 @@ const tocItems = Object.values(sections);
   <ReportSection
     id="model-variants"
     Content={ModelVariants}
-    kicker={sections.modelVariants.number}
+    kicker={modelVariants.kicker}
     title={modelVariants.title}
   >
     <div class="btwr-component-stack">
@@ -91,7 +86,7 @@ const tocItems = Object.values(sections);
   <ReportSection
     id="site-energy"
     Content={SiteEnergy}
-    kicker={sections.siteEnergy.number}
+    kicker={siteEnergy.kicker}
     title={siteEnergy.title}
   >
     <div class="btwr-component-stack">
@@ -102,7 +97,7 @@ const tocItems = Object.values(sections);
   <ReportSection
     id="co2-emissions"
     Content={Co2Emissions}
-    kicker={sections.co2Emissions.number}
+    kicker={co2Emissions.kicker}
     title={co2Emissions.title}
   >
     <div class="btwr-component-stack">
@@ -113,7 +108,7 @@ const tocItems = Object.values(sections);
   <ReportSection
     id="passive-house-thresholds"
     Content={PassiveHouseThresholds}
-    kicker={sections.passiveHouseThresholds.number}
+    kicker={passiveHouseThresholds.kicker}
     title={passiveHouseThresholds.title}
   >
     <CertificationChart data={report} title="Passive House thresholds" />
@@ -122,7 +117,7 @@ const tocItems = Object.values(sections);
   <ReportSection
     id="climate-data"
     Content={ClimateData}
-    kicker={sections.climateData.number}
+    kicker={climateData.kicker}
     title={climateData.title}
   >
     <ClimateMonthlyChart data={report} title="Monthly climate profile" />
@@ -131,7 +126,7 @@ const tocItems = Object.values(sections);
   <ReportSection
     id="passive-house-certifications"
     Content={PassiveHouseCertifications}
-    kicker={sections.passiveHouseCertifications.number}
+    kicker={passiveHouseCertifications.kicker}
     title={passiveHouseCertifications.title}
   >
     <PassiveHouseCertificationsInfo />

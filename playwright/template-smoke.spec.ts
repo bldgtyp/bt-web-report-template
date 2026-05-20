@@ -4,9 +4,9 @@ import type { Page } from "@playwright/test";
 const reportPages = [
   { path: "/", navLabel: "Summary", heading: "Executive summary" },
   { path: "/energy_model/", navLabel: "Energy Model", heading: "Model Geometry" },
-  { path: "/building_envelope/", navLabel: "Envelope", heading: "Model geometry" },
-  { path: "/windows/", navLabel: "Windows", heading: "Windows" },
-  { path: "/mechanical/", navLabel: "Mechanical", heading: "Mechanical" },
+  { path: "/building_envelope/", navLabel: "Envelope", heading: "Recommended Assemblies" },
+  { path: "/windows/", navLabel: "Windows", heading: "Window Thermal Comfort" },
+  { path: "/mechanical/", navLabel: "Mechanical", heading: "Fresh-Air Ventilation" },
 ];
 
 async function stackedBarGeometry(page: Page, chartSelector: string) {
@@ -59,21 +59,24 @@ for (const reportPage of reportPages) {
     await expect(page.getByRole("heading", { name: reportPage.heading })).toBeVisible();
     await expect(page.locator(".btwr-report-grid")).toHaveCSS("display", "grid");
 
+    const dimensions = await page.evaluate(() => ({
+      innerWidth: window.innerWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+    }));
+
     if (reportPage.path === "/") {
       await expect(page.locator("h1").first()).toBeVisible();
       await expect(page.locator(".btwr-hero")).toHaveCSS("display", "grid");
-    } else {
+    } else if (dimensions.innerWidth > 1180) {
       await expect(page.locator(".btwr-toc")).toBeVisible();
+    } else {
+      await expect(page.locator(".btwr-toc")).toBeHidden();
     }
 
     for (const expectedPage of reportPages) {
       await expect(page.locator(".btwr-masthead__nav").getByRole("link", { name: expectedPage.navLabel })).toBeVisible();
     }
 
-    const dimensions = await page.evaluate(() => ({
-      innerWidth: window.innerWidth,
-      scrollWidth: document.documentElement.scrollWidth,
-    }));
     expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.innerWidth);
     expect(consoleErrors).toEqual([]);
   });

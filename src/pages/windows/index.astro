@@ -13,13 +13,12 @@ import windowThermalComfortDiagram from "../../assets/windows/window-tc-diagram.
 
 const report = await loadTemplateReportData();
 const page = reportPages.windows;
-const sections = {
-  thermalComfort: { href: "#window-thermal-comfort", label: "Window Thermal Comfort", number: "01" },
-  siteShading: { href: "#site-shading", label: "Site Shading", number: "02" },
-  winterRadiation: { href: "#winter-radiation", label: "Winter Radiation", number: "03" },
-  summerRadiation: { href: "#summer-radiation", label: "Summer Radiation", number: "04" },
-};
-const tocItems = Object.values(sections);
+const tocItems = [
+  { href: "#window-thermal-comfort", label: windowThermalComfort.title, number: windowThermalComfort.kicker },
+  { href: "#site-shading", label: siteShading.title, number: siteShading.kicker },
+  { href: "#winter-radiation", label: winterRadiation.title, number: winterRadiation.kicker },
+  { href: "#summer-radiation", label: summerRadiation.title, number: summerRadiation.kicker },
+];
 const imageSize = { width: 1200, height: 927 };
 const siteShadingImages = [
   {
@@ -62,7 +61,7 @@ const radiationImages = {
   <ReportSection
     id="window-thermal-comfort"
     Content={WindowThermalComfort}
-    kicker={sections.thermalComfort.number}
+    kicker={windowThermalComfort.kicker}
     title={windowThermalComfort.title}
   >
     <figure class="btwr-section-hero" slot="before-content">
@@ -74,7 +73,7 @@ const radiationImages = {
       />
     </figure>
   </ReportSection>
-  <ReportSection id="site-shading" Content={SiteShading} kicker={sections.siteShading.number} title={siteShading.title}>
+  <ReportSection id="site-shading" Content={SiteShading} kicker={siteShading.kicker} title={siteShading.title}>
     <div class="btwr-window-image-grid" aria-label="Site-shading image placeholders">
       {
         siteShadingImages.map(({ image, imageFull, alt, caption }) => (
@@ -91,7 +90,7 @@ const radiationImages = {
   <ReportSection
     id="winter-radiation"
     Content={WinterRadiation}
-    kicker={sections.winterRadiation.number}
+    kicker={winterRadiation.kicker}
     title={winterRadiation.title}
   >
     <figure class="btwr-window-image-slot btwr-window-image-slot--wide">
@@ -114,7 +113,7 @@ const radiationImages = {
   <ReportSection
     id="summer-radiation"
     Content={SummerRadiation}
-    kicker={sections.summerRadiation.number}
+    kicker={summerRadiation.kicker}
     title={summerRadiation.title}
   >
     <figure class="btwr-window-image-slot btwr-window-image-slot--wide">
