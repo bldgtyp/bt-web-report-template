@@ -1,0 +1,39 @@
+---
+// <Var k="..." /> — MDX shortcode that resolves a dot-path into project.yaml.
+//
+// Reads the active project from Astro.locals (set by src/middleware/index.ts).
+// On missing keys: throws at build time so a typo can't ship to production;
+// renders a visible [MISSING: ...] placeholder during dev preview so the
+// author sees the broken reference in context.
+//
+// Wire-up: include `Var` in the components map passed to MDX content, e.g.
+//   <Content components={{ Var }} />
+// ReportSection does this for every section by default.
+
+import type { ProjectConfig } from "../data/project";
+import { resolveVar } from "../data/resolve-var";
+
+interface Props {
+  k: string;
+}
+
+const { k } = Astro.props;
+const project = Astro.locals.project as ProjectConfig | undefined;
+
+if (!project) {
+  throw new Error(
+    `<Var k="${k}" />: Astro.locals.project is not set. Ensure src/middleware/index.ts is registered.`,
+  );
+}
+
+const result = resolveVar(project, k);
+
+if (!result.found) {
+  if (import.meta.env.PROD) {
+    throw new Error(
+      `<Var k="${k}" /> could not be resolved (${result.reason}). Check project.yaml or the field name.`,
+    );
+  }
+}
+---
+{result.found ? result.value : `[MISSING: ${k}]`}

@@ -1,4 +1,4 @@
-schema_version: "0.1.0"
+schema_version: "0.2.0"
 slug: "project-0000"
 project_title: "Example Passive House Report"
 client_name: "Example Client"
@@ -23,3 +23,19 @@ source_files:
 publishing:
   production_url: "https://project-0000.bldgtyp.com"
   cloudflare_pages_project: "bt-proj-0000-example-report"
+narrative:
+  certification:
+    target: "EnerPHit by Component"
+    ph_ach_limit: "0.8"
+  climate:
+    weather_station_name: "Example Weather Station :: TMY3"
+    state_name: "New York"
+    state_name_abbreviation: "NY"
+    ashrae_location_name: "Zone 4(A)"
+  energy_code:
+    name: "Example Energy Code"
+    zone: "Zone 4(A)"
+  mechanical:
+    erv:
+      manufacturer_name: "Example Manufacturer"
+      type_name: "Example ERV"

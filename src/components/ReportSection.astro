@@ -1,5 +1,6 @@
 ---
 import SectionHeading from "./SectionHeading.astro";
+import Var from "./Var.astro";
 
 interface Props {
   id: string;
@@ -12,6 +13,10 @@ interface Props {
 }
 
 const { id, kicker, title, Content, callout_label, callout_body, show_heading = true } = Astro.props;
+
+// Shortcodes available to every MDX section. Add new shortcodes here, not
+// per-page, so authors get a consistent surface across the report.
+const mdxComponents = { Var };
 ---
 
 <section class="btwr-section" aria-labelledby={id}>
@@ -20,7 +25,7 @@ const { id, kicker, title, Content, callout_label, callout_body, show_heading = 
   <slot name="before-content" />
   {Content && (
     <div class="btwr-prose">
-      <Content />
+      <Content components={mdxComponents} />
     </div>
   )}
   {

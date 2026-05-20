@@ -1,29 +1,24 @@
-import { readFile } from "node:fs/promises";
-import { isAbsolute, resolve } from "node:path";
+// Validator for project.yaml.
+//
+// All structural and pattern rules are sourced from
+// @bldgtyp/web-report-schemas/project.schema.json, which is generated from
+// the Pydantic models in bt-web-report-schemas. Do NOT add custom validation
+// here — that would re-introduce drift between this validator and the Python
+// validator used by the CLI / Manager. If a rule needs to change, change it
+// in bt_web_report_schemas/project.py and regenerate.
 
+import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
+import { resolve } from "node:path";
+
+import Ajv from "ajv";
 import YAML from "yaml";
 
-const SCHEMA_VERSION = "0.1.0";
-const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const requireFromHere = createRequire(import.meta.url);
+const projectSchema = requireFromHere("@bldgtyp/web-report-schemas/project.schema.json");
 
-const REQUIRED_STRINGS = [
-  "schema_version",
-  "slug",
-  "project_title",
-  "client_name",
-  "building_name",
-  "phase",
-  "report_date",
-  "prepared_by",
-  "contact_email",
-  "target_standard",
-  "certification_program",
-  "certification_path",
-];
-
-const REQUIRED_BUILDING_STRINGS = ["address", "city", "state", "climate_zone", "building_type"];
-const REQUIRED_SOURCE_STRINGS = ["data_dir", "assets_dir"];
-const REQUIRED_PUBLISHING_STRINGS = ["production_url", "cloudflare_pages_project"];
+const ajv = new Ajv({ allErrors: true, strict: false });
+const validate = ajv.compile(projectSchema);
 
 export async function readProjectFile(path) {
   const text = await readFile(path, "utf8");
@@ -37,86 +32,37 @@ export function parseProjectYaml(text, source = "project.yaml") {
   } catch (error) {
     throw new Error(`${source}: invalid YAML: ${error.message}`);
   }
-
   return validateProjectConfig(value, source);
 }
 
 export function validateProjectConfig(value, source = "project.yaml") {
-  const errors = [];
-
-  if (!isRecord(value)) {
-    throw new Error(`${source}: expected a YAML object`);
+  if (validate(value)) {
+    return value;
   }
-
-  requireStrings(value, REQUIRED_STRINGS, source, errors);
-
-  if (value.schema_version && value.schema_version !== SCHEMA_VERSION) {
-    errors.push(`${source}: schema_version must be "${SCHEMA_VERSION}"`);
-  }
-
-  if (typeof value.slug === "string" && !SLUG_PATTERN.test(value.slug)) {
-    errors.push(`${source}: slug must be lowercase kebab-case, using only a-z, 0-9, and single hyphens`);
-  }
-
-  if (typeof value.contact_email === "string" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.contact_email)) {
-    errors.push(`${source}: contact_email must be a valid email address`);
-  }
-
-  requireNestedStrings(value, "building", REQUIRED_BUILDING_STRINGS, source, errors);
-  requireNestedStrings(value, "source_files", REQUIRED_SOURCE_STRINGS, source, errors);
-  requireNestedStrings(value, "publishing", REQUIRED_PUBLISHING_STRINGS, source, errors);
-
-  if (isRecord(value.source_files)) {
-    const phppPath = value.source_files.phpp_path;
-    if (phppPath !== undefined && phppPath !== null && typeof phppPath !== "string") {
-      errors.push(`${source}: source_files.phpp_path must be a string; use an empty string before PHPP exists`);
-    }
-    for (const key of ["data_dir", "assets_dir"]) {
-      const path = value.source_files[key];
-      if (typeof path === "string" && (path.startsWith("~") || isAbsolute(path))) {
-        errors.push(`${source}: source_files.${key} must be repo-relative, not machine-specific`);
-      }
-    }
-  }
-
-  if (isRecord(value.publishing) && typeof value.publishing.production_url === "string") {
-    try {
-      const url = new URL(value.publishing.production_url);
-      if (url.protocol !== "https:") {
-        errors.push(`${source}: publishing.production_url must use https`);
-      }
-    } catch {
-      errors.push(`${source}: publishing.production_url must be a valid URL`);
-    }
-  }
-
-  if (errors.length > 0) {
-    throw new Error(errors.join("\n"));
-  }
-
-  return value;
+  const messages = (validate.errors ?? []).map((err) => formatError(err, source));
+  throw new Error(messages.join("\n"));
 }
 
 export function projectPathFromRoot(root = process.cwd()) {
   return resolve(root, "project.yaml");
 }
 
-function requireNestedStrings(value, key, fields, source, errors) {
-  if (!isRecord(value[key])) {
-    errors.push(`${source}: ${key} is required`);
-    return;
+function formatError(err, source) {
+  const path = err.instancePath ? err.instancePath.replace(/^\//, "").replaceAll("/", ".") : "(root)";
+  switch (err.keyword) {
+    case "additionalProperties":
+      return `${source}: ${path} has unknown property "${err.params.additionalProperty}"`;
+    case "required":
+      return `${source}: missing required field "${err.params.missingProperty}"`;
+    case "pattern":
+      return `${source}: ${path} must match pattern ${err.params.pattern}`;
+    case "const":
+      return `${source}: ${path} must equal "${err.params.allowedValue}"`;
+    case "minLength":
+      return `${source}: ${path} must not be empty`;
+    case "type":
+      return `${source}: ${path} must be a ${err.params.type}`;
+    default:
+      return `${source}: ${path} ${err.message ?? "is invalid"}`;
   }
-  requireStrings(value[key], fields, `${source}: ${key}`, errors);
-}
-
-function requireStrings(value, fields, source, errors) {
-  for (const field of fields) {
-    if (typeof value[field] !== "string" || value[field].trim() === "") {
-      errors.push(`${source}: ${field} is required`);
-    }
-  }
-}
-
-function isRecord(value) {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
