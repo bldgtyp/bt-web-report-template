@@ -11,6 +11,13 @@ Splash page hero slot:
 - `content/summary.mdx` controls the displayed path, modal path, alt text, and
   caption.
 
+Model geometry slot:
+
+- `model-geometry/iso-dimensions.png` is the web-optimized display image.
+- `model-geometry/iso-dimensions-full.png` is the high-resolution modal image.
+- The energy-model page renders the display image and opens the high-resolution
+  image in the report modal.
+
 Windows image slots:
 
 - `windows/site-shading/sun-path-plan.png` and

@@ -58,7 +58,18 @@ const tocItems = Object.values(sections);
     title={modelGeometry.title}
   >
     <figure class="btwr-geometry-figure">
-      <img src="/assets/model-geometry/iso-dimensions.png" alt="Isometric building geometry diagram with dimension annotations." />
+      <a
+        href="/assets/model-geometry/iso-dimensions-full.png"
+        data-btwr-full-src="/assets/model-geometry/iso-dimensions-full.png"
+        data-btwr-caption="Isometric building geometry with dimension annotations."
+      >
+        <img
+          src="/assets/model-geometry/iso-dimensions.png"
+          width="1200"
+          height="927"
+          alt="Isometric building geometry diagram with dimension annotations."
+        />
+      </a>
     </figure>
     <RecommendedGeometryMetrics data={report} />
   </ReportSection>

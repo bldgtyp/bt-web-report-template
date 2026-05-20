@@ -320,9 +320,19 @@
   margin: var(--btwr-space-5) 0;
 }
 
-.btwr-geometry-figure img {
+.btwr-geometry-figure a {
   display: block;
   width: min(100%, 52rem);
+}
+
+.btwr-geometry-figure a:focus-visible {
+  outline: 2px solid var(--btwr-color-accent);
+  outline-offset: 3px;
+}
+
+.btwr-geometry-figure img {
+  display: block;
+  width: 100%;
   height: auto;
 }
 
