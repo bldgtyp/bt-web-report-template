@@ -91,7 +91,9 @@ instead, such as `4322` or `4323`.
 
 ## Project Edit Boundaries
 
-- Edit `project.yaml` for project metadata, publish URL, and local data paths.
+- Edit `project.yaml` for project metadata, publish URL, local data paths,
+  and the `narrative:` block of prose-facing values that MDX references via
+  the `<Var>` shortcode (see [Project variables and `<Var>`](#project-variables-and-var) below).
 - Edit `content/**/*.mdx` for report narrative.
 - Put client-visible images and diagrams in `public/assets/`.
 - Splash page hero images live at `public/assets/cover/hero.png` for the
@@ -138,6 +140,54 @@ is not wired in v1. See
 for the future investigation notes.
 
 PHPP-derived files in `data/` are deliberately not part of the editor schema.
+
+## Project variables and `<Var>`
+
+Prose-facing values that vary per project — energy code name, climate zone,
+selected ERV, certification target, climate-specific Passive House limits —
+live in `project.yaml` under the `narrative:` block, NOT hardcoded in MDX
+files. Authors reference them in MDX via the `<Var>` shortcode:
+
+```mdx
+The project targets <Var k="narrative.certification.target" /> under
+<Var k="narrative.energy_code.name" /> (<Var k="narrative.energy_code.zone" />),
+with an airtightness limit of <Var k="narrative.certification.ph_ach_limit" /> ACH50.
+```
+
+**Resolution rules** (`src/components/Var.astro` → `src/data/resolve-var.ts`):
+
+- The `k` prop is a dot-path into the validated `ProjectConfig` shape.
+- Only string-typed leaves resolve. Object containers (e.g. `narrative` or
+  `building`) refuse to inline so prose can't accidentally print a whole
+  object.
+- Missing key in **dev**: renders `[MISSING: narrative.foo.bar]` in place so
+  the broken reference is visible while editing.
+- Missing key in **production build**: throws — a typo never ships.
+
+**Where it's wired in:**
+
+- `src/middleware/index.ts` loads `project.yaml` once and stashes it on
+  `Astro.locals.project`.
+- `src/components/ReportSection.astro` passes `{ Var }` into every MDX
+  `<Content components={...} />`, so the shortcode works in every section
+  without per-page wiring.
+- `tina/config.ts` declares a `Var` rich-text template whose `k` field is
+  a dropdown auto-generated from `@bldgtyp/web-report-schemas` —
+  editors pick a labelled key like `"Climate > Weather Station Name"`,
+  Tina writes `<Var k="narrative.climate.weather_station_name" />`.
+
+**Adding a new variable end-to-end:**
+
+1. Add the field to the Pydantic schema in
+   `bt-web-report-schemas/src/bt_web_report_schemas/project.py`.
+2. `uv run gen-json-schemas` to regenerate the JSON Schema.
+3. Set the value in `project.yaml`.
+
+The TypeScript type (`src/data/project.ts`), ajv validator
+(`src/data/project-schema.mjs`), and Tina dropdown all pick it up
+automatically — there is no second place to edit. See
+[`../bt-web-report-schemas/README.md`](../bt-web-report-schemas/README.md)
+for the full flow.
 
 ## Data States
 
