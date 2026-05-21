@@ -133,6 +133,30 @@ test("energy model page renders available PHPP data state", async ({ page }) => 
   }
 });
 
+test("mechanical page renders starter plan cards after airflow table", async ({ page }) => {
+  await page.goto("/mechanical/");
+
+  const airflowTable = page.locator('[data-table="room-airflows"]');
+  const planGrid = page.locator(".btwr-mechanical-plan-grid");
+
+  await expect(airflowTable).toBeVisible();
+  await expect(planGrid).toBeVisible();
+  await expect(planGrid.locator(".btwr-mechanical-plan-card h3")).toHaveText([
+    "Level 00",
+    "Level 01",
+    "Level 02",
+    "Level 03",
+  ]);
+
+  const verticalOrder = await page.evaluate(() => {
+    const table = document.querySelector('[data-table="room-airflows"]');
+    const grid = document.querySelector(".btwr-mechanical-plan-grid");
+    return Boolean(table && grid && table.getBoundingClientRect().bottom < grid.getBoundingClientRect().top);
+  });
+
+  expect(verticalOrder).toBe(true);
+});
+
 test("stacked-bar axis thins tick labels when the axis track is narrow", async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 900 });
   await page.goto("/energy_model/");
