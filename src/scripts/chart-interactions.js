@@ -8,6 +8,7 @@
   const markSelector = ".btwr-chart-mark";
   const chartFrameSelector = ".btwr-chart-frame[data-chart]";
   const expandButtonSelector = ".btwr-chart-expand";
+  const fileDownloadSelector = "[data-download-filename]";
   const imageModalSelector = [
     ".btwr-hero__figure img",
     ".btwr-report-main .btwr-section-hero img",
@@ -405,10 +406,46 @@
     });
   }
 
+  function saveBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.hidden = true;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function downloadFile(link) {
+    const filename = link.getAttribute("data-download-filename") || link.getAttribute("download") || "download";
+    link.setAttribute("aria-busy", "true");
+    try {
+      const response = await fetch(link.href);
+      if (!response.ok) {
+        throw new Error(`Download failed with status ${response.status}`);
+      }
+      const blob = await response.blob();
+      saveBlob(blob, filename);
+    } finally {
+      link.removeAttribute("aria-busy");
+    }
+  }
+
   decorateCharts();
   decorateImages();
 
   document.addEventListener("click", (event) => {
+    const downloadLink = event.target instanceof Element ? event.target.closest(fileDownloadSelector) : null;
+    if (downloadLink instanceof HTMLAnchorElement) {
+      event.preventDefault();
+      downloadFile(downloadLink).catch(() => {
+        window.location.assign(downloadLink.href);
+      });
+      return;
+    }
+
     const match = findImageTrigger(event.target);
     if (!match) {
       return;
