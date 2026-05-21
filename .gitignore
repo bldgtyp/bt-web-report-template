@@ -12,6 +12,7 @@ tina/tina-lock.json
 .tina/
 playwright-report/
 test-results/
+.bldgtyp/lock.yaml
 .bldgtyp/config.local.yaml
 *.log
 .DS_Store
