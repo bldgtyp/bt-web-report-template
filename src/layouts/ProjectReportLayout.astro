@@ -210,15 +210,6 @@ const faviconHref =
         <span>
           Report date {reportDateValue ? <time datetime={reportDateValue}>{reportDate}</time> : <span>{reportDate}</span>}
         </span>
-        {manifest.generated_at ? (
-          <>
-            {" · "}Generated <time datetime={manifest.generated_at}>{manifest.generated_at}</time>
-          </>
-        ) : (
-          " · Generated date pending"
-        )}
-        {manifest.phpp_version ? ` · PHPP ${manifest.phpp_version}` : ""}
-        {manifest.schema_version ? ` · schema ${manifest.schema_version}` : ""}
       </p>
     </footer>
     <script is:inline>
