@@ -45,7 +45,8 @@ const projectName = manifest.project?.name ?? manifest.project?.slug ?? "Untitle
 const buildingName = report.project.building_name || projectName;
 const clientName = report.project.client_name || "Client";
 const phase = report.project.phase || "Design analysis";
-const reportDate = report.project.report_date || manifest.generated_at || "Date pending";
+const reportDateValue = report.project.report_date || manifest.generated_at;
+const reportDate = reportDateValue || "Date pending";
 const variantLabel = variants.length === 1 ? "variant" : "variants";
 const title = `${pageLabel} | ${report.project.project_title} | ${phase}`;
 const showHero = currentHref === "/";
@@ -91,10 +92,6 @@ const faviconHref =
             <span aria-hidden="true">·</span>
             <span>{buildingName}</span>
           </span>
-          <span class="btwr-masthead__date">
-            <span>Report date</span>
-            <time datetime={reportDate}>{reportDate}</time>
-          </span>
         </div>
         <nav class="btwr-masthead__nav" aria-label="Primary report pages">
           {
@@ -105,6 +102,25 @@ const faviconHref =
             ))
           }
         </nav>
+        <details class="btwr-masthead__menu">
+          <summary aria-label="Open primary report pages menu">
+            <span class="btwr-masthead__menu-icon" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <span class="btwr-masthead__menu-label">{pageLabel}</span>
+          </summary>
+          <nav aria-label="Primary report pages mobile menu">
+            {
+              reportPageNavItems.map((item) => (
+                <a href={item.href} aria-current={item.href === currentHref ? "page" : undefined}>
+                  {item.label}
+                </a>
+              ))
+            }
+          </nav>
+        </details>
       </div>
 
       {
@@ -121,6 +137,10 @@ const faviconHref =
                       recommended ? `${recommended.name} is the current recommended path.` : "The recommended path is pending."
                     }`
                   : "Project metadata is ready. PHPP-derived model data will populate this report after the scrape runs."}
+              </p>
+              <p class="btwr-hero__report-date">
+                <span>Report date</span>
+                {reportDateValue ? <time datetime={reportDateValue}>{reportDate}</time> : <span>{reportDate}</span>}
               </p>
             </div>
             <figure class="btwr-hero__figure">
@@ -187,7 +207,16 @@ const faviconHref =
     <footer class="btwr-report-footer">
       <p>© BLDGTYP, LLC · {buildingName}</p>
       <p>
-        {manifest.generated_at ? `Generated ${manifest.generated_at}` : "Generated date pending"}
+        <span>
+          Report date {reportDateValue ? <time datetime={reportDateValue}>{reportDate}</time> : <span>{reportDate}</span>}
+        </span>
+        {manifest.generated_at ? (
+          <>
+            {" · "}Generated <time datetime={manifest.generated_at}>{manifest.generated_at}</time>
+          </>
+        ) : (
+          " · Generated date pending"
+        )}
         {manifest.phpp_version ? ` · PHPP ${manifest.phpp_version}` : ""}
         {manifest.schema_version ? ` · schema ${manifest.schema_version}` : ""}
       </p>

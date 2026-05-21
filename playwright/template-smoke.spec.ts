@@ -55,7 +55,8 @@ for (const reportPage of reportPages) {
     await page.goto(reportPage.path);
 
     await expect(page.locator(".btwr-brand-lockup strong")).toHaveText("BLDGTYP");
-    await expect(page.locator(".btwr-masthead__nav a[aria-current='page']")).toHaveText(reportPage.navLabel);
+    await expect(page.locator(".btwr-masthead").getByText("Report date")).toHaveCount(0);
+    await expect(page.locator(".btwr-report-footer")).toContainText("Report date 2026-05-13");
     await expect(page.getByRole("heading", { name: reportPage.heading })).toBeVisible();
     await expect(page.locator(".btwr-report-grid")).toHaveCSS("display", "grid");
 
@@ -64,23 +65,63 @@ for (const reportPage of reportPages) {
       scrollWidth: document.documentElement.scrollWidth,
     }));
 
+    if (dimensions.innerWidth > 1180) {
+      await expect(page.locator(".btwr-masthead__nav")).toBeVisible();
+      await expect(page.locator(".btwr-masthead__menu")).toBeHidden();
+      await expect(page.locator(".btwr-masthead__nav a[aria-current='page']")).toHaveText(reportPage.navLabel);
+
+      for (const expectedPage of reportPages) {
+        await expect(page.locator(".btwr-masthead__nav").getByRole("link", { name: expectedPage.navLabel })).toBeVisible();
+      }
+    } else {
+      const mobileMenu = page.locator(".btwr-masthead__menu");
+
+      await expect(page.locator(".btwr-masthead__nav")).toBeHidden();
+      await expect(mobileMenu).toBeVisible();
+      await expect(mobileMenu.locator(".btwr-masthead__menu-label")).toHaveText(reportPage.navLabel);
+
+      await mobileMenu.locator("summary").click();
+      await expect(mobileMenu.locator("a[aria-current='page']")).toHaveText(reportPage.navLabel);
+
+      for (const expectedPage of reportPages) {
+        await expect(mobileMenu.getByRole("link", { name: expectedPage.navLabel })).toBeVisible();
+      }
+    }
+
     if (reportPage.path === "/") {
       await expect(page.locator("h1").first()).toBeVisible();
       await expect(page.locator(".btwr-hero")).toHaveCSS("display", "grid");
+      await expect(page.locator(".btwr-hero__report-date")).toHaveText("Report date 2026-05-13");
     } else if (dimensions.innerWidth > 1180) {
+      await expect(page.locator(".btwr-hero__report-date")).toHaveCount(0);
       await expect(page.locator(".btwr-toc")).toBeVisible();
     } else {
+      await expect(page.locator(".btwr-hero__report-date")).toHaveCount(0);
       await expect(page.locator(".btwr-toc")).toBeHidden();
-    }
-
-    for (const expectedPage of reportPages) {
-      await expect(page.locator(".btwr-masthead__nav").getByRole("link", { name: expectedPage.navLabel })).toBeVisible();
     }
 
     expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.innerWidth);
     expect(consoleErrors).toEqual([]);
   });
 }
+
+test("mobile hamburger menu opens primary report pages and navigates", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  const mobileMenu = page.locator(".btwr-masthead__menu");
+
+  await expect(page.locator(".btwr-masthead__nav")).toBeHidden();
+  await expect(mobileMenu).toBeVisible();
+  await mobileMenu.locator("summary").click();
+
+  await expect(mobileMenu.getByRole("link", { name: "Mechanical" })).toBeVisible();
+  await mobileMenu.getByRole("link", { name: "Mechanical" }).click();
+
+  await expect(page).toHaveURL(/\/mechanical\/$/);
+  await expect(page.getByRole("heading", { name: "Fresh-Air Ventilation" })).toBeVisible();
+  await expect(page.locator(".btwr-masthead__menu a[aria-current='page']")).toHaveText("Mechanical");
+});
 
 test("page table of contents follows click and scroll position", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
