@@ -15,20 +15,20 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
     steps:
       - name: Checkout project content
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: project
       - name: Checkout shared renderer
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: bldgtyp/bt-web-report-template
           path: renderer
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 10.33.0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
       - name: Verify GitHub Packages auth
         run: |
           if [ -z "$NODE_AUTH_TOKEN" ]; then
