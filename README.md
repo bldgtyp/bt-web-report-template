@@ -24,11 +24,16 @@ shared app-support runtime:
 ```text
 ~/Library/Application Support/bt-web-report-manager/
 ├── renderer/current/
+│   └── node_modules/
 ├── pnpm-store/
 ├── builds/<slug>/
 ├── previews/<slug>/
 └── cache/
 ```
+
+Node dependencies are installed once in `renderer/current/node_modules/`.
+Disposable `builds/<slug>/` and `previews/<slug>/` workspaces symlink to that
+shared app-support install; project repos never receive `node_modules/`.
 
 During platform development, set `BTWR_RENDERER_SOURCE` or pass
 `--renderer-source /path/to/bt-web-report-template` so the shared runtime can be
