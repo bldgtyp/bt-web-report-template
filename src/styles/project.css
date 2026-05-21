@@ -1095,10 +1095,35 @@ a.btwr-assembly-download:focus-visible {
   fill: var(--btwr-color-link);
 }
 
+@media (max-width: 1180px) {
+  .btwr-masthead {
+    grid-template-columns: minmax(14rem, 1fr) minmax(12rem, auto) minmax(9rem, auto);
+    gap: var(--btwr-space-4);
+  }
+}
+
 @media (max-width: 860px) {
+  .btwr-masthead {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand nav"
+      "meta meta";
+    gap: var(--btwr-space-2) var(--btwr-space-4);
+  }
+
+  .btwr-masthead__menu nav {
+    right: 0;
+    left: auto;
+  }
+
   .btwr-masthead__meta {
     flex-wrap: wrap;
     gap: var(--btwr-space-2) var(--btwr-space-4);
+    white-space: normal;
+  }
+
+  .btwr-masthead__project {
+    flex-wrap: wrap;
     white-space: normal;
   }
 

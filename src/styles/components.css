@@ -181,6 +181,10 @@
   box-shadow: 0 1.1rem 2.4rem rgba(30, 30, 30, 0.12);
 }
 
+.btwr-masthead__menu:not([open]) nav {
+  display: none;
+}
+
 .btwr-masthead__menu a {
   display: block;
   padding: 0.75rem 0.85rem;
@@ -1559,6 +1563,8 @@
 
 .btwr-report-footer p {
   margin: 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 1180px) {
