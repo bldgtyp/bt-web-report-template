@@ -163,7 +163,7 @@ jobs:
       - name: Prepare content-only runtime
         run: |
           mkdir runtime
-          for item in astro.config.mjs package.json pnpm-lock.yaml playwright playwright.config.ts scripts tsconfig.json; do
+          for item in astro.config.mjs package.json pnpm-lock.yaml playwright playwright.config.ts scripts tsconfig.json vitest.config.ts; do
             if [ -e "renderer/$item" ]; then
               ln -s "../renderer/$item" "runtime/$item"
             fi

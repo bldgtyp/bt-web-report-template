@@ -103,8 +103,6 @@ const faviconHref =
             ))
           }
         </nav>
-        <PdfDownload variant="masthead" />
-
         <details class="btwr-masthead__menu">
           <summary aria-label="Open primary report pages menu">
             <span class="btwr-masthead__menu-icon" aria-hidden="true">
@@ -142,7 +140,7 @@ const faviconHref =
                 <span>Report date</span>
                 {reportDateValue ? <time datetime={reportDateValue}>{reportDate}</time> : <span>{reportDate}</span>}
               </p>
-              <PdfDownload variant="hero" />
+              <PdfDownload />
             </div>
             <figure class="btwr-hero__figure">
               {heroImage ? (
