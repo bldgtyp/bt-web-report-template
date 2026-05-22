@@ -313,6 +313,12 @@ export default defineConfig({
       ),
       fixedMdxSection("Recommended assemblies intro", "assemblies", "content/envelope", "assemblies"),
       fixedMdxSection("Building airtightness intro", "airtightness", "content/envelope", "airtightness"),
+      fixedMdxSection(
+        "Masonry Rowhouse Air-Sealing Primer",
+        "masonry_rowhouse_airsealing_primer",
+        "content/envelope",
+        "masonry-rowhouse-airsealing-primer",
+      ),
       fixedMdxSection("AeroBarrier", "aerobarrier", "content/envelope", "aerobarrier"),
       {
         label: "Recommended assemblies",

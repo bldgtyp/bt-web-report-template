@@ -327,6 +327,63 @@
   height: auto;
 }
 
+.btwr-download-row {
+  margin: var(--btwr-space-5) 0;
+}
+
+.btwr-download-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--btwr-space-2);
+  min-height: 2.75rem;
+  padding: 0 var(--btwr-space-4);
+  border: 1px solid var(--btwr-color-heading);
+  border-radius: var(--btwr-radius-sm);
+  background: var(--btwr-color-heading);
+  color: var(--btwr-color-surface);
+  font-family: var(--btwr-font-label);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.btwr-download-link::before,
+.btwr-assembly-download::before {
+  content: "";
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='7 10 12 15 17 10'/%3E%3Cline x1='12' x2='12' y1='15' y2='3'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.btwr-prose .btwr-download-link {
+  color: var(--btwr-color-surface);
+  text-decoration: none;
+}
+
+.btwr-download-link:hover,
+.btwr-download-link:focus-visible {
+  border-color: var(--btwr-color-accent);
+  background: var(--btwr-color-accent);
+  color: var(--btwr-color-surface);
+}
+
+.btwr-prose .btwr-download-link:hover,
+.btwr-prose .btwr-download-link:focus-visible {
+  color: var(--btwr-color-surface);
+}
+
+.btwr-download-link:focus-visible {
+  outline: 2px solid var(--btwr-color-accent);
+  outline-offset: 3px;
+}
+
 .btwr-window-image-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -770,6 +827,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: var(--btwr-space-2);
   min-height: 2.75rem;
   margin-top: var(--btwr-space-5);
   padding: 0 var(--btwr-space-4);

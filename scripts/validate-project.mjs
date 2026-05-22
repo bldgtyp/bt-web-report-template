@@ -14,6 +14,7 @@ const REQUIRED_SECTION_FILES = [
   "content/energy-model/passive-house-certifications.mdx",
   "content/envelope/assemblies.mdx",
   "content/envelope/airtightness.mdx",
+  "content/envelope/masonry-rowhouse-airsealing-primer.mdx",
   "content/envelope/aerobarrier.mdx",
   "content/windows/window-thermal-comfort.mdx",
   "content/windows/site-shading.mdx",
