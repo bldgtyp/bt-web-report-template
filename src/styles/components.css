@@ -18,6 +18,10 @@
   color: inherit;
 }
 
+.btwr-report strong {
+  font-weight: 700;
+}
+
 .btwr-report-header {
   border-bottom: 1px solid var(--btwr-color-border);
   background: var(--btwr-color-surface);
