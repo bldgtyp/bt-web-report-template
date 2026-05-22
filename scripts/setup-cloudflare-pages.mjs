@@ -86,18 +86,32 @@ export async function ensureCloudflarePages({
     log(`Cloudflare Pages custom domain exists: ${domainName} (${existingDomain.status})`);
     domainStatus = existingDomain.status;
   } else {
-    const domain = await cloudflareRequest({
-      accountId,
-      apiToken,
-      path: `${projectPath}/domains`,
-      fetchImpl,
-      apiBaseUrl,
-      method: "POST",
-      body: { name: domainName },
-    });
-    domainCreated = true;
-    domainStatus = domain.result.status;
-    log(`Cloudflare Pages custom domain added: ${domainName} (${domain.result.status})`);
+    try {
+      const domain = await cloudflareRequest({
+        accountId,
+        apiToken,
+        path: `${projectPath}/domains`,
+        fetchImpl,
+        apiBaseUrl,
+        method: "POST",
+        body: { name: domainName },
+      });
+      domainCreated = true;
+      domainStatus = domain.result.status;
+      log(`Cloudflare Pages custom domain added: ${domainName} (${domain.result.status})`);
+    } catch (error) {
+      // Cloudflare's list-domains API can disagree with the add-domain API
+      // (paginated list, recent attach, etc.). Treat "already added" as a
+      // success — the goal of this script is to ENSURE the domain is
+      // attached, not to fail loudly if a previous attempt got it there.
+      const message = error?.message ?? String(error);
+      if (/already added this custom domain/i.test(message)) {
+        log(`Cloudflare Pages custom domain already attached: ${domainName} (treating as success)`);
+        domainStatus = "active";
+      } else {
+        throw error;
+      }
+    }
   }
 
   const dnsRecord = await ensurePagesDnsRecord({
