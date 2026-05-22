@@ -163,7 +163,7 @@ jobs:
       - name: Prepare content-only runtime
         run: |
           mkdir runtime
-          for item in astro.config.mjs package.json pnpm-lock.yaml playwright playwright.config.ts scripts tsconfig.json vitest.config.ts; do
+          for item in astro.config.mjs package.json pnpm-lock.yaml playwright playwright.config.ts scripts tests tsconfig.json vitest.config.ts; do
             if [ -e "renderer/$item" ]; then
               ln -s "../renderer/$item" "runtime/$item"
             fi
@@ -221,7 +221,13 @@ jobs:
 
       - name: Tests
         working-directory: runtime
-        run: pnpm test
+        # Per-project CI only runs the PDF integration assertion. Renderer
+        # unit tests (data, markdown, resolve-var, var-keys, assembly-*) depend
+        # on the workspace layout (test-files/ fixtures, sibling schemas repo)
+        # and don't belong in per-project CI. They run via `pnpm test:unit`
+        # locally; once they're decoupled from workspace paths, add a separate
+        # unit-test job to the template repo's ci.yml.
+        run: pnpm test:integration
 
       - name: Resolve Cloudflare project name
         id: cf

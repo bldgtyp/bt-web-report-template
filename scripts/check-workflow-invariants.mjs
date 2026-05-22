@@ -195,6 +195,57 @@ function fail(invariant, detail) {
   }
 }
 
+// --- Invariant 6 ----------------------------------------------------------
+// The local emulator (scripts/ci-emulate.sh) must symlink the SAME set of
+// files into runtime/ as the workflow does. Drift between them is how
+// "works locally / fails in CI" bugs sneak in. We parse the symlink loop
+// out of both files and require exact equality (order-independent).
+{
+  const buildJob = doc?.jobs?.build;
+  const prepareStep = (buildJob?.steps ?? []).find((step) => step?.name === "Prepare content-only runtime");
+  const workflowRun = prepareStep?.run ?? "";
+  const workflowMatch = workflowRun.match(/for item in ([^;]+); do/);
+  const workflowItems = workflowMatch?.[1]?.trim().split(/\s+/) ?? [];
+
+  const emulatorPath = resolve(repoRoot, "scripts/ci-emulate.sh");
+  if (!existsSync(emulatorPath)) {
+    fail("ci-emulate-missing", `scripts/ci-emulate.sh not found at ${emulatorPath}`);
+  } else {
+    const emulatorSrc = readFileSync(emulatorPath, "utf8");
+    // Anchor to the "Prepare content-only runtime" section header so we don't
+    // accidentally pick up earlier `for item in …` loops (the rsync step
+    // higher up uses the same shape for project.yaml/content/data/public).
+    const sectionMatch = emulatorSrc.match(
+      /Prepare content-only runtime[\s\S]*?for item in ([^;]+); do[\s\S]*?ln -s/,
+    );
+    const emulatorItems = sectionMatch?.[1]?.trim().split(/\s+/) ?? [];
+
+    if (workflowItems.length === 0 || emulatorItems.length === 0) {
+      fail(
+        "symlink-loop-unparseable",
+        "Could not parse the 'for item in … ; do' symlink loop from either the workflow or the emulator. " +
+          "Both must use that exact shape so drift can be detected.",
+      );
+    } else {
+      const sortedWorkflow = [...workflowItems].sort();
+      const sortedEmulator = [...emulatorItems].sort();
+      const same = sortedWorkflow.length === sortedEmulator.length &&
+        sortedWorkflow.every((item, i) => item === sortedEmulator[i]);
+      if (!same) {
+        const onlyInWorkflow = sortedWorkflow.filter((x) => !sortedEmulator.includes(x));
+        const onlyInEmulator = sortedEmulator.filter((x) => !sortedWorkflow.includes(x));
+        fail(
+          "ci-emulate-symlink-drift",
+          "scripts/ci-emulate.sh symlink loop has drifted from .github/workflows/_renderer-build.yml. " +
+            `Only in workflow: [${onlyInWorkflow.join(", ") || "(none)"}]. ` +
+            `Only in emulator: [${onlyInEmulator.join(", ") || "(none)"}]. ` +
+            "Update the emulator so local `pnpm test:ci` reproduces what GitHub Actions actually does.",
+        );
+      }
+    }
+  }
+}
+
 // --- Report ---------------------------------------------------------------
 if (failures.length === 0) {
   console.log("check-workflow-invariants: OK");

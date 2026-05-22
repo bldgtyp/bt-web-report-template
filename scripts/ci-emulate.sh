@@ -132,12 +132,19 @@ else
 fi
 
 step "2. Prepare content-only runtime (mirrors CI 'Prepare content-only runtime')"
+# Keep this symlink list in lock-step with _renderer-build.yml. The
+# check-workflow-invariants.mjs script enforces this; if it ever diverges
+# silently, the local emulator stops reproducing CI.
 mkdir runtime
-for item in astro.config.mjs package.json pnpm-lock.yaml playwright playwright.config.ts scripts src tina tsconfig.json; do
+for item in astro.config.mjs package.json pnpm-lock.yaml playwright playwright.config.ts scripts tests tsconfig.json vitest.config.ts; do
   if [ -e "renderer/$item" ]; then
     ln -s "../renderer/$item" "runtime/$item"
   fi
 done
+# Copy src/tina (don't symlink) so relative MDX imports resolve from
+# runtime/content, mirroring the workflow.
+cp -a renderer/src runtime/src
+cp -a renderer/tina runtime/tina
 ln -s ../renderer/node_modules runtime/node_modules
 for item in project.yaml content data public; do
   cp -a "project/$item" "runtime/$item"
@@ -163,6 +170,12 @@ pnpm check:editor
 
 step "6. Build (mirrors CI 'Build' — this is where env-scope bugs surface)"
 pnpm build
+
+step "7. Build PDF (mirrors CI 'Build PDF')"
+node scripts/build-pdf.mjs
+
+step "8. Tests (mirrors CI 'Tests' — integration only; renderer unit tests run via 'pnpm test:unit' in the workspace)"
+pnpm test:integration
 
 echo
 echo "================================================================================"

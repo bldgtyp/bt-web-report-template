@@ -24,6 +24,8 @@
     "test:e2e": "playwright test",
     "test:ci": "scripts/ci-emulate.sh",
     "test:workflows": "node scripts/check-workflow-invariants.mjs",
+    "test:integration": "vitest run tests/report-pdf.test.ts",
+    "test:unit": "vitest run --exclude tests/report-pdf.test.ts",
     "test": "vitest run",
     "smoke:fixture": "node scripts/smoke-fixture-data.mjs"
   },
