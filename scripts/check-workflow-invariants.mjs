@@ -111,6 +111,90 @@ function fail(invariant, detail) {
   }
 }
 
+// --- Invariant 4 ----------------------------------------------------------
+// Source directories that contain relative MDX imports must be copied into the
+// runtime workspace, not symlinked. If runtime/src points to renderer/src,
+// imports like "../../content/summary.mdx" resolve against renderer/content
+// and deployed project pages silently render template MDX instead of the
+// per-project content repository.
+{
+  const buildJob = doc?.jobs?.build;
+  const prepareStep = (buildJob?.steps ?? []).find((step) => step?.name === "Prepare content-only runtime");
+  const run = prepareStep?.run;
+  if (typeof run !== "string") {
+    fail("prepare-runtime-step-missing", 'jobs.build must include a "Prepare content-only runtime" run step.');
+  } else {
+    if (!/cp -a renderer\/src runtime\/src/.test(run)) {
+      fail(
+        "runtime-src-must-be-copied",
+        "Prepare content-only runtime must copy renderer/src into runtime/src. " +
+          "Symlinking src makes relative MDX imports resolve from renderer/content instead of project content.",
+      );
+    }
+    if (!/cp -a renderer\/tina runtime\/tina/.test(run)) {
+      fail(
+        "runtime-tina-must-be-copied",
+        "Prepare content-only runtime must copy renderer/tina into runtime/tina so editor-relative paths stay inside the runtime.",
+      );
+    }
+    const symlinkLoop = run.match(/for item in ([^;]+); do/);
+    const symlinkItems = symlinkLoop?.[1]?.trim().split(/\s+/) ?? [];
+    for (const disallowed of ["src", "tina"]) {
+      if (symlinkItems.includes(disallowed)) {
+        fail(
+          "runtime-source-dirs-must-not-be-symlinked",
+          `Prepare content-only runtime symlinks ${disallowed}. Copy source directories instead so relative content imports use runtime/content.`,
+        );
+      }
+    }
+  }
+}
+
+// --- Invariant 5 ----------------------------------------------------------
+// dist/report.pdf must be produced as part of the standard build pipeline.
+// The Cloudflare Pages publish picks up dist/ wholesale, so if "Build PDF"
+// is skipped or removed, every deploy ships without the /report.pdf artifact
+// the cover-page "Download PDF" button links to.
+{
+  const buildJob = doc?.jobs?.build;
+  const steps = buildJob?.steps ?? [];
+  const buildStepIdx = steps.findIndex((step) => step?.name === "Build");
+  const buildPdfStepIdx = steps.findIndex((step) => step?.name === "Build PDF");
+  const playwrightInstallIdx = steps.findIndex(
+    (step) => step?.name && /Install Playwright/i.test(step.name),
+  );
+
+  if (buildPdfStepIdx < 0) {
+    fail(
+      "build-pdf-step-missing",
+      'jobs.build must include a "Build PDF" step that runs scripts/build-pdf.mjs. ' +
+        "Without it, dist/report.pdf is never produced and the cover-page Download PDF button 404s.",
+    );
+  }
+  if (playwrightInstallIdx < 0) {
+    fail(
+      "playwright-install-step-missing",
+      "jobs.build must install Playwright's Chromium before the PDF build step.",
+    );
+  }
+  if (buildStepIdx >= 0 && buildPdfStepIdx >= 0 && buildPdfStepIdx <= buildStepIdx) {
+    fail(
+      "build-pdf-step-order",
+      'The "Build PDF" step must run AFTER the "Build" step ' +
+        "(build-pdf.mjs consumes dist/ produced by astro build).",
+    );
+  }
+  if (buildPdfStepIdx >= 0) {
+    const run = steps[buildPdfStepIdx]?.run ?? "";
+    if (!/build-pdf\.mjs/.test(run)) {
+      fail(
+        "build-pdf-step-content",
+        'The "Build PDF" step must invoke scripts/build-pdf.mjs.',
+      );
+    }
+  }
+}
+
 // --- Report ---------------------------------------------------------------
 if (failures.length === 0) {
   console.log("check-workflow-invariants: OK");

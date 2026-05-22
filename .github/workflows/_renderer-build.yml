@@ -163,11 +163,15 @@ jobs:
       - name: Prepare content-only runtime
         run: |
           mkdir runtime
-          for item in astro.config.mjs package.json pnpm-lock.yaml playwright playwright.config.ts scripts src tina tsconfig.json; do
+          for item in astro.config.mjs package.json pnpm-lock.yaml playwright playwright.config.ts scripts tsconfig.json; do
             if [ -e "renderer/$item" ]; then
               ln -s "../renderer/$item" "runtime/$item"
             fi
           done
+          # Copy source directories so relative MDX imports resolve from
+          # runtime/content, not renderer/content through the symlink target.
+          cp -a renderer/src runtime/src
+          cp -a renderer/tina runtime/tina
           ln -s ../renderer/node_modules runtime/node_modules
           for item in project.yaml content data public; do
             cp -a "project/$item" "runtime/$item"
@@ -188,6 +192,33 @@ jobs:
       - name: Build
         working-directory: runtime
         run: pnpm build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('renderer/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Chromium (full, on cache miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: runtime
+        run: ../renderer/scripts/retry.sh --label='playwright install' --max-attempts=4 --initial-delay=10 -- pnpm exec playwright install --with-deps chromium
+
+      - name: Install Playwright system deps (cache hit path)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        working-directory: runtime
+        run: ../renderer/scripts/retry.sh --label='playwright install-deps' --max-attempts=4 --initial-delay=10 -- pnpm exec playwright install-deps chromium
+
+      - name: Build PDF
+        working-directory: runtime
+        # Run the post-build PDF script directly (not `pnpm build:pdf`) so we
+        # don't re-execute validate+build a second time inside the same CI job.
+        # dist/report.pdf is produced alongside dist/index.html and rides the
+        # same artifact upload + Cloudflare deploy below.
+        run: node scripts/build-pdf.mjs
 
       - name: Resolve Cloudflare project name
         id: cf
