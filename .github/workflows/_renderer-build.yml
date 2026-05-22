@@ -56,9 +56,9 @@ on:
         type: string
         default: ""
       package-publish-timeout-seconds:
-        description: "Max seconds to wait for the pinned @bldgtyp/web-report-schemas version to appear on GitHub Packages."
+        description: "Max seconds to wait for the pinned @bldgtyp/web-report-schemas version to appear on GitHub Packages. Default 1800 (30 min) — CI waits, not fails, while the auto-publish flow catches up."
         type: number
-        default: 600
+        default: 1800
     secrets:
       BLDGTYP_PACKAGES_TOKEN:
         description: "Token with read:packages on @bldgtyp. Required."

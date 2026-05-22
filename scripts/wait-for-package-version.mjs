@@ -8,7 +8,7 @@
 // turn-around for "rerun the action").
 //
 // Usage:
-//   node scripts/wait-for-package-version.mjs <package> <version> [--timeout-seconds=600]
+//   node scripts/wait-for-package-version.mjs <package> <version> [--timeout-seconds=1800]
 //
 // Exit codes:
 //   0  version is available
@@ -19,7 +19,7 @@ import { spawnSync } from "node:child_process";
 import { setTimeout as sleep } from "node:timers/promises";
 
 const POLL_SECONDS = 15;
-const DEFAULT_TIMEOUT_SECONDS = 600;
+const DEFAULT_TIMEOUT_SECONDS = 1800; // 30 minutes — CI waits, never fails outright.
 
 function parseArgs(argv) {
   const positional = [];
