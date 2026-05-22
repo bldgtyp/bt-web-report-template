@@ -39,3 +39,4 @@ narrative:
     erv:
       manufacturer_name: "Example Manufacturer"
       type_name: "Example ERV"
+  user_defined: {}

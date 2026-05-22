@@ -162,6 +162,21 @@ The project targets <Var k="narrative.certification.target" /> under
 with an airtightness limit of <Var k="narrative.certification.ph_ach_limit" /> ACH50.
 ```
 
+Project-specific one-off variables belong under `narrative.user_defined.*`:
+
+```yaml
+narrative:
+  user_defined:
+    cad_received_date: May 1, 2026
+```
+
+```mdx
+CAD background received <Var k="narrative.user_defined.cad_received_date" />.
+```
+
+`narrative.user_defined.*` keys are dynamic, so they are typed directly instead
+of appearing in Tina's generated `<Var>` dropdown.
+
 **Resolution rules** (`src/components/Var.astro` → `src/data/resolve-var.ts`):
 
 - The `k` prop is a dot-path into the validated `ProjectConfig` shape.
@@ -184,7 +199,7 @@ with an airtightness limit of <Var k="narrative.certification.ph_ach_limit" /> A
   editors pick a labelled key like `"Climate > Weather Station Name"`,
   Tina writes `<Var k="narrative.climate.weather_station_name" />`.
 
-**Adding a new variable end-to-end:**
+**Adding a standard variable end-to-end:**
 
 1. Add the field to the Pydantic schema in
    `bt-web-report-schemas/src/bt_web_report_schemas/project.py`.

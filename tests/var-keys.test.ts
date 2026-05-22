@@ -66,6 +66,7 @@ describe("listVarKeyOptions", () => {
     expect(values.has("narrative")).toBe(false);
     expect(values.has("narrative.mechanical")).toBe(false);
     expect(values.has("narrative.mechanical.erv")).toBe(false);
+    expect(values.has("narrative.user_defined")).toBe(false);
   });
 
   it("produces deterministic, unique dot-paths", () => {

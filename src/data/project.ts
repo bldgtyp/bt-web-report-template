@@ -67,6 +67,7 @@ export interface Narrative {
   co2: Co2Narrative;
   windows: WindowsNarrative;
   mechanical: MechanicalNarrative;
+  user_defined?: Record<string, string | null>;
 }
 
 export interface ProjectConfig {

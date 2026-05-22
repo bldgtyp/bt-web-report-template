@@ -7,18 +7,34 @@
 // validator used by the CLI / Manager. If a rule needs to change, change it
 // in bt_web_report_schemas/project.py and regenerate.
 
+import { existsSync, readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import Ajv from "ajv";
 import YAML from "yaml";
 
 const requireFromHere = createRequire(import.meta.url);
-const projectSchema = requireFromHere("@bldgtyp/web-report-schemas/project.schema.json");
+const packagedProjectSchema = requireFromHere("@bldgtyp/web-report-schemas/project.schema.json");
+const moduleDir = dirname(fileURLToPath(import.meta.url));
+const workspaceProjectSchemaPath = resolve(moduleDir, "../../../bt-web-report-schemas/schemas/project.schema.json");
+const projectSchema = loadProjectSchema();
 
 const ajv = new Ajv({ allErrors: true, strict: false });
 const validate = ajv.compile(projectSchema);
+
+function loadProjectSchema() {
+  const overridePath = process.env.BTWR_PROJECT_SCHEMA_JSON;
+  if (overridePath) {
+    return JSON.parse(readFileSync(resolve(overridePath), "utf8"));
+  }
+  if (existsSync(workspaceProjectSchemaPath)) {
+    return JSON.parse(readFileSync(workspaceProjectSchemaPath, "utf8"));
+  }
+  return packagedProjectSchema;
+}
 
 export async function readProjectFile(path) {
   const text = await readFile(path, "utf8");

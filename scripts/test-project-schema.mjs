@@ -57,12 +57,14 @@ const withNarrative = parseProjectYaml(
     narrative: {
       certification: { target: "EnerPHit by Component", ph_ach_limit: "0.8" },
       mechanical: { erv: { manufacturer_name: "Zehnder America" } },
+      user_defined: { cad_received_date: "May 1, 2026" },
     },
   }),
   "project.yaml",
 );
 assert.equal(withNarrative.narrative.certification.target, "EnerPHit by Component");
 assert.equal(withNarrative.narrative.mechanical.erv.manufacturer_name, "Zehnder America");
+assert.equal(withNarrative.narrative.user_defined.cad_received_date, "May 1, 2026");
 
 // Bad slugs.
 for (const slug of ["Project-2606", "project_2606", "project--2606", "-project-2606", "project-2606-"]) {
