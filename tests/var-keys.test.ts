@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { listVarKeyOptions } from "@bldgtyp/web-report-schemas";
+import { listVarKeyOptions } from "../../bt-web-report-schemas/src-js/var-keys";
 
 describe("listVarKeyOptions", () => {
   it("includes top-level project facts", () => {
@@ -18,6 +18,9 @@ describe("listVarKeyOptions", () => {
 
     expect(byValue.get("building.address")).toBe("Building > Address");
     expect(byValue.get("building.climate_zone")).toBe("Building > Climate Zone");
+    expect(byValue.get("source_files.cad_files_received_date")).toBe(
+      "Source Files > Cad Files Received Data",
+    );
     expect(byValue.get("publishing.production_url")).toBe("Publishing > Production Url");
   });
 

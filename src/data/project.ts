@@ -92,6 +92,7 @@ export interface ProjectConfig {
   };
   source_files: {
     phpp_path: string;
+    cad_files_received_date?: string | null;
     data_dir: string;
     assets_dir: string;
   };

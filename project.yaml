@@ -18,6 +18,7 @@ building:
   building_type: "single-family residential"
 source_files:
   phpp_path: ""
+  cad_files_received_date: "May 1, 2026"
   data_dir: "data"
   assets_dir: "public/assets"
 publishing:
