@@ -198,6 +198,15 @@ test("mechanical page renders starter plan cards after airflow table", async ({ 
   expect(verticalOrder).toBe(true);
 });
 
+test("envelope masonry primer download keeps its PDF filename", async ({ page }) => {
+  await page.goto("/building_envelope/");
+
+  const primerLink = page.getByRole("link", { name: /Download the Masonry Rowhouse Air-Sealing Primer/ });
+
+  await expect(primerLink).toHaveAttribute("href", "/assets/envelope/masonry-rowhouse-airsealing-primer.pdf");
+  await expect(primerLink).toHaveAttribute("download", "masonry-rowhouse-airsealing-primer.pdf");
+});
+
 test("stacked-bar axis thins tick labels when the axis track is narrow", async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 900 });
   await page.goto("/energy_model/");

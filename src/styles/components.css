@@ -262,7 +262,7 @@
 }
 
 .btwr-hero__report-date {
-  display: inline-flex;
+  display: flex;
   gap: var(--btwr-space-2);
   align-items: baseline;
   margin: var(--btwr-space-4) 0 0;
@@ -376,8 +376,7 @@
   margin-top: var(--btwr-space-5, 1.5rem);
 }
 
-.btwr-pdf-download .btwr-pdf-download__primary,
-.btwr-pdf-download .btwr-pdf-download__secondary {
+.btwr-pdf-download .btwr-pdf-download__primary {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -406,18 +405,6 @@
   background: var(--btwr-color-link, #205d72);
   border-color: var(--btwr-color-link, #205d72);
   color: var(--btwr-color-surface, #fff);
-}
-
-.btwr-pdf-download .btwr-pdf-download__secondary {
-  color: var(--btwr-color-heading, #1a1a1a);
-  background: transparent;
-  border-color: var(--btwr-color-border, #d8d2c4);
-}
-
-.btwr-pdf-download .btwr-pdf-download__secondary:hover,
-.btwr-pdf-download .btwr-pdf-download__secondary:focus-visible {
-  border-color: var(--btwr-color-accent, #3e93ae);
-  color: var(--btwr-color-accent, #3e93ae);
 }
 
 .btwr-pdf-download__icon {
