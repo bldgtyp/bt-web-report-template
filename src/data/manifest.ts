@@ -33,14 +33,14 @@ export function isReportManifest(value: unknown): value is ReportManifest {
   );
 }
 
-export function normalizeVariants(manifest: ReportManifest): ReportVariant[] {
+export function normalizeVariants(manifest: ReportManifest, recommendedVariantId = manifest.recommended_variant_id): ReportVariant[] {
   return manifest.variants
     .map((variant, index) => ({ variant, index }))
     .sort((a, b) => compareVariants(a.variant, b.variant) || a.index - b.index)
     .map(({ variant }) => variant)
     .map((variant) => ({
       ...variant,
-      recommended: variant.recommended || variant.id === manifest.recommended_variant_id,
+      recommended: recommendedVariantId ? variant.id === recommendedVariantId : Boolean(variant.recommended),
     }));
 }
 

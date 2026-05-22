@@ -21,6 +21,7 @@ const baseProject = {
   target_standard: "Passive House",
   certification_program: "Design analysis only",
   certification_path: "Not submitted",
+  recommended_variant_id: "improved",
   building: {
     address: "TBD",
     city: "Brooklyn",

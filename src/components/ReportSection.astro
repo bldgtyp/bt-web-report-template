@@ -1,6 +1,7 @@
 ---
 import SectionHeading from "./SectionHeading.astro";
 import Var from "./Var.astro";
+import VarLink from "./VarLink.astro";
 
 interface Props {
   id: string;
@@ -16,7 +17,7 @@ const { id, kicker, title, Content, callout_label, callout_body, show_heading = 
 
 // Shortcodes available to every MDX section. Add new shortcodes here, not
 // per-page, so authors get a consistent surface across the report.
-const mdxComponents = { Var };
+const mdxComponents = { Var, VarLink };
 ---
 
 <section class="btwr-section" aria-labelledby={id}>

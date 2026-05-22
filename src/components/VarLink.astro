@@ -1,0 +1,35 @@
+---
+// <VarLink hrefKey="..." /> — MDX shortcode for links whose href comes from project.yaml.
+
+import type { ProjectConfig } from "../data/project";
+import { resolveVar } from "../data/resolve-var";
+
+interface Props {
+  hrefKey: string;
+  target?: string;
+  rel?: string;
+}
+
+const { hrefKey, target, rel } = Astro.props;
+const project = Astro.locals.project as ProjectConfig | undefined;
+
+if (!project) {
+  throw new Error(
+    `<VarLink hrefKey="${hrefKey}" />: Astro.locals.project is not set. Ensure src/middleware/index.ts is registered.`,
+  );
+}
+
+const result = resolveVar(project, hrefKey);
+
+if (!result.found && import.meta.env.PROD) {
+  throw new Error(
+    `<VarLink hrefKey="${hrefKey}" /> could not be resolved (${result.reason}). Check project.yaml or the field name.`,
+  );
+}
+
+const href = result.found ? result.value : "#";
+---
+
+<a href={href} target={target} rel={rel}>
+  <slot />
+</a>

@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { coerceCsvCell, parseCsv } from "../src/data/csv";
+import { loadTemplateReportData } from "../src/data/report";
 import { loadReportData } from "../src/data/report-loader";
 import { formatValue, labelize, siteEnergyGroupForEndUse, siteEnergyGroups, variantColorMap } from "../src/data/rows";
 
@@ -100,6 +101,64 @@ describe("loadReportData", () => {
     expect(data.variantOrder.map((variant) => variant.id)).toEqual(["left", "middle", "right"]);
     expect(data.variantOrder[1].recommended).toBe(true);
     expect(data.energy.map((row) => row.variant_id)).toEqual(["left", "middle", "right"]);
+  });
+
+  it("lets project.yaml override the scraped recommended variant", async () => {
+    const root = await mkdtemp(join(tmpdir(), "btwr-template-"));
+    await mkdir(join(root, "data"));
+    await writeFile(
+      join(root, "project.yaml"),
+      [
+        'schema_version: "0.2.0"',
+        'slug: "project-0000"',
+        'project_title: "Example Passive House Report"',
+        'client_name: "Example Client"',
+        'building_name: "Example Residence"',
+        'phase: "Design Analysis"',
+        'report_date: "2026-05-13"',
+        'prepared_by: "BLDGTYP"',
+        'contact_email: "info@bldgtyp.com"',
+        'target_standard: "Passive House"',
+        'certification_program: "Design analysis only"',
+        'certification_path: "Not submitted"',
+        'recommended_variant_id: "middle"',
+        "building:",
+        '  address: "123 Example Street"',
+        '  city: "Brooklyn"',
+        '  state: "NY"',
+        '  climate_zone: "ASHRAE 4A"',
+        '  building_type: "single-family residential"',
+        "source_files:",
+        '  phpp_path: ""',
+        '  data_dir: "data"',
+        '  assets_dir: "public/assets"',
+        "publishing:",
+        '  production_url: "https://project-0000.bldgtyp.com"',
+        '  cloudflare_pages_project: "bt-proj-0000-example-report"',
+        "",
+      ].join("\n"),
+    );
+    await writeFile(
+      join(root, "data", "manifest.json"),
+      JSON.stringify({
+        status: "ok",
+        recommended_variant_id: "right",
+        variants: [
+          { id: "left", name: "Left", order: 0 },
+          { id: "middle", name: "Middle", order: 1 },
+          { id: "right", name: "Right", order: 2, recommended: true },
+        ],
+      }),
+    );
+
+    const data = await loadTemplateReportData(root);
+
+    expect(data.manifest.recommended_variant_id).toBe("middle");
+    expect(data.variantOrder.map((variant) => [variant.id, variant.recommended])).toEqual([
+      ["left", false],
+      ["middle", true],
+      ["right", false],
+    ]);
   });
 });
 

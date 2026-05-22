@@ -10,6 +10,7 @@ contact_email: "info@bldgtyp.com"
 target_standard: "Passive House"
 certification_program: "Design analysis only"
 certification_path: "Not submitted"
+recommended_variant_id: "enerphit_by_component"
 building:
   address: "123 Example Street"
   city: "Brooklyn"
@@ -34,8 +35,10 @@ narrative:
     state_name_abbreviation: "NY"
     ashrae_location_name: "Zone 4(A)"
   energy_code:
-    name: "Example Energy Code"
+    name: "NYC Energy Code 2025"
     zone: "Zone 4(A)"
+    code_base_url: https://up.codes/viewer/new_york_city/nyc-energy-conservation-code-2025
+    code_airtightness_url: https://up.codes/viewer/new_york_city/nyc-energy-conservation-code-2025/chapter/R4/residential-energy-efficiency#R402.5.1.3
   mechanical:
     erv:
       manufacturer_name: "Example Manufacturer"

@@ -19,7 +19,7 @@ describe("listVarKeyOptions", () => {
     expect(byValue.get("building.address")).toBe("Building > Address");
     expect(byValue.get("building.climate_zone")).toBe("Building > Climate Zone");
     expect(byValue.get("source_files.cad_files_received_date")).toBe(
-      "Source Files > Cad Files Received Data",
+      "Source Files > Cad Files Received Date",
     );
     expect(byValue.get("publishing.production_url")).toBe("Publishing > Production Url");
   });
@@ -33,6 +33,12 @@ describe("listVarKeyOptions", () => {
       "Narrative > Climate > Weather Station Name",
     );
     expect(byValue.get("narrative.energy_code.ach_limit")).toBe("Narrative > Energy code > Ach Limit");
+    expect(byValue.get("narrative.energy_code.code_base_url")).toBe(
+      "Narrative > Energy code > Code Bae Url",
+    );
+    expect(byValue.get("narrative.energy_code.code_airtightness_url")).toBe(
+      "Narrative > Energy code > Code Airtightness Url",
+    );
     expect(byValue.get("narrative.co2.subregion_name")).toBe("Narrative > CO2 > Subregion Name");
     expect(byValue.get("narrative.windows.ph_window_u_value")).toBe(
       "Narrative > Windows > Ph Window U Value",

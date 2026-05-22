@@ -33,6 +33,8 @@ export interface EnergyCodeNarrative {
   name?: string | null;
   zone?: string | null;
   link?: string | null;
+  code_base_url?: string | null;
+  code_airtightness_url?: string | null;
   u_val_link?: string | null;
   ach_link?: string | null;
   ach_limit?: string | null;
@@ -83,6 +85,7 @@ export interface ProjectConfig {
   target_standard: string;
   certification_program: string;
   certification_path: string;
+  recommended_variant_id?: string | null;
   building: {
     address: string;
     city: string;
