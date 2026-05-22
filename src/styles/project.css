@@ -760,7 +760,8 @@
   margin-top: var(--btwr-space-5);
 }
 
-a.btwr-assembly-download {
+.btwr-assembly-download {
+  appearance: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -771,6 +772,7 @@ a.btwr-assembly-download {
   border-radius: var(--btwr-radius-sm);
   background: var(--btwr-color-heading);
   color: var(--btwr-color-surface);
+  cursor: pointer;
   font-family: var(--btwr-font-label);
   font-size: 0.76rem;
   font-weight: 700;
@@ -780,16 +782,21 @@ a.btwr-assembly-download {
   text-transform: uppercase;
 }
 
-a.btwr-assembly-download:hover,
-a.btwr-assembly-download:focus-visible {
+.btwr-assembly-download:hover,
+.btwr-assembly-download:focus-visible {
   border-color: var(--btwr-color-accent);
   background: var(--btwr-color-accent);
   color: var(--btwr-color-surface);
 }
 
-a.btwr-assembly-download:focus-visible {
+.btwr-assembly-download:focus-visible {
   outline: 2px solid var(--btwr-color-accent);
   outline-offset: 3px;
+}
+
+.btwr-assembly-download:disabled {
+  cursor: progress;
+  opacity: 0.72;
 }
 
 .btwr-assembly-card {
