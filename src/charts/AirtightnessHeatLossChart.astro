@@ -1,12 +1,13 @@
 ---
 import DataState from "../components/DataState.astro";
 import type { ReportData } from "../data/report-loader";
+import type { ProjectConfig } from "../data/project";
 import { cellNumber, cellText, formatValue } from "../data/rows";
 import { recommendedVariant } from "../data/variants";
 import { linearAxis } from "./chart-axis";
 
 interface Props {
-  data: ReportData;
+  data: ReportData & { project?: ProjectConfig };
   title?: string;
 }
 
@@ -18,9 +19,11 @@ interface Point {
 const { data, title = "Winter Heat Loss due to Envelope Air Leakage" } = Astro.props;
 const recommended = recommendedVariant(data.variantOrder);
 const recommendedId = recommended?.id ?? data.variantOrder[0]?.id;
-const passiveHouseTargetAch = 0.6;
-const energyCodeTargetAch = 5.0;
-const energyCodeLabel = "Code 2021 / Zone 5(B)";
+const projectPassiveHouseTargetAch = parseAchLimit(data.project?.narrative.certification.ph_ach_limit);
+const passiveHouseTargetAch = projectPassiveHouseTargetAch ?? 0.6;
+const projectEnergyCodeTargetAch = parseAchLimit(data.project?.narrative.energy_code.ach_limit);
+const energyCodeTargetAch = projectEnergyCodeTargetAch ?? 5.0;
+const energyCodeLabel = energyCodeTargetLabel(data.project);
 const chartWidth = 760;
 const chartHeight = 500;
 const margin = { top: 34, right: 26, bottom: 64, left: 84 };
@@ -32,6 +35,24 @@ function variantInput(fieldId: string): number | null {
     (candidate) => cellText(candidate, "variant_id") === recommendedId && cellText(candidate, "field_id") === fieldId,
   );
   return row ? cellNumber(row, "value") : null;
+}
+
+function parseAchLimit(value: string | null | undefined): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function energyCodeTargetLabel(project: ProjectConfig | undefined): string {
+  const energyCode = project?.narrative.energy_code;
+  if (!energyCode?.name) {
+    return "Code";
+  }
+
+  return energyCode.zone ? `${energyCode.name} / ${energyCode.zone}` : energyCode.name;
 }
 
 const vv = variantInput("airtightness.vv");
@@ -77,7 +98,7 @@ const codePoint = { ach: energyCodeTargetAch, heatLoss: heatLossForAch(energyCod
 const typicalY = y(yMax * 0.16);
 const yGridLines = yTicks.filter((tick) => tick > 0);
 const xGridLines = xTicks.filter((tick) => tick > 0);
-const targetLabelBaselineY = margin.top + plotHeight - 10;
+const targetLabelTopY = margin.top + 8;
 ---
 
 {
@@ -144,10 +165,10 @@ const targetLabelBaselineY = margin.top + plotHeight - 10;
               <text x="8" y="-10">{`${recommended?.name ?? "Recommended"}: ${formatValue(recommendedPoint.ach)} ACH`}</text>
             </g>
           ) : null}
-          <text class="btwr-airtightness-chart__target-label" text-anchor="end" transform={`translate(${x(passiveHouseTargetAch) - 10} ${margin.top + 96}) rotate(-90)`}>
+          <text class="btwr-airtightness-chart__target-label" text-anchor="end" transform={`translate(${x(passiveHouseTargetAch) - 10} ${targetLabelTopY}) rotate(-90)`}>
             {`Target: ${passiveHouseTargetAch} ACH@50`}
           </text>
-          <text class="btwr-airtightness-chart__target-label" text-anchor="start" transform={`translate(${x(energyCodeTargetAch) - 10} ${targetLabelBaselineY}) rotate(-90)`}>
+          <text class="btwr-airtightness-chart__target-label" text-anchor="end" transform={`translate(${x(energyCodeTargetAch) - 10} ${targetLabelTopY}) rotate(-90)`}>
             {`${energyCodeLabel}: ${energyCodeTargetAch} ACH@50`}
           </text>
           <line class="btwr-airtightness-chart__axis" x1={margin.left} y1={margin.top} x2={margin.left} y2={margin.top + plotHeight} />
