@@ -27,6 +27,8 @@ export interface ClimateNarrative {
   state_name_abbreviation?: string | null;
   ashrae_location_name?: string | null;
   ashrae_design_temps?: string | null;
+  ashrae_winter_design_temp_F?: string | null;
+  ashrae_winter_design_temp_C?: string | null;
 }
 
 export interface EnergyCodeNarrative {
@@ -50,6 +52,8 @@ export interface Co2Narrative {
 export interface WindowsNarrative {
   ph_window_u_value?: string | null;
   ph_window_r_value?: string | null;
+  comfort_target_r_value?: string | null;
+  comfort_target_u_value?: string | null;
 }
 
 export interface ErvNarrative {

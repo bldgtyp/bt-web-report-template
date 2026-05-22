@@ -32,9 +32,15 @@ describe("listVarKeyOptions", () => {
     expect(byValue.get("narrative.climate.weather_station_name")).toBe(
       "Narrative > Climate > Weather Station Name",
     );
+    expect(byValue.get("narrative.climate.ashrae_winter_design_temp_F")).toBe(
+      "Narrative > Climate > Ashrae Winter Design Temp F",
+    );
+    expect(byValue.get("narrative.climate.ashrae_winter_design_temp_C")).toBe(
+      "Narrative > Climate > Ashrae Winter Design Temp C",
+    );
     expect(byValue.get("narrative.energy_code.ach_limit")).toBe("Narrative > Energy code > Ach Limit");
     expect(byValue.get("narrative.energy_code.code_base_url")).toBe(
-      "Narrative > Energy code > Code Bae Url",
+      "Narrative > Energy code > Code Base Url",
     );
     expect(byValue.get("narrative.energy_code.code_airtightness_url")).toBe(
       "Narrative > Energy code > Code Airtightness Url",
@@ -42,6 +48,12 @@ describe("listVarKeyOptions", () => {
     expect(byValue.get("narrative.co2.subregion_name")).toBe("Narrative > CO2 > Subregion Name");
     expect(byValue.get("narrative.windows.ph_window_u_value")).toBe(
       "Narrative > Windows > Ph Window U Value",
+    );
+    expect(byValue.get("narrative.windows.comfort_target_r_value")).toBe(
+      "Narrative > Windows > Comfort Target R Value",
+    );
+    expect(byValue.get("narrative.windows.comfort_target_u_value")).toBe(
+      "Narrative > Windows > Comfort Target U Value",
     );
     expect(byValue.get("narrative.mechanical.erv.manufacturer_name")).toBe(
       "Narrative > Mechanical > ERV > Manufacturer Name",

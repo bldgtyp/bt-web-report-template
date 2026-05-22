@@ -34,6 +34,8 @@ narrative:
     state_name: "New York"
     state_name_abbreviation: "NY"
     ashrae_location_name: "Zone 4(A)"
+    ashrae_winter_design_temp_F: "10.4"
+    ashrae_winter_design_temp_C: "-12.0"
   energy_code:
     name: "NYC Energy Code 2025"
     zone: "Zone 4(A)"
@@ -44,4 +46,7 @@ narrative:
     erv:
       manufacturer_name: "Example Manufacturer"
       type_name: "Example ERV"
+  windows:
+    comfort_target_r_value: "5.6"
+    comfort_target_u_value: "0.18"
   user_defined: {}

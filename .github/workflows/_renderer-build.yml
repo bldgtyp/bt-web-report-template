@@ -4,20 +4,29 @@ name: Renderer build (reusable)
 # Called by the template's own ci.yml / deploy.yml AND by every per-project
 # repo's CI. Editing the build flow happens here, once.
 #
-# Key design choices to keep this low-touch and cascade-resistant:
+# Cascade-resistance principles (every change here is in service of one of these):
 #
 # 1. Schema validation reads from a sibling checkout of bt-web-report-schemas,
-#    NOT from the GitHub Packages tarball. New schema fields land in the
-#    `main` branch immediately; consumers never wait for a publish to validate.
+#    NOT from the GitHub Packages tarball. New schema fields land on `main`
+#    immediately; consumers never wait for a publish to validate.
 #
-# 2. The schemas npm package is still needed for `pnpm install` (for the
-#    Tina var-keys helpers). If the renderer's pinned schemas version isn't
-#    on GitHub Packages yet, we POLL until it lands instead of failing.
-#    Combined with the schemas repo's auto-publish-on-version-bump workflow,
-#    this means CI can never race ahead of the publish.
+# 2. The schemas npm package is still needed for `pnpm install` (Tina helpers).
+#    If the renderer's pinned version isn't on GitHub Packages yet, we POLL
+#    until it lands instead of failing. Combined with the schemas repo's
+#    auto-publish-on-version-bump workflow, CI can never race ahead of the publish.
 #
-# 3. Cloudflare deploy is gated by an input so one workflow file handles
-#    both CI (build-only) and deploy use cases without duplication.
+# 3. Every step that touches an external network or API (Cloudflare, the npm
+#    registry, GitHub Packages, git checkouts) is wrapped in retry-with-backoff
+#    via scripts/retry.sh. Cloudflare returning a 5xx on asset upload (it does,
+#    regularly) no longer fails the whole pipeline.
+#
+# 4. Build artifacts are uploaded after the build job and downloaded by a
+#    separate deploy job. A failed deploy can be re-run from the GitHub UI
+#    without rebuilding — saving time and isolating "did the build actually
+#    work" from "is Cloudflare currently up".
+#
+# 5. Cloudflare deploy is gated by an input so one workflow file handles both
+#    CI (build-only) and deploy use cases without duplication.
 
 on:
   workflow_call:
@@ -71,6 +80,9 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    outputs:
+      dist-artifact: ${{ steps.dist-artifact.outputs.name }}
+      project-name: ${{ steps.cf.outputs.project }}
     steps:
       - name: Checkout project content
         uses: actions/checkout@v6
@@ -134,9 +146,9 @@ jobs:
           echo "Renderer pins @bldgtyp/web-report-schemas@$PINNED"
           node scripts/wait-for-package-version.mjs @bldgtyp/web-report-schemas "$PINNED" --timeout-seconds=${{ inputs.package-publish-timeout-seconds }}
 
-      - name: Install renderer dependencies
-        run: pnpm install --ignore-scripts --no-frozen-lockfile
+      - name: Install renderer dependencies (with retry)
         working-directory: renderer
+        run: scripts/retry.sh --label='pnpm install' --max-attempts=4 --initial-delay=10 -- pnpm install --ignore-scripts --no-frozen-lockfile
 
       - name: Prepare content-only runtime
         run: |
@@ -169,20 +181,77 @@ jobs:
         working-directory: runtime
         run: pnpm build
 
-      - name: Ensure Cloudflare Pages project and domain
+      - name: Resolve Cloudflare project name
+        id: cf
         if: ${{ inputs.run-deploy }}
         run: |
           PROJECT_NAME="${{ inputs.cloudflare-pages-project }}"
           if [ -z "$PROJECT_NAME" ]; then
             PROJECT_NAME="${GITHUB_REPOSITORY#*/}"
           fi
-          node renderer/scripts/setup-cloudflare-pages.mjs --project-yaml project/project.yaml --project-name "$PROJECT_NAME"
+          echo "project=$PROJECT_NAME" >> "$GITHUB_OUTPUT"
+          echo "Cloudflare Pages project: $PROJECT_NAME"
 
-      - name: Deploy dist
+      - name: Ensure Cloudflare Pages project and domain (with retry)
         if: ${{ inputs.run-deploy }}
         run: |
-          PROJECT_NAME="${{ inputs.cloudflare-pages-project }}"
-          if [ -z "$PROJECT_NAME" ]; then
-            PROJECT_NAME="${GITHUB_REPOSITORY#*/}"
-          fi
-          pnpm dlx wrangler pages deploy runtime/dist --project-name "$PROJECT_NAME"
+          renderer/scripts/retry.sh \
+            --label='setup-cloudflare-pages' \
+            --max-attempts=5 \
+            --initial-delay=10 \
+            --max-delay=120 \
+            -- \
+            node renderer/scripts/setup-cloudflare-pages.mjs --project-yaml project/project.yaml --project-name "${{ steps.cf.outputs.project }}"
+
+      - name: Resolve dist artifact name
+        id: dist-artifact
+        if: ${{ inputs.run-deploy }}
+        run: echo "name=runtime-dist-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload built dist for deploy job
+        if: ${{ inputs.run-deploy }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.dist-artifact.outputs.name }}
+          path: runtime/dist
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    if: ${{ inputs.run-deploy }}
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Checkout renderer (for retry.sh)
+        uses: actions/checkout@v6
+        with:
+          repository: bldgtyp/bt-web-report-template
+          ref: ${{ inputs.renderer-ref }}
+          path: renderer
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Download built dist
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.dist-artifact }}
+          path: dist
+
+      - name: Deploy dist to Cloudflare Pages (with retry on transient 5xx)
+        run: |
+          renderer/scripts/retry.sh \
+            --label='wrangler pages deploy' \
+            --max-attempts=6 \
+            --initial-delay=15 \
+            --max-delay=180 \
+            -- \
+            pnpm dlx wrangler pages deploy dist --project-name "${{ needs.build.outputs.project-name }}"
