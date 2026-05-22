@@ -2,9 +2,13 @@
 // <Var k="..." /> — MDX shortcode that resolves a dot-path into project.yaml.
 //
 // Reads the active project from Astro.locals (set by src/middleware/index.ts).
-// On missing keys: throws at build time so a typo can't ship to production;
-// renders a visible [MISSING: ...] placeholder during dev preview so the
-// author sees the broken reference in context.
+// On missing keys: emits a build warning and renders a visible
+// [MISSING: ...] placeholder in BOTH dev and prod. We do NOT throw — the
+// platform must tolerate template content that references new
+// project.yaml fields older per-project repos haven't adopted yet.
+// The placeholder makes the gap obvious in the rendered page, and the
+// warning is captured in CI logs so it can be triaged without blocking
+// the deploy.
 //
 // Wire-up: include `Var` in the components map passed to MDX content, e.g.
 //   <Content components={{ Var }} />
@@ -29,11 +33,9 @@ if (!project) {
 const result = resolveVar(project, k);
 
 if (!result.found) {
-  if (import.meta.env.PROD) {
-    throw new Error(
-      `<Var k="${k}" /> could not be resolved (${result.reason}). Check project.yaml or the field name.`,
-    );
-  }
+  console.warn(
+    `[Var] missing key '${k}' (${result.reason}). Rendering placeholder. Add the field to project.yaml or fix the reference.`,
+  );
 }
 ---
 {result.found ? result.value : `[MISSING: ${k}]`}

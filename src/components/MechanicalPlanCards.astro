@@ -16,35 +16,66 @@ const plans = Object.entries(planModules)
     ...module.frontmatter,
     slug: path.split("/").pop()?.replace(/\.mdx$/, "") ?? module.frontmatter.title,
   }))
-  .filter((plan) => plan.title && plan.image)
+  .filter((plan): plan is MechanicalPlanFrontmatter & { image: string; slug: string } => Boolean(plan.title && plan.image))
   .sort((left, right) => (left.order ?? 999) - (right.order ?? 999) || left.title.localeCompare(right.title));
+
+const archiveFiles = plans.map((plan) => {
+  const url = plan.pdf ?? plan.image;
+  return {
+    url,
+    filename: filenameFromUrl(url),
+  };
+});
+
+function filenameFromUrl(value: string): string {
+  const path = value.split("?")[0]?.split("#")[0] ?? value;
+  return path.split("/").filter(Boolean).pop() ?? "fresh-air-plan";
+}
 ---
 
 {
   plans.length > 0 ? (
-    <div class="btwr-mechanical-plan-grid" aria-label="Mechanical plan drawings">
-      {plans.map((plan) => (
-        <article class="btwr-mechanical-plan-card">
-          <h3>
-            {plan.pdf ? (
-              <a href={plan.pdf} target="_blank" rel="noopener noreferrer">
-                {plan.title}
-              </a>
-            ) : (
-              plan.title
-            )}
-          </h3>
-          <a
-            class="btwr-mechanical-plan-card__image"
-            href={plan.pdf ?? plan.image}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Open ${plan.title} mechanical plan`}
-          >
-            <img src={plan.image} alt={`${plan.title} mechanical plan`} loading="lazy" />
-          </a>
-        </article>
-      ))}
-    </div>
+    <>
+      <button
+        class="btwr-assembly-download"
+        type="button"
+        data-assembly-archive-files={JSON.stringify(archiveFiles)}
+        data-assembly-archive-name="fresh-air-plans.zip"
+        data-label-default="Download Fresh-Air Plans"
+        data-label-busy="Preparing..."
+      >
+        Download Fresh-Air Plans
+      </button>
+      <div class="btwr-mechanical-plan-grid" aria-label="Mechanical plan drawings">
+        {plans.map((plan) => (
+          <article class="btwr-mechanical-plan-card">
+            <h3>
+              {plan.pdf ? (
+                <a href={plan.pdf} target="_blank" rel="noopener noreferrer">
+                  {plan.title}
+                </a>
+              ) : (
+                plan.title
+              )}
+            </h3>
+            <a
+              class="btwr-mechanical-plan-card__image"
+              href={plan.pdf ?? plan.image}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Open ${plan.title} mechanical plan`}
+            >
+              <img src={plan.image} alt={`${plan.title} mechanical plan`} loading="lazy" />
+            </a>
+          </article>
+        ))}
+      </div>
+    </>
   ) : null
 }
+
+<script>
+  import { setupAssemblyArchiveDownloads } from "../scripts/assembly-archive";
+
+  setupAssemblyArchiveDownloads();
+</script>

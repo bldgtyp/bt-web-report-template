@@ -19,9 +19,9 @@ interface Point {
 const { data, title = "Winter Heat Loss due to Envelope Air Leakage" } = Astro.props;
 const recommended = recommendedVariant(data.variantOrder);
 const recommendedId = recommended?.id ?? data.variantOrder[0]?.id;
-const projectPassiveHouseTargetAch = parseAchLimit(data.project?.narrative.certification.ph_ach_limit);
+const projectPassiveHouseTargetAch = parseAchLimit(data.project?.narrative?.certification?.ph_ach_limit);
 const passiveHouseTargetAch = projectPassiveHouseTargetAch ?? 0.6;
-const projectEnergyCodeTargetAch = parseAchLimit(data.project?.narrative.energy_code.ach_limit);
+const projectEnergyCodeTargetAch = parseAchLimit(data.project?.narrative?.energy_code?.ach_limit);
 const energyCodeTargetAch = projectEnergyCodeTargetAch ?? 5.0;
 const energyCodeLabel = energyCodeTargetLabel(data.project);
 const chartWidth = 760;

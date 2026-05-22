@@ -22,9 +22,9 @@ if (!project) {
 
 const result = resolveVar(project, hrefKey);
 
-if (!result.found && import.meta.env.PROD) {
-  throw new Error(
-    `<VarLink hrefKey="${hrefKey}" /> could not be resolved (${result.reason}). Check project.yaml or the field name.`,
+if (!result.found) {
+  console.warn(
+    `[VarLink] missing key '${hrefKey}' (${result.reason}). Rendering '#' placeholder href. Add the field to project.yaml or fix the reference.`,
   );
 }
 

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Force every per-project repo in the bldgtyp-projects org to use the
-# canonical minimal reusable-workflow form for ci.yml and deploy.yml.
+# Force every per-project repo in the bldgtyp-projects org to (a) use the
+# canonical minimal reusable-workflow form for ci.yml/deploy.yml, AND
+# (b) have all required-by-the-template content files. Files that already
+# exist in the per-project repo are NEVER touched — the sync is additive.
 #
-# Idempotent: if the workflow files already match the canonical templates,
-# the script makes no commits.
+# Idempotent: if everything already matches, the script makes no commits.
 #
 # Usage:
 #   scripts/sync-per-project-workflows.sh                # all repos in bldgtyp-projects
@@ -15,8 +16,25 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RENDERER_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 CI_TEMPLATE="$SCRIPT_DIR/per-project-ci.yml"
 DEPLOY_TEMPLATE="$SCRIPT_DIR/per-project-deploy.yml"
+
+# Discover required section MDX files from validate-project.mjs so this
+# script and the validator can never drift. Reads REQUIRED_SECTION_FILES.
+# (Using `while read` for bash 3.x compatibility — mapfile is bash 4+.)
+REQUIRED_CONTENT_FILES=()
+while IFS= read -r line; do
+  REQUIRED_CONTENT_FILES+=("$line")
+done < <(node -e '
+import("fs").then((fs) => {
+  const text = fs.readFileSync(process.argv[1], "utf8");
+  const m = text.match(/REQUIRED_SECTION_FILES\s*=\s*\[([\s\S]*?)\];/);
+  if (!m) { process.exit(1); }
+  const items = m[1].match(/"([^"]+)"/g) || [];
+  for (const it of items) console.log(it.slice(1, -1));
+});
+' "$RENDERER_ROOT/scripts/validate-project.mjs")
 
 if [ ! -f "$CI_TEMPLATE" ] || [ ! -f "$DEPLOY_TEMPLATE" ]; then
   echo "sync-per-project-workflows: cannot find templates at $CI_TEMPLATE / $DEPLOY_TEMPLATE" >&2
@@ -70,8 +88,32 @@ for repo in "${REPOS[@]}"; do
 
   mkdir -p .github/workflows
   needs_update=0
-  if ! cmp -s "$CI_TEMPLATE" .github/workflows/ci.yml; then needs_update=1; fi
-  if ! cmp -s "$DEPLOY_TEMPLATE" .github/workflows/deploy.yml; then needs_update=1; fi
+  changes=()
+  if ! cmp -s "$CI_TEMPLATE" .github/workflows/ci.yml; then
+    needs_update=1; changes+=(".github/workflows/ci.yml")
+  fi
+  if ! cmp -s "$DEPLOY_TEMPLATE" .github/workflows/deploy.yml; then
+    needs_update=1; changes+=(".github/workflows/deploy.yml")
+  fi
+
+  # Additive content sync: copy any template-required content file that the
+  # per-project doesn't have. Never overwrites existing files (the per-project
+  # owns its content). Catches the "template added a new section, every
+  # existing project breaks on next CI run" cascade.
+  for relpath in "${REQUIRED_CONTENT_FILES[@]}"; do
+    src="$RENDERER_ROOT/$relpath"
+    if [ ! -f "$src" ]; then
+      echo "  WARNING: template source missing $relpath — skipping"
+      continue
+    fi
+    if [ -f "$relpath" ]; then
+      continue  # per-project already has it; leave alone
+    fi
+    mkdir -p "$(dirname "$relpath")"
+    cp "$src" "$relpath"
+    needs_update=1
+    changes+=("$relpath")
+  done
 
   if [ "$needs_update" = "0" ]; then
     echo "  already canonical"
@@ -82,26 +124,31 @@ for repo in "${REPOS[@]}"; do
   cp "$CI_TEMPLATE" .github/workflows/ci.yml
   cp "$DEPLOY_TEMPLATE" .github/workflows/deploy.yml
 
+  echo "  changes:"
+  for path in "${changes[@]}"; do
+    echo "    $path"
+  done
+
   if [ "$DRY_RUN" = "1" ]; then
-    echo "  would update (dry-run):"
-    git --no-pager diff --stat
+    echo "  (dry-run — not pushing)"
     updated=$((updated + 1))
     continue
   fi
 
-  git -c user.name="bt-web-report-sync" -c user.email="phtools@bldgtyp.com" add .github/workflows/ci.yml .github/workflows/deploy.yml
+  git -c user.name="bt-web-report-sync" -c user.email="phtools@bldgtyp.com" add "${changes[@]}"
   if git diff --cached --quiet; then
     echo "  no diff after staging — odd, skipping"
     unchanged=$((unchanged + 1))
     continue
   fi
-  git -c user.name="bt-web-report-sync" -c user.email="phtools@bldgtyp.com" commit -m "Sync per-project workflows to canonical reusable form
+  git -c user.name="bt-web-report-sync" -c user.email="phtools@bldgtyp.com" commit -m "Sync per-project from template canonical state
 
-Per bldgtyp/bt-web-report-template scripts/per-project-{ci,deploy}.yml.
-This propagates schema sibling-checkout, wait-for-publish, retry-with-
-backoff, and the build/deploy job split to this project's next CI run."
+Workflows updated to the reusable-workflow form; any new template-required
+content files were added (additive only — existing per-project content
+is never touched). See bldgtyp/bt-web-report-template
+scripts/sync-per-project-workflows.sh."
   git push origin HEAD
-  echo "  updated and pushed"
+  echo "  pushed"
   updated=$((updated + 1))
 done
 
