@@ -35,15 +35,16 @@ describe("assembly notes", () => {
 
       expect(frontmatter).toMatchObject({
         title: expect.any(String),
-        notes: expect.any(Array),
       });
+      expect(frontmatter.notes).toBeUndefined();
     }
   });
 
-  it("preserves inch marks in parsed note text", async () => {
+  it("keeps inch marks in assembly body text instead of YAML frontmatter", async () => {
     const source = await readFile(new URL("../content/envelope/assemblies/floor.mdx", import.meta.url), "utf8");
     const frontmatter = parse(frontmatterFor(source));
 
-    expect(frontmatter.notes).toEqual(['Target. 6" sub-slab (Neopor Graphite EPS or sim.).']);
+    expect(frontmatter.notes).toBeUndefined();
+    expect(source).toContain('- Target. 6" sub-slab (Neopor Graphite EPS or sim.).');
   });
 });

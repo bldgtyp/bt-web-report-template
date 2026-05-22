@@ -1,6 +1,5 @@
 import { listVarKeyOptions } from "@bldgtyp/web-report-schemas";
 import { defineConfig, type Collection, type Template, type TinaField } from "tinacms";
-import { normalizeAssemblyNotes } from "../src/content/assembly-notes";
 
 const lockedSectionActions = {
   create: false,
@@ -215,15 +214,6 @@ const assemblyFields: TinaField[] = [
     required: true,
   },
   {
-    type: "string",
-    name: "notes",
-    label: "Notes",
-    list: true,
-    ui: {
-      component: "textarea",
-    },
-  },
-  {
     type: "rich-text",
     name: "body",
     label: "Additional content",
@@ -335,13 +325,10 @@ export default defineConfig({
             delete: true,
             createNestedFolder: false,
           },
-          beforeSubmit: ({ values }) => {
-            const notes = normalizeAssemblyNotes(values.notes);
-
-            return {
-              ...values,
-              notes: notes.length > 0 ? notes : undefined,
-            };
+          beforeSubmit: async ({ values }) => {
+            const bodyFirstValues = { ...values };
+            delete bodyFirstValues.notes;
+            return bodyFirstValues;
           },
         },
         fields: assemblyFields,

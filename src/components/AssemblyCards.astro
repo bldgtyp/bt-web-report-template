@@ -10,6 +10,7 @@ interface AssemblyFrontmatter {
 }
 
 interface AssemblyModule {
+  default: any;
   frontmatter: AssemblyFrontmatter;
   url?: string;
 }
@@ -19,6 +20,7 @@ const archiveName = "recommended-assemblies.zip";
 const assemblies = Object.entries(assemblyModules)
   .map(([path, module]) => ({
     ...module.frontmatter,
+    Content: module.default,
     notes: normalizeAssemblyNotes(module.frontmatter.notes),
     slug: path.split("/").pop()?.replace(/\.mdx$/, "") ?? module.frontmatter.title,
   }))
@@ -59,31 +61,38 @@ function filenameFromUrl(value: string): string {
         </button>
       ) : null}
       <div class="btwr-assembly-list" aria-label="Recommended assembly types">
-        {assemblies.map((assembly) => (
-          <article class="btwr-assembly-card">
-            <h3>{assembly.title}</h3>
-            <div class="btwr-assembly-card__body">
-              {assembly.image ? (
-                <a
-                  class="btwr-assembly-card__image"
-                  href={assembly.pdf ?? assembly.image}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Open ${assembly.title} assembly detail`}
-                >
-                  <img src={assembly.image} alt={`${assembly.title} assembly diagram`} loading="lazy" />
-                </a>
-              ) : null}
-              {assembly.notes && assembly.notes.length > 0 ? (
-                <ul>
-                  {assembly.notes.map((note) => (
-                    <li>{note}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-          </article>
-        ))}
+        {assemblies.map((assembly) => {
+          const AssemblyContent = assembly.Content;
+
+          return (
+            <article class="btwr-assembly-card">
+              <h3>{assembly.title}</h3>
+              <div class="btwr-assembly-card__body">
+                {assembly.image ? (
+                  <a
+                    class="btwr-assembly-card__image"
+                    href={assembly.pdf ?? assembly.image}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open ${assembly.title} assembly detail`}
+                  >
+                    <img src={assembly.image} alt={`${assembly.title} assembly diagram`} loading="lazy" />
+                  </a>
+                ) : null}
+                <div class="btwr-assembly-card__content">
+                  <AssemblyContent />
+                  {assembly.notes.length > 0 ? (
+                    <ul>
+                      {assembly.notes.map((note) => (
+                        <li>{note}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </div>
     </>
   ) : (
