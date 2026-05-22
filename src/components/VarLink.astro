@@ -3,6 +3,7 @@
 
 import type { ProjectConfig } from "../data/project";
 import { resolveVar } from "../data/resolve-var";
+import { isFullUrl, newTabRel } from "../markdown/remark-full-url-links-new-tab.mjs";
 
 interface Props {
   hrefKey: string;
@@ -28,8 +29,11 @@ if (!result.found && import.meta.env.PROD) {
 }
 
 const href = result.found ? result.value : "#";
+const opensNewTab = isFullUrl(href);
+const linkTarget = opensNewTab ? "_blank" : target;
+const linkRel = opensNewTab ? newTabRel(rel) : rel;
 ---
 
-<a href={href} target={target} rel={rel}>
+<a href={href} target={linkTarget} rel={linkRel}>
   <slot />
 </a>

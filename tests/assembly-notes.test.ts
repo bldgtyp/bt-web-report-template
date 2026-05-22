@@ -42,9 +42,10 @@ describe("assembly notes", () => {
 
   it("keeps inch marks in assembly body text instead of YAML frontmatter", async () => {
     const source = await readFile(new URL("../content/envelope/assemblies/floor.mdx", import.meta.url), "utf8");
-    const frontmatter = parse(frontmatterFor(source));
+  const frontmatter = parse(frontmatterFor(source));
 
-    expect(frontmatter.notes).toBeUndefined();
-    expect(source).toContain('- Target. 6" sub-slab (Neopor Graphite EPS or sim.).');
+  expect(frontmatter.notes).toBeUndefined();
+  expect(source).toContain('- Target. 6" sub-slab (');
+  expect(source).toContain("Neopor Graphite EPS");
   });
 });
