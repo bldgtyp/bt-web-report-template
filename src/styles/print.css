@@ -69,7 +69,8 @@
   .btwr-chart-tooltip,
   .btwr-chart-expand,
   .btwr-assembly-download,
-  .btwr-chart-modal {
+  .btwr-chart-modal,
+  .btwr-pdf-download {
     display: none !important;
   }
 }

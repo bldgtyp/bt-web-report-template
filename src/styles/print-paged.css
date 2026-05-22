@@ -1,0 +1,248 @@
+@page {
+  size: letter;
+  margin: 0.75in;
+}
+
+@page cover {
+  margin: 0;
+  @top-left   { content: none; }
+  @top-right  { content: none; }
+  @bottom-left  { content: none; }
+  @bottom-right { content: none; }
+}
+
+@page toc {
+  margin: 0.75in;
+  @top-right    { content: "Contents"; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8pt; color: #777; letter-spacing: 0.08em; text-transform: uppercase; }
+  @bottom-right { content: counter(page); font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8pt; color: #777; }
+}
+
+@page body {
+  margin: 0.75in;
+  @top-right    { content: string(section); font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8pt; color: #777; letter-spacing: 0.08em; text-transform: uppercase; }
+  @bottom-right { content: counter(page) " / " counter(pages); font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8pt; color: #777; }
+  @bottom-left  { content: string(report-title); font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8pt; color: #777; }
+}
+
+.btwr-print-cover { page: cover; break-after: page; }
+.btwr-print-toc   { page: toc;   break-before: page; break-after: page; }
+.btwr-section     { page: body;  break-before: page; }
+
+/* Target only the canonical section heading, not nested MDX `## Heading`
+   lines, so the running header doesn't drift mid-section. */
+.btwr-section-heading h2 { string-set: section content(); }
+
+.btwr-print-cover h1 { string-set: report-title content(); }
+
+.btwr-print-toc__entry {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 0.5em;
+  text-decoration: none;
+  color: inherit;
+  padding-block: 0.15em;
+}
+
+.btwr-print-toc__entry .btwr-print-toc__label {
+  position: relative;
+  overflow: hidden;
+}
+
+.btwr-print-toc__entry::after {
+  content: target-counter(attr(href), page);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  color: #555;
+}
+
+.btwr-print-toc__entry--page {
+  font-weight: 600;
+  font-size: 1.1em;
+  padding-block: 0.5em;
+  border-top: 1px solid #ccc;
+}
+
+.btwr-print-toc__entry--page:first-of-type {
+  border-top: none;
+}
+
+.btwr-print-toc__entry--section {
+  padding-inline-start: 1.5em;
+  font-size: 0.95em;
+  color: #333;
+}
+
+.btwr-print-toc__kicker {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.85em;
+  color: #999;
+  letter-spacing: 0.04em;
+  min-width: 2.5em;
+}
+
+.btwr-print-toc__pages {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.btwr-print-toc__sections {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.btwr-print-toc__page {
+  margin-bottom: 0.4em;
+}
+
+.btwr-print-toc__header {
+  margin-bottom: 1.5em;
+}
+
+.btwr-print-toc__eyebrow {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9pt;
+  color: #777;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.btwr-print-toc__title {
+  font-size: 24pt;
+  margin: 0.2em 0 0;
+  font-weight: 700;
+}
+
+/* The web hero is sized for a wider viewport with a fixed-width image column;
+   override for the zero-margin Letter cover page. */
+.btwr-print-cover .btwr-hero {
+  min-height: 100vh;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0.6in;
+  box-sizing: border-box;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.3in;
+  align-items: center;
+}
+
+.btwr-print-cover .btwr-hero__copy {
+  min-width: 0;
+}
+
+.btwr-print-cover .btwr-hero__figure {
+  margin: 0;
+  align-self: center;
+}
+
+.btwr-print-cover .btwr-hero__image {
+  max-width: 100%;
+  height: auto;
+}
+
+.btwr-print-cover h1 {
+  font-size: 32pt;
+  line-height: 1.05;
+  margin-block: 0 0.3in;
+  font-weight: 700;
+}
+
+.btwr-print-cover .btwr-hero__lede {
+  font-size: 13pt;
+  line-height: 1.5;
+  max-width: none;
+}
+
+.btwr-print-cover .btwr-hero__report-date {
+  margin-top: 0.4in;
+}
+
+h2, h3, h4 { break-after: avoid; }
+
+figure,
+.btwr-chart-frame,
+.btwr-metric-card,
+.btwr-table-wrap,
+.btwr-data-state,
+.btwr-callout {
+  break-inside: avoid;
+}
+
+table thead   { display: table-header-group; }
+tr            { break-inside: avoid; }
+td, th        { break-inside: avoid; }
+
+p { orphans: 3; widows: 3; }
+
+/* Opt-in modifier: any figure too tall to fit can be tagged with this class
+   to claim its own page, scaled to fit. */
+.btwr-figure--full-page {
+  break-before: page;
+  break-after: page;
+  height: 9.5in;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btwr-figure--full-page > * {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Belt-and-braces: most of these aren't rendered by PrintReportLayout, but
+   keep the hide rule so a future component reuse doesn't leak web chrome. */
+.btwr-masthead,
+.btwr-toc,
+.btwr-chart-expand,
+.btwr-chart-modal,
+.btwr-assembly-download,
+.btwr-chart-tooltip,
+.btwr-pdf-download {
+  display: none !important;
+}
+
+.btwr-report--print {
+  font-size: 11pt;
+  line-height: 1.45;
+  color: #111;
+  background: #fff;
+}
+
+.btwr-report--print h1 { font-size: 28pt; }
+.btwr-report--print h2 { font-size: 18pt; }
+.btwr-report--print h3 { font-size: 13pt; }
+.btwr-report--print h4 { font-size: 11pt; }
+
+.btwr-report--print .btwr-chart-frame svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.btwr-report--print a,
+.btwr-report--print code,
+.btwr-report--print pre {
+  overflow-wrap: anywhere;
+}
+
+/* Chart-frame plot containers can collapse to height: 0 in headless capture,
+   which makes Observable Plot render at the wrong size. */
+.btwr-report--print .btwr-chart-frame__plot {
+  min-height: 3.5in;
+}
+
+.btwr-report--print .btwr-section {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.btwr-report--print .btwr-print-main > .btwr-section + .btwr-section {
+  margin-top: 0;
+}

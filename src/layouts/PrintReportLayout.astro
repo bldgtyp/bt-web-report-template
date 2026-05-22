@@ -1,0 +1,58 @@
+---
+import componentsCss from "../styles/components.css?raw";
+import tokensCss from "../styles/tokens.css?raw";
+import projectCss from "../styles/project.css?raw";
+import printPagedCss from "../styles/print-paged.css?raw";
+
+import type { TemplateReportData } from "../data/report";
+
+interface Props {
+  report: TemplateReportData;
+}
+
+const { report } = Astro.props;
+const manifest = report.manifest;
+const projectName = manifest.project?.name ?? manifest.project?.slug ?? "Untitled project";
+const buildingName = report.project.building_name || projectName;
+const clientName = report.project.client_name || "Client";
+const phase = report.project.phase || "Design analysis";
+const reportDateValue = report.project.report_date || manifest.generated_at;
+const reportDate = reportDateValue || "Date pending";
+const title = `${projectName} | ${phase} | Printable report`;
+const faviconHref =
+  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><path fill="%233E93AE" d="M6 28V12l12-7 12 7v16h-7V16H13v12H6Z"/></svg>';
+---
+
+<!doctype html>
+<html lang="en" data-theme="light" data-print-route="true">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="btwr-project-name" content={projectName} />
+    <meta name="btwr-client-name" content={clientName} />
+    <meta name="btwr-building-name" content={buildingName} />
+    <meta name="btwr-phase" content={phase} />
+    <meta name="btwr-report-date" content={reportDate} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400&display=swap"
+    />
+    <link rel="icon" href={faviconHref} />
+    <title>{title}</title>
+    <style set:html={tokensCss} />
+    <style set:html={componentsCss} />
+    <style set:html={projectCss} />
+    <style set:html={printPagedCss} />
+  </head>
+  <body class="btwr-report btwr-report--print">
+    <main id="btwr-print-main" class="btwr-print-main">
+      <slot />
+    </main>
+    <script>
+      import "../scripts/paged-init";
+    </script>
+  </body>
+</html>

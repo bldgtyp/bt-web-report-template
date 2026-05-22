@@ -214,11 +214,14 @@ jobs:
 
       - name: Build PDF
         working-directory: runtime
-        # Run the post-build PDF script directly (not `pnpm build:pdf`) so we
-        # don't re-execute validate+build a second time inside the same CI job.
-        # dist/report.pdf is produced alongside dist/index.html and rides the
-        # same artifact upload + Cloudflare deploy below.
+        # Run the post-build script directly (not `pnpm build:pdf`) so we don't
+        # re-execute validate+build inside the same job. dist/report.pdf rides
+        # the same artifact upload + Cloudflare deploy as dist/index.html.
         run: node scripts/build-pdf.mjs
+
+      - name: Tests
+        working-directory: runtime
+        run: pnpm test
 
       - name: Resolve Cloudflare project name
         id: cf

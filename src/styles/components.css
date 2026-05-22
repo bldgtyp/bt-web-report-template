@@ -32,8 +32,8 @@
   top: 0;
   z-index: 10;
   display: grid;
-  grid-template-columns: minmax(16rem, 1fr) minmax(12rem, auto) minmax(24rem, auto);
-  grid-template-areas: "brand meta nav";
+  grid-template-columns: minmax(16rem, 1fr) minmax(12rem, auto) minmax(24rem, auto) auto;
+  grid-template-areas: "brand meta nav actions";
   gap: var(--btwr-space-5);
   align-items: center;
   padding: 0.85rem 3.75rem;
@@ -367,6 +367,77 @@
   font-size: 0.72rem;
   letter-spacing: 0.1em;
 }
+
+.btwr-pdf-download {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--btwr-space-2);
+  align-items: center;
+}
+
+.btwr-pdf-download--hero {
+  margin-top: var(--btwr-space-5, 1.5rem);
+}
+
+.btwr-pdf-download .btwr-pdf-download__primary,
+.btwr-pdf-download .btwr-pdf-download__secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  font-family: var(--btwr-font-label);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--btwr-radius-sm);
+  border: 1px solid currentColor;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.btwr-pdf-download .btwr-pdf-download__primary {
+  color: var(--btwr-color-surface, #fff);
+  background: var(--btwr-color-accent, #3e93ae);
+  border-color: var(--btwr-color-accent, #3e93ae);
+}
+
+.btwr-pdf-download .btwr-pdf-download__primary:hover,
+.btwr-pdf-download .btwr-pdf-download__primary:focus-visible {
+  background: var(--btwr-color-link, #205d72);
+  border-color: var(--btwr-color-link, #205d72);
+  color: var(--btwr-color-surface, #fff);
+}
+
+.btwr-pdf-download .btwr-pdf-download__secondary {
+  color: var(--btwr-color-heading, #1a1a1a);
+  background: transparent;
+  border-color: var(--btwr-color-border, #d8d2c4);
+}
+
+.btwr-pdf-download .btwr-pdf-download__secondary:hover,
+.btwr-pdf-download .btwr-pdf-download__secondary:focus-visible {
+  border-color: var(--btwr-color-accent, #3e93ae);
+  color: var(--btwr-color-accent, #3e93ae);
+}
+
+.btwr-pdf-download__icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.btwr-pdf-download--masthead {
+  grid-area: actions;
+}
+
+.btwr-pdf-download--masthead .btwr-pdf-download__primary {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.72rem;
+}
+
 
 .btwr-hero__stats {
   grid-column: 1 / -1;

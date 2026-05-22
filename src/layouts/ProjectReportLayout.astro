@@ -4,6 +4,7 @@ import componentsCss from "../styles/components.css?raw";
 import printCss from "../styles/print.css?raw";
 import tokensCss from "../styles/tokens.css?raw";
 
+import PdfDownload from "../components/PdfDownload.astro";
 import { reportPageNavItems } from "../data/pages";
 import type { TemplateReportData } from "../data/report";
 import chartInteractionsJs from "../scripts/chart-interactions.js?raw";
@@ -102,6 +103,8 @@ const faviconHref =
             ))
           }
         </nav>
+        <PdfDownload variant="masthead" />
+
         <details class="btwr-masthead__menu">
           <summary aria-label="Open primary report pages menu">
             <span class="btwr-masthead__menu-icon" aria-hidden="true">
@@ -139,6 +142,7 @@ const faviconHref =
                 <span>Report date</span>
                 {reportDateValue ? <time datetime={reportDateValue}>{reportDate}</time> : <span>{reportDate}</span>}
               </p>
+              <PdfDownload variant="hero" />
             </div>
             <figure class="btwr-hero__figure">
               {heroImage ? (

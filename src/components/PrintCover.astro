@@ -1,0 +1,60 @@
+---
+import { frontmatter as summary } from "../../content/summary.mdx";
+import { recommendedVariant } from "../data/variants";
+import type { TemplateReportData } from "../data/report";
+
+interface Props {
+  report: TemplateReportData;
+}
+
+const { report } = Astro.props;
+const manifest = report.manifest;
+const variants = report.variantOrder;
+const recommended = recommendedVariant(variants);
+const projectName = manifest.project?.name ?? manifest.project?.slug ?? "Untitled project";
+const reportDateValue = report.project.report_date || manifest.generated_at;
+const reportDate = reportDateValue || "Date pending";
+const variantLabel = variants.length === 1 ? "variant" : "variants";
+const heroImage = summary.hero_image;
+const heroAlt = summary.hero_alt ?? "";
+const heroCaption = summary.hero_caption;
+---
+
+<section class="btwr-print-cover" aria-label="Report cover">
+  <div class="btwr-hero">
+    <div class="btwr-hero__copy">
+      <h1>{projectName}</h1>
+      <p class="btwr-hero__lede">
+        {variants.length > 0
+          ? `${variants.length} ${variantLabel} tested. ${
+              recommended ? `${recommended.name} is the current recommended path.` : "The recommended path is pending."
+            }`
+          : "Project metadata is ready. PHPP-derived model data will populate this report after the scrape runs."}
+      </p>
+      <p class="btwr-hero__report-date">
+        <span>Report date</span>
+        {reportDateValue ? <time datetime={reportDateValue}>{reportDate}</time> : <span>{reportDate}</span>}
+      </p>
+    </div>
+    <figure class="btwr-hero__figure">
+      {
+        heroImage ? (
+          <>
+            <img
+              class="btwr-hero__image"
+              src={heroImage}
+              alt={heroAlt}
+              fetchpriority="high"
+              decoding="async"
+            />
+            {heroCaption ? <figcaption>{heroCaption}</figcaption> : null}
+          </>
+        ) : (
+          <div class="btwr-placeholder-iso" aria-hidden="true">
+            <span>ISOMETRIC RENDER</span>
+          </div>
+        )
+      }
+    </figure>
+  </div>
+</section>
