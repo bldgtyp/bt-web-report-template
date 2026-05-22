@@ -21,6 +21,8 @@
     "test:schema": "node scripts/test-project-schema.mjs",
     "test:cloudflare": "node scripts/test-cloudflare-pages-setup.mjs",
     "test:e2e": "playwright test",
+    "test:ci": "scripts/ci-emulate.sh",
+    "test:workflows": "node scripts/check-workflow-invariants.mjs",
     "test": "vitest run",
     "smoke:fixture": "node scripts/smoke-fixture-data.mjs"
   },
