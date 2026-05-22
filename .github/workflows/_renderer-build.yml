@@ -1,0 +1,188 @@
+name: Renderer build (reusable)
+
+# Single source of truth for the bt-web-report renderer build pipeline.
+# Called by the template's own ci.yml / deploy.yml AND by every per-project
+# repo's CI. Editing the build flow happens here, once.
+#
+# Key design choices to keep this low-touch and cascade-resistant:
+#
+# 1. Schema validation reads from a sibling checkout of bt-web-report-schemas,
+#    NOT from the GitHub Packages tarball. New schema fields land in the
+#    `main` branch immediately; consumers never wait for a publish to validate.
+#
+# 2. The schemas npm package is still needed for `pnpm install` (for the
+#    Tina var-keys helpers). If the renderer's pinned schemas version isn't
+#    on GitHub Packages yet, we POLL until it lands instead of failing.
+#    Combined with the schemas repo's auto-publish-on-version-bump workflow,
+#    this means CI can never race ahead of the publish.
+#
+# 3. Cloudflare deploy is gated by an input so one workflow file handles
+#    both CI (build-only) and deploy use cases without duplication.
+
+on:
+  workflow_call:
+    inputs:
+      project-repo:
+        description: "owner/repo holding the project content (project.yaml + content/)."
+        type: string
+        required: true
+      project-ref:
+        description: "Ref of project-repo to check out. Empty means the default branch."
+        type: string
+        default: ""
+      renderer-ref:
+        description: "Ref of bldgtyp/bt-web-report-template to check out."
+        type: string
+        default: "main"
+      schemas-ref:
+        description: "Ref of bldgtyp/bt-web-report-schemas to check out for the validate step."
+        type: string
+        default: "main"
+      run-deploy:
+        description: "Deploy to Cloudflare Pages after a successful build."
+        type: boolean
+        default: false
+      cloudflare-pages-project:
+        description: "Cloudflare Pages project name. Defaults to the project repo name."
+        type: string
+        default: ""
+      package-publish-timeout-seconds:
+        description: "Max seconds to wait for the pinned @bldgtyp/web-report-schemas version to appear on GitHub Packages."
+        type: number
+        default: 600
+    secrets:
+      BLDGTYP_PACKAGES_TOKEN:
+        description: "Token with read:packages on @bldgtyp. Required."
+        required: true
+      CLOUDFLARE_API_TOKEN:
+        description: "Required when run-deploy=true."
+        required: false
+      CLOUDFLARE_ACCOUNT_ID:
+        description: "Required when run-deploy=true."
+        required: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Checkout project content
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.project-repo }}
+          ref: ${{ inputs.project-ref }}
+          path: project
+
+      - name: Checkout shared renderer
+        uses: actions/checkout@v6
+        with:
+          repository: bldgtyp/bt-web-report-template
+          ref: ${{ inputs.renderer-ref }}
+          path: renderer
+
+      - name: Checkout schemas (source of truth for validate)
+        uses: actions/checkout@v6
+        with:
+          repository: bldgtyp/bt-web-report-schemas
+          ref: ${{ inputs.schemas-ref }}
+          path: schemas-src
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Verify required secrets
+        run: |
+          missing=0
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::BLDGTYP_PACKAGES_TOKEN is not available to this repo. Configure it as a repo or org Actions secret with read:packages on @bldgtyp."
+            missing=1
+          fi
+          if [ "${{ inputs.run-deploy }}" = "true" ]; then
+            if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+              echo "::error::CLOUDFLARE_API_TOKEN required when run-deploy=true."
+              missing=1
+            fi
+            if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+              echo "::error::CLOUDFLARE_ACCOUNT_ID required when run-deploy=true."
+              missing=1
+            fi
+          fi
+          exit "$missing"
+
+      - name: Configure GitHub Packages auth
+        run: echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
+
+      - name: Wait for pinned schemas package to publish
+        working-directory: renderer
+        run: |
+          PINNED=$(node -e 'const p=require("./package.json");const v=p.dependencies["@bldgtyp/web-report-schemas"]; if(!v){process.exit(1)}; console.log(v.replace(/^[\^~]/,""))')
+          if [ -z "$PINNED" ]; then
+            echo "::error::renderer package.json does not declare @bldgtyp/web-report-schemas"
+            exit 1
+          fi
+          echo "Renderer pins @bldgtyp/web-report-schemas@$PINNED"
+          node scripts/wait-for-package-version.mjs @bldgtyp/web-report-schemas "$PINNED" --timeout-seconds=${{ inputs.package-publish-timeout-seconds }}
+
+      - name: Install renderer dependencies
+        run: pnpm install --ignore-scripts --no-frozen-lockfile
+        working-directory: renderer
+
+      - name: Prepare content-only runtime
+        run: |
+          mkdir runtime
+          for item in astro.config.mjs package.json pnpm-lock.yaml playwright playwright.config.ts scripts src tina tsconfig.json; do
+            if [ -e "renderer/$item" ]; then
+              ln -s "../renderer/$item" "runtime/$item"
+            fi
+          done
+          ln -s ../renderer/node_modules runtime/node_modules
+          for item in project.yaml content data public; do
+            cp -a "project/$item" "runtime/$item"
+          done
+
+      - name: Validate project metadata (against schemas source of truth)
+        working-directory: runtime
+        env:
+          BTWR_PROJECT_SCHEMA_JSON: ${{ github.workspace }}/schemas-src/schemas/project.schema.json
+        run: pnpm validate
+
+      - name: Type-check
+        working-directory: runtime
+        run: pnpm check
+
+      - name: Tina editor audit
+        working-directory: runtime
+        run: pnpm check:editor
+
+      - name: Build
+        working-directory: runtime
+        run: pnpm build
+
+      - name: Ensure Cloudflare Pages project and domain
+        if: ${{ inputs.run-deploy }}
+        run: |
+          PROJECT_NAME="${{ inputs.cloudflare-pages-project }}"
+          if [ -z "$PROJECT_NAME" ]; then
+            PROJECT_NAME="${GITHUB_REPOSITORY#*/}"
+          fi
+          node renderer/scripts/setup-cloudflare-pages.mjs --project-yaml project/project.yaml --project-name "$PROJECT_NAME"
+
+      - name: Deploy dist
+        if: ${{ inputs.run-deploy }}
+        run: |
+          PROJECT_NAME="${{ inputs.cloudflare-pages-project }}"
+          if [ -z "$PROJECT_NAME" ]; then
+            PROJECT_NAME="${GITHUB_REPOSITORY#*/}"
+          fi
+          pnpm dlx wrangler pages deploy runtime/dist --project-name "$PROJECT_NAME"

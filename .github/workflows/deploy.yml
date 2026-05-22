@@ -1,78 +1,25 @@
 name: Deploy to Cloudflare Pages
 
+# Template repo's own deploy: builds the seed content and deploys it as a
+# preview/demo Pages project. Shares all build logic with CI via the
+# reusable _renderer-build.yml; the only delta is run-deploy=true.
+
 on:
   workflow_dispatch:
   push:
     branches: [main]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
+    uses: ./.github/workflows/_renderer-build.yml
+    with:
+      project-repo: ${{ github.repository }}
+      project-ref: ${{ github.ref }}
+      renderer-ref: ${{ github.sha }}
+      schemas-ref: main
+      run-deploy: true
+      cloudflare-pages-project: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+    secrets:
+      BLDGTYP_PACKAGES_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
-    steps:
-      - name: Checkout project content
-        uses: actions/checkout@v6
-        with:
-          path: project
-      - name: Checkout shared renderer
-        uses: actions/checkout@v6
-        with:
-          repository: bldgtyp/bt-web-report-template
-          path: renderer
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10.33.0
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - name: Verify deploy secrets
-        run: |
-          missing=0
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::error::BLDGTYP_PACKAGES_TOKEN is not available to this repo. Configure it as a repo or org Actions secret with read access to @bldgtyp packages."
-            missing=1
-          fi
-          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-            echo "::error::CLOUDFLARE_API_TOKEN is not available to this repo. Configure it as a repo or org Actions secret with Cloudflare Pages and bldgtyp.com DNS access."
-            missing=1
-          fi
-          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "::error::CLOUDFLARE_ACCOUNT_ID is not available to this repo."
-            missing=1
-          fi
-          exit "$missing"
-      - name: Configure GitHub Packages auth
-        run: echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
-      - name: Install renderer dependencies
-        run: pnpm install --ignore-scripts --no-frozen-lockfile
-        working-directory: renderer
-      - name: Prepare content-only runtime
-        run: |
-          mkdir runtime
-          for item in astro.config.mjs package.json pnpm-lock.yaml scripts src tina tsconfig.json; do
-            ln -s "../renderer/$item" "runtime/$item"
-          done
-          ln -s ../renderer/node_modules runtime/node_modules
-          for item in project.yaml content data public; do
-            cp -a "project/$item" "runtime/$item"
-          done
-      - name: Validate project metadata
-        run: pnpm validate
-        working-directory: runtime
-      - run: pnpm build
-        working-directory: runtime
-      - name: Ensure Cloudflare Pages project and domain
-        run: |
-          PROJECT_NAME="${CLOUDFLARE_PAGES_PROJECT:-${GITHUB_REPOSITORY#*/}}"
-          node renderer/scripts/setup-cloudflare-pages.mjs --project-yaml project/project.yaml --project-name "$PROJECT_NAME"
-      - name: Deploy dist
-        run: |
-          PROJECT_NAME="${CLOUDFLARE_PAGES_PROJECT:-${GITHUB_REPOSITORY#*/}}"
-          pnpm dlx wrangler pages deploy runtime/dist --project-name "$PROJECT_NAME"

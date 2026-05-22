@@ -1,4 +1,6 @@
 ---
+import { normalizeAssemblyNotes } from "../content/assembly-notes";
+
 interface AssemblyFrontmatter {
   title: string;
   order?: number;
@@ -17,6 +19,7 @@ const archiveName = "recommended-assemblies.zip";
 const assemblies = Object.entries(assemblyModules)
   .map(([path, module]) => ({
     ...module.frontmatter,
+    notes: normalizeAssemblyNotes(module.frontmatter.notes),
     slug: path.split("/").pop()?.replace(/\.mdx$/, "") ?? module.frontmatter.title,
   }))
   .sort((left, right) => (left.order ?? 999) - (right.order ?? 999) || left.title.localeCompare(right.title));
