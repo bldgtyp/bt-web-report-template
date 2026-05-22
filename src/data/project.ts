@@ -45,8 +45,10 @@ export interface EnergyCodeNarrative {
 
 export interface Co2Narrative {
   subregion_name?: string | null;
+  epa_subgrid_name?: string | null;
   occupancy?: string | null;
   target_tons?: string | null;
+  taget_co2_per_person?: number | null;
 }
 
 export interface WindowsNarrative {
@@ -96,6 +98,7 @@ export interface ProjectConfig {
     state: string;
     climate_zone: string;
     building_type: string;
+    total_num_occupants: number;
   };
   source_files: {
     phpp_path: string;

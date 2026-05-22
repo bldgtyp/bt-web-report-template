@@ -128,6 +128,7 @@ describe("loadReportData", () => {
         '  state: "NY"',
         '  climate_zone: "ASHRAE 4A"',
         '  building_type: "single-family residential"',
+        "  total_num_occupants: 4",
         "source_files:",
         '  phpp_path: ""',
         '  data_dir: "data"',

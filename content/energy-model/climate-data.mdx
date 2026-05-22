@@ -4,6 +4,14 @@ title: "Climate Data"
 dek: "Document the climate file and monthly conditions driving the model."
 ---
 
-Climate assumptions affect heating demand, cooling demand, solar gains, and comfort risk. The model uses the <Var
-k="narrative.climate.weather_station_name" /> weather file for <Var k="narrative.climate.state_name" /> (<Var
-k="narrative.climate.ashrae_location_name" />). Note any project-specific adjustments below.
+For all the modeled cases shown in the following sections, climate data from the nearest weather station was used.
+
+<VarLink hrefKey="narrative.climate.weather_station_url" target="_blank" rel="noopener noreferrer">
+    - <Var k="narrative.climate.weather_station_name" />
+</VarLink>
+
+The data from this climate set is illustrated here for reference purposes. It should be noted that 
+for the Passive House energy models, monthly average climate data are used and therefore may 
+appear different from the more typical ASHRAE hourly data shown in some other US Energy Modeling 
+programs. The monthly data is all derived from the same sources (local weather stations) as the 
+typical ASHRAE data however.

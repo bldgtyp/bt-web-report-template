@@ -3,15 +3,15 @@
 // Authors reference fields from project.yaml in MDX using dot-paths into the
 // validated ProjectConfig shape — e.g. `client_name`, `building.city`,
 // `narrative.certification.target`, `narrative.mechanical.erv.type_name`.
-// Only string-valued fields are returned; structural paths (e.g. `building`
-// or `narrative`) resolve to null so prose can't accidentally inline an
-// entire object.
+// Only scalar fields are returned; structural paths (e.g. `building` or
+// `narrative`) resolve to null so prose can't accidentally inline an entire
+// object.
 
 import type { ProjectConfig } from "./project";
 
 export type VarResolution =
   | { found: true; value: string }
-  | { found: false; reason: "missing" | "non-string" };
+  | { found: false; reason: "missing" | "non-scalar" };
 
 export function resolveVar(project: ProjectConfig, dotPath: string): VarResolution {
   let current: unknown = project;
@@ -24,8 +24,8 @@ export function resolveVar(project: ProjectConfig, dotPath: string): VarResoluti
   if (current === null || current === undefined) {
     return { found: false, reason: "missing" };
   }
-  if (typeof current !== "string") {
-    return { found: false, reason: "non-string" };
+  if (typeof current !== "string" && typeof current !== "number") {
+    return { found: false, reason: "non-scalar" };
   }
-  return { found: true, value: current };
+  return { found: true, value: String(current) };
 }

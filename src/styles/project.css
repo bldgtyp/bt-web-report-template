@@ -234,7 +234,6 @@
 .btwr-callout--critical strong,
 .btwr-callout--critical span {
   color: var(--btwr-color-warning);
-  font-weight: 700;
 }
 
 .btwr-section + .btwr-section {

@@ -28,6 +28,7 @@ const baseProject = {
     state: "NY",
     climate_zone: "ASHRAE 4A",
     building_type: "single-family residential",
+    total_num_occupants: 4,
   },
   source_files: {
     phpp_path: "../07_PHPP/model.xlsx",
@@ -46,6 +47,7 @@ function toYaml(project) {
 
 // Happy path: minimum required payload validates and round-trips slug.
 assert.equal(parseProjectYaml(toYaml(baseProject), "project.yaml").slug, "project-2606");
+assert.equal(parseProjectYaml(toYaml(baseProject), "project.yaml").building.total_num_occupants, 4);
 assert.equal(
   parseProjectYaml(toYaml({ ...baseProject, slug: "2606-vandam" }), "project.yaml").slug,
   "2606-vandam",
@@ -57,6 +59,7 @@ const withNarrative = parseProjectYaml(
     ...baseProject,
     narrative: {
       certification: { target: "EnerPHit by Component", ph_ach_limit: "0.8" },
+      co2: { epa_subgrid_name: "NY (NYCW)", taget_co2_per_person: 4.0 },
       mechanical: { erv: { manufacturer_name: "Zehnder America" } },
       user_defined: { cad_received_date: "May 1, 2026" },
     },
@@ -64,6 +67,8 @@ const withNarrative = parseProjectYaml(
   "project.yaml",
 );
 assert.equal(withNarrative.narrative.certification.target, "EnerPHit by Component");
+assert.equal(withNarrative.narrative.co2.epa_subgrid_name, "NY (NYCW)");
+assert.equal(withNarrative.narrative.co2.taget_co2_per_person, 4.0);
 assert.equal(withNarrative.narrative.mechanical.erv.manufacturer_name, "Zehnder America");
 assert.equal(withNarrative.narrative.user_defined.cad_received_date, "May 1, 2026");
 

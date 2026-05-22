@@ -18,6 +18,7 @@ describe("listVarKeyOptions", () => {
 
     expect(byValue.get("building.address")).toBe("Building > Address");
     expect(byValue.get("building.climate_zone")).toBe("Building > Climate Zone");
+    expect(byValue.get("building.total_num_occupants")).toBe("Building > Total Num Occupants");
     expect(byValue.get("source_files.cad_files_received_date")).toBe(
       "Source Files > Cad Files Received Date",
     );
@@ -46,6 +47,10 @@ describe("listVarKeyOptions", () => {
       "Narrative > Energy code > Code Airtightness Url",
     );
     expect(byValue.get("narrative.co2.subregion_name")).toBe("Narrative > CO2 > Subregion Name");
+    expect(byValue.get("narrative.co2.epa_subgrid_name")).toBe("Narrative > CO2 > Epa Subgrid Name");
+    expect(byValue.get("narrative.co2.taget_co2_per_person")).toBe(
+      "Narrative > CO2 > Taget Co2 Per Person",
+    );
     expect(byValue.get("narrative.windows.ph_window_u_value")).toBe(
       "Narrative > Windows > Ph Window U Value",
     );

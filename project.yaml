@@ -1,7 +1,7 @@
 schema_version: "0.2.0"
 slug: "project-2606"
-project_title: "Example Passive House Report"
-client_name: "Yun Architects"
+project_title: "SOHO Townhouse Design Phase Report"
+client_name: "Yun Architecture"
 building_name: "SOHO Townhouse"
 phase: "Design Analysis"
 report_date: "2026-05-22"
@@ -17,6 +17,7 @@ building:
   state: "NY"
   climate_zone: "ASHRAE 4A"
   building_type: "single-family residential"
+  total_num_occupants: 4
 source_files:
   phpp_path: ""
   cad_files_received_date: "May 1, 2026"
@@ -30,7 +31,8 @@ narrative:
     target: "EnerPHit by Component"
     ph_ach_limit: "1.0"
   climate:
-    weather_station_name: "Example Weather Station :: TMY3"
+    weather_station_name: "New_York_J_F_Kennedy_IntL_Ar :: 744860 :: TMY3"
+    weather_station_url: "https://energyplus-weather.s3.amazonaws.com/north_and_central_america_wmo_region_4/USA/NY/USA_NY_New.York-J.F.Kennedy.Intl.AP.744860_TMY3/USA_NY_New.York-J.F.Kennedy.Intl.AP.744860_TMY3.zip"
     state_name: "New York"
     state_name_abbreviation: "NY"
     ashrae_location_name: "Zone 4(A)"
@@ -42,6 +44,10 @@ narrative:
     ach_limit: "3.0"
     code_base_url: https://up.codes/viewer/new_york_city/nyc-energy-conservation-code-2025
     code_airtightness_url: https://up.codes/viewer/new_york_city/nyc-energy-conservation-code-2025/chapter/R4/residential-energy-efficiency#R402.5.1.3
+  co2:
+    epa_subgrid_name: "NY (NYCW)"
+    target_tons: "4"
+    taget_co2_per_person: 4.0
   mechanical:
     erv:
       manufacturer_name: "Example Manufacturer"
