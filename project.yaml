@@ -24,8 +24,8 @@ source_files:
   data_dir: "data"
   assets_dir: "public/assets"
 publishing:
-  production_url: "https://project-2606.bldgtyp.com"
-  cloudflare_pages_project: "bt-proj-2606-example-report"
+  production_url: "https://bt-web-report-template.pages.dev"
+  cloudflare_pages_project: "bt-web-report-template"
 narrative:
   certification:
     target: "EnerPHit by Component"

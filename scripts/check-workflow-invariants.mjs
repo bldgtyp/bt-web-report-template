@@ -15,6 +15,7 @@ import YAML from "yaml";
 const moduleDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(moduleDir, "..");
 const workflowPath = resolve(repoRoot, ".github/workflows/_renderer-build.yml");
+const templateDeployWorkflowPath = resolve(repoRoot, ".github/workflows/deploy.yml");
 
 if (!existsSync(workflowPath)) {
   console.error(`check-workflow-invariants: cannot find ${workflowPath}`);
@@ -22,6 +23,9 @@ if (!existsSync(workflowPath)) {
 }
 
 const doc = YAML.parse(readFileSync(workflowPath, "utf8"));
+const templateDeployDoc = existsSync(templateDeployWorkflowPath)
+  ? YAML.parse(readFileSync(templateDeployWorkflowPath, "utf8"))
+  : null;
 
 const failures = [];
 
@@ -242,6 +246,26 @@ function fail(invariant, detail) {
             "Update the emulator so local `pnpm test:ci` reproduces what GitHub Actions actually does.",
         );
       }
+    }
+  }
+}
+
+// --- Invariant 7 ----------------------------------------------------------
+// The template repo's own deploy is a demo deploy. It must never manage a
+// real project's custom domain from the seed project.yaml; per-project repos
+// own project-<number>.bldgtyp.com DNS.
+{
+  if (!templateDeployDoc) {
+    fail("template-deploy-workflow-missing", `Cannot find ${templateDeployWorkflowPath}`);
+  } else {
+    const deployJob = templateDeployDoc?.jobs?.deploy;
+    const manageCustomDomain = deployJob?.with?.["manage-custom-domain"];
+    if (manageCustomDomain !== false) {
+      fail(
+        "template-deploy-must-not-manage-custom-domain",
+        ".github/workflows/deploy.yml must pass `manage-custom-domain: false` to _renderer-build.yml. " +
+          "The template deploy builds pending seed data and must not rewire project-<number>.bldgtyp.com DNS.",
+      );
     }
   }
 }

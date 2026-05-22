@@ -51,6 +51,10 @@ on:
         description: "Deploy to Cloudflare Pages after a successful build."
         type: boolean
         default: false
+      manage-custom-domain:
+        description: "Attach/update the project.yaml production URL as a Cloudflare Pages custom domain."
+        type: boolean
+        default: true
       cloudflare-pages-project:
         description: "Cloudflare Pages project name. Defaults to the project repo name."
         type: string
@@ -241,7 +245,7 @@ jobs:
           echo "Cloudflare Pages project: $PROJECT_NAME"
 
       - name: Ensure Cloudflare Pages project and domain (with retry)
-        if: ${{ inputs.run-deploy }}
+        if: ${{ inputs.run-deploy && inputs.manage-custom-domain }}
         run: |
           renderer/scripts/retry.sh \
             --label='setup-cloudflare-pages' \

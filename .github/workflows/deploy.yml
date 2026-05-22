@@ -18,6 +18,7 @@ jobs:
       renderer-ref: ${{ github.sha }}
       schemas-ref: main
       run-deploy: true
+      manage-custom-domain: false
       cloudflare-pages-project: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
     secrets:
       BLDGTYP_PACKAGES_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
