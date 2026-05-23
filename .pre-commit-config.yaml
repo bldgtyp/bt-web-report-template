@@ -8,43 +8,14 @@
 # minutes later in a GitHub Actions run.
 #
 # Skip selectively:
-#   SKIP=ci-emulate git commit ...       # skip the slow emulator
 #   PRE_COMMIT_ALLOW_NO_CONFIG=1 ...     # disable hooks for an emergency commit
 
 repos:
   - repo: local
     hooks:
-      - id: check-workflow-invariants
-        name: lint .github/workflows/_renderer-build.yml invariants
-        entry: node scripts/check-workflow-invariants.mjs
-        language: system
-        pass_filenames: false
-        files: ^\.github/workflows/_renderer-build\.yml$
-
       - id: validate-project-yaml
-        name: validate project.yaml against workspace schema
-        entry: bash -c 'BTWR_PROJECT_SCHEMA_JSON="$PWD/../bt-web-report-schemas/schemas/project.schema.json" pnpm --silent validate'
+        name: validate project.yaml against the schema
+        entry: pnpm --silent validate
         language: system
         pass_filenames: false
         files: ^(project\.yaml|scripts/validate-project\.mjs|src/data/project-schema\.mjs)$
-
-      - id: ci-emulate
-        name: emulate full CI build pipeline in a sandbox
-        entry: scripts/ci-emulate.sh --skip-install
-        language: system
-        pass_filenames: false
-        # Run on any change that could affect the build pipeline. Skips
-        # automatically on commits that only touch docs/markdown/css.
-        files: |
-          (?x)^(
-            project\.yaml |
-            package\.json |
-            pnpm-lock\.yaml |
-            astro\.config\.mjs |
-            tsconfig\.json |
-            src/.*\.(astro|ts|tsx|mjs|js)$ |
-            tina/.*\.(ts|tsx|mjs|js)$ |
-            scripts/.*\.(mjs|js|sh)$ |
-            \.github/workflows/.*\.ya?ml$
-          )
-        stages: [pre-push]
