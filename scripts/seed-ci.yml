@@ -1,0 +1,78 @@
+name: CI
+
+# Project-local CI for vendored bt-web-report projects.
+#
+# The project directory IS the runtime — src/, tina/, scripts/, package.json,
+# and pnpm-lock.yaml are vendored at `btwr new` seed time and live in the
+# project repo. Builds are a pure function of the project commit; no
+# cross-repo checkout, no floating refs, no template dependency at runtime.
+#
+# Schemas come from the public npm registry (@bldgtyp/web-report-schemas);
+# no BLDGTYP_PACKAGES_TOKEN required.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install dependencies (with retry)
+        run: scripts/retry.sh --label='pnpm install' --max-attempts=4 --initial-delay=10 -- pnpm install --ignore-scripts --frozen-lockfile
+
+      - name: Validate project metadata
+        run: pnpm validate
+
+      - name: Type-check
+        run: pnpm check
+
+      - name: Tina editor audit
+        run: pnpm check:editor
+
+      - name: Build
+        run: pnpm build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Chromium (full, on cache miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: scripts/retry.sh --label='playwright install' --max-attempts=4 --initial-delay=10 -- pnpm exec playwright install --with-deps chromium
+
+      - name: Install Playwright system deps (cache hit path)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: scripts/retry.sh --label='playwright install-deps' --max-attempts=4 --initial-delay=10 -- pnpm exec playwright install-deps chromium
+
+      - name: Build PDF
+        # Run the post-build script directly (not `pnpm build:pdf`) so validate +
+        # build do not re-execute inside the same job. dist/report.pdf rides
+        # the same Cloudflare deploy as dist/index.html.
+        run: node scripts/build-pdf.mjs
+
+      - name: Tests
+        # Renderer unit tests depend on workspace fixtures and run in the
+        # template repo's CI. Per-project CI runs the PDF integration
+        # assertion only.
+        run: pnpm test:integration
