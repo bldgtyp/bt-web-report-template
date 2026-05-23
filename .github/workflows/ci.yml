@@ -1,78 +1,24 @@
 name: CI
 
-# Template repo's own CI: builds the template's seed content with the same
-# steps that vendored project repos use (scripts/seed-ci.yml). This is the
-# template's smoke test — if a renderer-source change breaks the build,
-# this workflow catches it before any project consumer re-seeds against it.
-#
-# This workflow is intentionally a near-clone of scripts/seed-ci.yml. The
-# two are NOT the same file (the seed version is what btwr new vendors;
-# this one runs in the template repo against the template's own checkout).
-# If they drift, fix here first, then mirror the change to seed-ci.yml.
-#
-# There is no demo Pages deploy (per Option-C decision #6). Live deploys
-# happen from per-project repos, not from the template.
+# Template repo's own CI runs the shared renderer build against the seed
+# project content that lives in this repo. Everything else (checkout strategy,
+# schemas source-of-truth, dependency install, validate/check/build steps)
+# is defined once in _renderer-build.yml and reused by every per-project
+# repo's CI as well.
 
 on:
   pull_request:
   push:
     branches: [main]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout template
-        uses: actions/checkout@v6
-
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10.33.0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-
-      - name: Install dependencies (with retry)
-        run: scripts/retry.sh --label='pnpm install' --max-attempts=4 --initial-delay=10 -- pnpm install --ignore-scripts --no-frozen-lockfile --ignore-workspace
-
-      - name: Validate seed project metadata
-        run: pnpm validate
-
-      - name: Type-check
-        run: pnpm check
-
-      - name: Tina editor audit
-        run: pnpm check:editor
-
-      - name: Build seed content
-        run: pnpm build
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
-
-      - name: Install Playwright Chromium (full, on cache miss)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: scripts/retry.sh --label='playwright install' --max-attempts=4 --initial-delay=10 -- pnpm exec playwright install --with-deps chromium
-
-      - name: Install Playwright system deps (cache hit path)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: scripts/retry.sh --label='playwright install-deps' --max-attempts=4 --initial-delay=10 -- pnpm exec playwright install-deps chromium
-
-      - name: Build PDF
-        run: node scripts/build-pdf.mjs
-
-      - name: Renderer unit tests
-        run: pnpm test:unit
-
-      - name: PDF integration test
-        run: pnpm test:integration
+    uses: ./.github/workflows/_renderer-build.yml
+    with:
+      project-repo: ${{ github.repository }}
+      project-ref: ${{ github.ref }}
+      renderer-ref: ${{ github.sha }}
+      schemas-ref: main
+      run-deploy: false
+    secrets:
+      BLDGTYP_PACKAGES_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
