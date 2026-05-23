@@ -71,9 +71,8 @@ jobs:
       - name: Build PDF
         run: node scripts/build-pdf.mjs
 
+      - name: Renderer unit tests
+        run: pnpm test:unit
+
       - name: PDF integration test
-        # Renderer unit tests (data, markdown, resolve-var, var-keys, assembly-*)
-        # depend on workspace fixtures under ../test-files/ that don't ship with
-        # the template repo. They run locally via pre-commit and `pnpm test:unit`
-        # in the workspace; template CI runs the integration assertion only.
         run: pnpm test:integration
