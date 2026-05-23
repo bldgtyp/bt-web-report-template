@@ -4,10 +4,14 @@ name: CI
 # template repo. Editing the build pipeline happens in ONE place:
 # bldgtyp/bt-web-report-template/.github/workflows/_renderer-build.yml
 #
-# The @main pin means template fixes (schema sibling-checkout, wait-for-publish,
-# Cloudflare deploy retry, etc.) propagate to this project's next CI run
-# automatically. If a template change ever breaks this project, pin to a
-# specific commit SHA or tag instead of @main while the issue is sorted out.
+# Refs MUST be explicit SHAs (or tags). Floating `main` is rejected by
+# `btwr new` / `btwr pin` because it causes cross-project cascade
+# redeploys when the template changes. `btwr new` substitutes the SHAs
+# below at seed time; `btwr pin` rewrites them when the project intentionally
+# advances to a newer template revision.
+#
+# Schemas comes from the public npm registry (@bldgtyp/web-report-schemas);
+# no auth token required for the dependency fetch.
 
 on:
   pull_request:
@@ -23,5 +27,3 @@ jobs:
       renderer-ref: main
       schemas-ref: main
       run-deploy: false
-    secrets:
-      BLDGTYP_PACKAGES_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}

@@ -21,6 +21,5 @@ jobs:
       manage-custom-domain: false
       cloudflare-pages-project: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
     secrets:
-      BLDGTYP_PACKAGES_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

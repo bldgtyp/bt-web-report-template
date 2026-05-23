@@ -5,6 +5,8 @@ name: CI
 # schemas source-of-truth, dependency install, validate/check/build steps)
 # is defined once in _renderer-build.yml and reused by every per-project
 # repo's CI as well.
+#
+# Schemas comes from the public npm registry; no auth secret required.
 
 on:
   pull_request:
@@ -20,5 +22,3 @@ jobs:
       renderer-ref: ${{ github.sha }}
       schemas-ref: main
       run-deploy: false
-    secrets:
-      BLDGTYP_PACKAGES_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}

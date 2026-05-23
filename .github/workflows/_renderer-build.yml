@@ -60,13 +60,10 @@ on:
         type: string
         default: ""
       package-publish-timeout-seconds:
-        description: "Max seconds to wait for the pinned @bldgtyp/web-report-schemas version to appear on GitHub Packages. Default 1800 (30 min) — CI waits, not fails, while the auto-publish flow catches up."
+        description: "Max seconds to wait for the pinned @bldgtyp/web-report-schemas version to appear on the public npm registry. Default 1800 (30 min) — CI waits, not fails, while the auto-publish flow catches up."
         type: number
         default: 1800
     secrets:
-      BLDGTYP_PACKAGES_TOKEN:
-        description: "Token with read:packages on @bldgtyp. Required."
-        required: true
       CLOUDFLARE_API_TOKEN:
         description: "Required when run-deploy=true."
         required: false
@@ -81,7 +78,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      NODE_AUTH_TOKEN: ${{ secrets.BLDGTYP_PACKAGES_TOKEN }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       # MUST be at job level (not step level). pnpm scripts chain: `pnpm build`
@@ -124,26 +120,18 @@ jobs:
           node-version: 24
 
       - name: Verify required secrets
+        if: ${{ inputs.run-deploy }}
         run: |
           missing=0
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::error::BLDGTYP_PACKAGES_TOKEN is not available to this repo. Configure it as a repo or org Actions secret with read:packages on @bldgtyp."
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN required when run-deploy=true."
             missing=1
           fi
-          if [ "${{ inputs.run-deploy }}" = "true" ]; then
-            if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-              echo "::error::CLOUDFLARE_API_TOKEN required when run-deploy=true."
-              missing=1
-            fi
-            if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-              echo "::error::CLOUDFLARE_ACCOUNT_ID required when run-deploy=true."
-              missing=1
-            fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::CLOUDFLARE_ACCOUNT_ID required when run-deploy=true."
+            missing=1
           fi
           exit "$missing"
-
-      - name: Configure GitHub Packages auth
-        run: echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
 
       - name: Wait for pinned schemas package to publish
         working-directory: renderer
