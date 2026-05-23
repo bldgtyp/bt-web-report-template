@@ -11,18 +11,32 @@ interface Props {
   callout_label?: string;
   callout_body?: string;
   show_heading?: boolean;
+  show_standalone_heading?: boolean;
 }
 
-const { id, kicker, title, Content, callout_label, callout_body, show_heading = true } = Astro.props;
+const {
+  id,
+  kicker,
+  title,
+  Content,
+  callout_label,
+  callout_body,
+  show_heading = true,
+  show_standalone_heading = true,
+} = Astro.props;
 
 // Shortcodes available to every MDX section. Add new shortcodes here, not
 // per-page, so authors get a consistent surface across the report.
 const mdxComponents = { Var, VarLink };
 ---
 
-<section class="btwr-section" aria-labelledby={id}>
+<section
+  class="btwr-section"
+  aria-labelledby={show_heading || show_standalone_heading ? id : undefined}
+  aria-label={!show_heading && !show_standalone_heading ? title : undefined}
+>
   {show_heading && <SectionHeading id={id} kicker={kicker} title={title} />}
-  {!show_heading && <h2 id={id} class="btwr-section-heading__standalone">{title}</h2>}
+  {!show_heading && show_standalone_heading && <h2 id={id} class="btwr-section-heading__standalone">{title}</h2>}
   <slot name="before-content" />
   {Content && (
     <div class="btwr-prose">
