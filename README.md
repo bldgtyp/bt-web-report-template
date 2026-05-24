@@ -68,7 +68,7 @@ Use pnpm only.
 Use the Vandam fixture mode for normal report UI work:
 
 ```bash
-cd /Users/em/Dropbox/bldgtyp-00/00_PH_Tools/bt-web-report
+cd /Users/em/Dropbox/bldgtyp-00/00_PH_Tools/bldgtyp/bt-web-report
 pnpm --filter @bldgtyp/web-report-template dev:fixture
 ```
 
