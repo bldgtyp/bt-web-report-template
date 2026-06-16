@@ -407,6 +407,13 @@
   color: var(--btwr-color-surface, #fff);
 }
 
+.btwr-pdf-download .btwr-pdf-download__primary.is-pending {
+  color: var(--btwr-color-muted);
+  background: transparent;
+  border-color: var(--btwr-color-border);
+  cursor: default;
+}
+
 .btwr-pdf-download__icon {
   width: 1rem;
   height: 1rem;
@@ -1598,6 +1605,46 @@
 
 .btwr-toc a:hover {
   color: var(--btwr-color-link);
+}
+
+.btwr-toc a.btwr-toc__next {
+  gap: 0.3rem;
+  margin-top: var(--btwr-space-5);
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--btwr-color-border);
+  border-radius: var(--btwr-radius-md);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.btwr-toc a.btwr-toc__next:hover {
+  border-color: var(--btwr-color-accent);
+  background: var(--btwr-color-accent-soft);
+}
+
+.btwr-toc a .btwr-toc__next-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--btwr-color-heading);
+  font-family: var(--btwr-font-label);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.btwr-toc a.btwr-toc__next:hover .btwr-toc__next-title {
+  color: var(--btwr-color-link);
+}
+
+.btwr-toc__next-arrow {
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .btwr-report-footer {

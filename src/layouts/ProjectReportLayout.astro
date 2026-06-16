@@ -53,6 +53,9 @@ const title = `${pageLabel} | ${report.project.project_title} | ${phase}`;
 const showHero = currentHref === "/";
 const showToc = currentHref !== "/";
 const initialTocHref = tocItems[0]?.href;
+const navIndex = reportPageNavItems.findIndex((item) => item.href === currentHref);
+const nextPage = navIndex >= 0 ? reportPageNavItems[(navIndex + 1) % reportPageNavItems.length] : undefined;
+const nextIsWrap = navIndex === reportPageNavItems.length - 1;
 const faviconHref =
   'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><path fill="%233E93AE" d="M6 28V12l12-7 12 7v16h-7V16H13v12H6Z"/></svg>';
 ---
@@ -198,6 +201,17 @@ const faviconHref =
                 ))}
               </ol>
             </nav>
+            {nextPage && (
+              <a class="btwr-toc__next" href={nextPage.href}>
+                <span class="btwr-toc__next-kicker">{nextIsWrap ? "Back to start" : "Next page"}</span>
+                <span class="btwr-toc__next-title">
+                  {nextPage.label}
+                  <svg class="btwr-toc__next-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h13M13 6l6 6-6 6" />
+                  </svg>
+                </span>
+              </a>
+            )}
           </aside>
         )
       }
