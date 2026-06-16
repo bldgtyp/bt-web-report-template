@@ -927,6 +927,7 @@
 
 .btwr-threshold-bars {
   --btwr-bars-label-width: 6.75rem;
+  --btwr-bars-total-width: 5.35rem;
   --btwr-limit-line-color: var(--btwr-color-heading);
   display: grid;
   gap: 0.55rem;
@@ -943,7 +944,8 @@
 
 .btwr-threshold-bars__grid {
   position: absolute;
-  inset: -0.45rem 0 calc(-0.55rem - 1px) calc(var(--btwr-bars-label-width) + var(--btwr-space-2));
+  inset: -0.45rem calc(var(--btwr-bars-total-width) + var(--btwr-space-2)) calc(-0.55rem - 1px)
+    calc(var(--btwr-bars-label-width) + var(--btwr-space-2));
   z-index: 0;
   background: var(--btwr-axis-grid, none);
   pointer-events: none;
@@ -951,7 +953,8 @@
 
 .btwr-threshold-bars__chart-limit {
   position: absolute;
-  inset: -0.45rem 0 calc(-0.55rem - 1px) calc(var(--btwr-bars-label-width) + var(--btwr-space-2));
+  inset: -0.45rem calc(var(--btwr-bars-total-width) + var(--btwr-space-2)) calc(-0.55rem - 1px)
+    calc(var(--btwr-bars-label-width) + var(--btwr-space-2));
   z-index: 2;
   pointer-events: none;
 }
@@ -982,7 +985,10 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(5.25rem, var(--btwr-bars-label-width)) minmax(0, 1fr);
+  grid-template-columns: minmax(5.25rem, var(--btwr-bars-label-width)) minmax(0, 1fr) minmax(
+      var(--btwr-bars-total-width),
+      auto
+    );
   gap: var(--btwr-space-2);
   align-items: center;
 }
@@ -1010,7 +1016,6 @@
   height: 1.6rem;
   border-left: 1px solid var(--btwr-color-border-strong);
   background: transparent;
-  overflow: visible;
 }
 
 .btwr-threshold-bars__limit {
@@ -1057,8 +1062,7 @@
 .btwr-threshold-bars__total {
   align-self: center;
   color: var(--btwr-color-muted);
-  flex: 0 0 auto;
-  margin-left: 0.45rem;
+  min-width: 0;
   text-align: left;
   white-space: nowrap;
 }
@@ -1067,7 +1071,7 @@
   position: relative;
   min-height: 1.2rem;
   margin-left: calc(var(--btwr-bars-label-width) + var(--btwr-space-2));
-  margin-right: 0;
+  margin-right: calc(var(--btwr-bars-total-width) + var(--btwr-space-2));
   padding-top: 0.2rem;
   border-top: 1px solid var(--btwr-color-border);
   color: var(--btwr-color-muted);
@@ -1438,11 +1442,12 @@
   }
 
   .btwr-threshold-bars__row {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(var(--btwr-bars-total-width), auto);
     gap: var(--btwr-space-2);
   }
 
   .btwr-threshold-bars__label {
+    grid-column: 1 / -1;
     text-align: left;
   }
 
@@ -1455,7 +1460,7 @@
 
   .btwr-threshold-bars__grid,
   .btwr-threshold-bars__chart-limit {
-    inset: -0.4rem 0 calc(-0.55rem - 1px) 0;
+    inset: -0.4rem calc(var(--btwr-bars-total-width) + var(--btwr-space-2)) calc(-0.55rem - 1px) 0;
   }
 
   .btwr-threshold-bars__axis,

@@ -59,7 +59,7 @@ const withNarrative = parseProjectYaml(
     ...baseProject,
     narrative: {
       certification: { target: "EnerPHit by Component", ph_ach_limit: "0.8" },
-      co2: { epa_subgrid_name: "NY (NYCW)", taget_co2_per_person: 4.0 },
+      co2: { epa_subgrid_name: "NY (NYCW)", taget_co2_per_person: "4.0" },
       mechanical: { erv: { manufacturer_name: "Zehnder America" } },
       user_defined: { cad_received_date: "May 1, 2026" },
     },
@@ -68,7 +68,7 @@ const withNarrative = parseProjectYaml(
 );
 assert.equal(withNarrative.narrative.certification.target, "EnerPHit by Component");
 assert.equal(withNarrative.narrative.co2.epa_subgrid_name, "NY (NYCW)");
-assert.equal(withNarrative.narrative.co2.taget_co2_per_person, 4.0);
+assert.equal(withNarrative.narrative.co2.taget_co2_per_person, "4.0");
 assert.equal(withNarrative.narrative.mechanical.erv.manufacturer_name, "Zehnder America");
 assert.equal(withNarrative.narrative.user_defined.cad_received_date, "May 1, 2026");
 

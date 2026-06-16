@@ -2,6 +2,7 @@
 import DataState from "./DataState.astro";
 import { axisGridBackground, linearAxis } from "../charts/chart-axis";
 import { cellNumber, cellText, formatValue, siteEnergyGroupForEndUse, siteEnergyGroups } from "../data/rows";
+import type { ProjectConfig } from "../data/project";
 import type { ReportData } from "../data/report-loader";
 
 interface Props {
@@ -73,7 +74,16 @@ const chartRows: Co2VariantRow[] = data.variantOrder
     };
   })
   .filter((row) => row.total !== 0);
-const limitValue = limitRows.length > 0 ? limitRows[0] : null;
+// The CO2e limit line is driven by `narrative.co2.target_tons` (the same
+// prose-facing value shown via <Var k="narrative.co2.target_tons" />). Fall
+// back to the energy.csv `ipcc_limit` row only when the narrative value is
+// missing or non-numeric, so existing reports keep rendering a line.
+const project = Astro.locals.project as ProjectConfig | undefined;
+const targetTonsRaw = project?.narrative?.co2?.target_tons;
+const targetTons = targetTonsRaw != null ? Number.parseFloat(String(targetTonsRaw)) : Number.NaN;
+const narrativeLimit = Number.isFinite(targetTons) ? targetTons : null;
+const csvLimit = limitRows.length > 0 ? limitRows[0] : null;
+const limitValue = narrativeLimit ?? csvLimit;
 const maxTotal = Math.max(...chartRows.map((row) => row.total), 0);
 const chartMax = Math.max(maxTotal, limitValue ?? 0);
 const axis = linearAxis(chartMax);

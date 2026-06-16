@@ -48,7 +48,7 @@ export interface Co2Narrative {
   epa_subgrid_name?: string | null;
   occupancy?: string | null;
   target_tons?: string | null;
-  taget_co2_per_person?: number | null;
+  taget_co2_per_person?: string | null;
 }
 
 export interface WindowsNarrative {

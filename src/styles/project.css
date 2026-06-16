@@ -259,7 +259,12 @@
 
 .btwr-site-energy-bars__limit {
   position: absolute;
-  inset: -0.55rem calc(7rem + var(--btwr-space-3)) calc(-0.7rem - 1px) calc(13rem + var(--btwr-space-3));
+  /* Match the plot's track region exactly so the limit offset (a % of this
+     box) lands on the same scale as the bars, grid, and axis. These must stay
+     in lockstep with .btwr-site-energy-bars__grid; hardcoded rem values here
+     drift from --btwr-bars-*-width and misplace the line. */
+  inset: -0.55rem calc(var(--btwr-bars-total-width) + var(--btwr-space-3)) calc(-0.7rem - 1px)
+    calc(var(--btwr-bars-label-width) + var(--btwr-space-3));
   z-index: 2;
   pointer-events: none;
 }

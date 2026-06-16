@@ -47,7 +47,7 @@ narrative:
   co2:
     epa_subgrid_name: "NY (NYCW)"
     target_tons: "4"
-    taget_co2_per_person: 4.0
+    taget_co2_per_person: "4.0"
   mechanical:
     erv:
       manufacturer_name: "Example Manufacturer"
