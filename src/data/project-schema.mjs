@@ -22,7 +22,13 @@ const moduleDir = dirname(fileURLToPath(import.meta.url));
 const workspaceProjectSchemaPath = resolve(moduleDir, "../../../bt-web-report-schemas/schemas/project.schema.json");
 const projectSchema = loadProjectSchema();
 
-const ajv = new Ajv({ allErrors: true, strict: false });
+// coerceTypes lets a hand-edited project.yaml use either form for a scalar
+// (e.g. `taget_co2_per_person: 1.0` or `"1.0"`, `total_num_occupants: 6` or
+// `"6"`): ajv casts the value to the schema's declared type instead of
+// rejecting it. This mirrors `coerce_numbers_to_str=True` on the Pydantic
+// (server-side) models so both validators accept the same loose inputs and
+// stay in lock-step.
+const ajv = new Ajv({ allErrors: true, strict: false, coerceTypes: true });
 const validate = ajv.compile(projectSchema);
 
 function loadProjectSchema() {

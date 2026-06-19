@@ -72,6 +72,22 @@ assert.equal(withNarrative.narrative.co2.taget_co2_per_person, "4.0");
 assert.equal(withNarrative.narrative.mechanical.erv.manufacturer_name, "Zehnder America");
 assert.equal(withNarrative.narrative.user_defined.cad_received_date, "May 1, 2026");
 
+// Coercion (coerceTypes): a bare number in a string narrative field and a
+// stringified number in the numeric occupants field are accepted and cast to
+// the schema's declared type, mirroring coerce_numbers_to_str on the Python
+// side so both validators accept the same loose inputs.
+const coerced = parseProjectYaml(
+  toYaml({
+    ...baseProject,
+    building: { ...baseProject.building, total_num_occupants: "7" },
+    narrative: { co2: { taget_co2_per_person: 2, target_tons: 6 } },
+  }),
+  "project.yaml",
+);
+assert.equal(coerced.building.total_num_occupants, 7);
+assert.equal(coerced.narrative.co2.taget_co2_per_person, "2");
+assert.equal(coerced.narrative.co2.target_tons, "6");
+
 // Bad slugs.
 for (const slug of ["Project-2606", "project_2606", "project--2606", "-project-2606", "project-2606-"]) {
   assert.throws(
