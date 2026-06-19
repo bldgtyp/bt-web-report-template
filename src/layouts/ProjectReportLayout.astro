@@ -9,6 +9,10 @@ import { reportPageNavItems } from "../data/pages";
 import type { TemplateReportData } from "../data/report";
 import chartInteractionsJs from "../scripts/chart-interactions.js?raw";
 import projectCss from "../styles/project.css?raw";
+// Vite-processed (not ?raw): emits the self-hosted woff2 into _astro/ and
+// injects the @font-face stylesheet, so no fonts.googleapis.com request is
+// made at build time (which would hang the Paged.js PDF render on CI).
+import "../styles/fonts.css";
 
 interface TocItem {
   href: string;
@@ -65,12 +69,6 @@ const faviconHref =
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400&display=swap"
-    />
     <link rel="icon" href={faviconHref} />
     <title>{title}</title>
     <style set:html={tokensCss} />

@@ -3,6 +3,10 @@ import componentsCss from "../styles/components.css?raw";
 import tokensCss from "../styles/tokens.css?raw";
 import projectCss from "../styles/project.css?raw";
 import printPagedCss from "../styles/print-paged.css?raw";
+// Vite-processed (not ?raw): emits the self-hosted woff2 into _astro/ and
+// injects the @font-face stylesheet, so the Paged.js PDF render needs no
+// fonts.googleapis.com request (which hangs on the network-restricted CI runner).
+import "../styles/fonts.css";
 
 import type { TemplateReportData } from "../data/report";
 
@@ -34,12 +38,6 @@ const faviconHref =
     <meta name="btwr-building-name" content={buildingName} />
     <meta name="btwr-phase" content={phase} />
     <meta name="btwr-report-date" content={reportDate} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400&display=swap"
-    />
     <link rel="icon" href={faviconHref} />
     <title>{title}</title>
     <style set:html={tokensCss} />
