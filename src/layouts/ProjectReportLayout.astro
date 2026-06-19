@@ -77,6 +77,29 @@ const faviconHref =
     <style set:html={componentsCss} />
     <style set:html={printCss} />
     <style set:html={projectCss} />
+    <script is:inline>
+      // Auto-retry an image whose first load was aborted/errored (a transient
+      // transport failure shows the broken-image icon and never self-heals,
+      // forcing a manual reload). Defined in <head> so it exists before the
+      // hero <img onerror> is parsed. Cache-busts each attempt so a negatively
+      // cached failure can't stick; gives up after a few tries.
+      window.__btwrRetryImage = function (img) {
+        var max = 3;
+        var n = parseInt(img.getAttribute("data-btwr-retry") || "0", 10);
+        if (n >= max) {
+          return;
+        }
+        n += 1;
+        img.setAttribute("data-btwr-retry", String(n));
+        var base = (img.getAttribute("src") || "").split("?")[0];
+        if (!base) {
+          return;
+        }
+        window.setTimeout(function () {
+          img.src = base + "?btwr-retry=" + n;
+        }, 300 * n);
+      };
+    </script>
   </head>
   <body class="btwr-report">
     <header class="btwr-report-header">
@@ -161,6 +184,8 @@ const faviconHref =
                       alt={heroAlt ?? ""}
                       fetchpriority="high"
                       decoding="async"
+                      data-btwr-retry="0"
+                      onerror="window.__btwrRetryImage && window.__btwrRetryImage(this)"
                     />
                   </a>
                   {heroCaption ? <figcaption>{heroCaption}</figcaption> : null}
