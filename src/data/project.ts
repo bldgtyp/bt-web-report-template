@@ -109,6 +109,10 @@ export interface ProjectConfig {
   publishing: {
     production_url: string;
     cloudflare_pages_project: string;
+    access?: {
+      mode: "public" | "cloudflare_access_otp";
+      allowed_emails: string[];
+    };
   };
   narrative: Narrative;
 }

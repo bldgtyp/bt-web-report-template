@@ -48,10 +48,41 @@ function toYaml(project) {
 // Happy path: minimum required payload validates and round-trips slug.
 assert.equal(parseProjectYaml(toYaml(baseProject), "project.yaml").slug, "project-2606");
 assert.equal(parseProjectYaml(toYaml(baseProject), "project.yaml").building.total_num_occupants, 4);
+assert.equal(parseProjectYaml(toYaml(baseProject), "project.yaml").publishing.access, undefined);
 assert.equal(
   parseProjectYaml(toYaml({ ...baseProject, slug: "2606-vandam" }), "project.yaml").slug,
   "2606-vandam",
 );
+
+// Happy path: optional publishing.access accepts public and Cloudflare OTP configs.
+const withPublicAccess = parseProjectYaml(
+  toYaml({
+    ...baseProject,
+    publishing: {
+      ...baseProject.publishing,
+      access: { mode: "public", allowed_emails: [] },
+    },
+  }),
+  "project.yaml",
+);
+assert.equal(withPublicAccess.publishing.access.mode, "public");
+assert.deepEqual(withPublicAccess.publishing.access.allowed_emails, []);
+
+const withOtpAccess = parseProjectYaml(
+  toYaml({
+    ...baseProject,
+    publishing: {
+      ...baseProject.publishing,
+      access: {
+        mode: "cloudflare_access_otp",
+        allowed_emails: ["ed@bldgtyp.com", "john@bldgtyp.com"],
+      },
+    },
+  }),
+  "project.yaml",
+);
+assert.equal(withOtpAccess.publishing.access.mode, "cloudflare_access_otp");
+assert.deepEqual(withOtpAccess.publishing.access.allowed_emails, ["ed@bldgtyp.com", "john@bldgtyp.com"]);
 
 // Happy path: optional narrative round-trips through ajv.
 const withNarrative = parseProjectYaml(
@@ -119,6 +150,33 @@ assert.throws(
       "project.yaml",
     ),
   /publishing\.production_url must match pattern/,
+);
+
+// Bad publishing access mode and email.
+assert.throws(
+  () =>
+    parseProjectYaml(
+      toYaml({
+        ...baseProject,
+        publishing: { ...baseProject.publishing, access: { mode: "password", allowed_emails: [] } },
+      }),
+      "project.yaml",
+    ),
+  /publishing\.access\.mode must be equal to one of the allowed values/,
+);
+assert.throws(
+  () =>
+    parseProjectYaml(
+      toYaml({
+        ...baseProject,
+        publishing: {
+          ...baseProject.publishing,
+          access: { mode: "cloudflare_access_otp", allowed_emails: ["not-an-email"] },
+        },
+      }),
+      "project.yaml",
+    ),
+  /publishing\.access\.allowed_emails\.0 must match pattern/,
 );
 
 // Repo-relative path violation.
