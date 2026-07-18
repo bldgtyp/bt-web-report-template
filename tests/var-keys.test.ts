@@ -85,6 +85,12 @@ describe("listVarKeyOptions", () => {
     expect(values.has("schema_version")).toBe(false);
   });
 
+  it("omits operational publishing access fields", () => {
+    const opts = listVarKeyOptions();
+    const values = new Set(opts.map((o) => o.value));
+    expect(values.has("publishing.access.mode")).toBe(false);
+  });
+
   it("emits only string-typed leaves (no object containers)", () => {
     const opts = listVarKeyOptions();
     const values = new Set(opts.map((o) => o.value));

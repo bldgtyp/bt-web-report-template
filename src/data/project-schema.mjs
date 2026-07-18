@@ -74,8 +74,10 @@ function formatError(err, source) {
   switch (err.keyword) {
     case "additionalProperties":
       return `${source}: ${path} has unknown property "${err.params.additionalProperty}"`;
-    case "required":
-      return `${source}: missing required field "${err.params.missingProperty}"`;
+    case "required": {
+      const parentPath = path === "(root)" ? "" : `${path}: `;
+      return `${source}: ${parentPath}missing required field "${err.params.missingProperty}"`;
+    }
     case "pattern":
       return `${source}: ${path} must match pattern ${err.params.pattern}`;
     case "const":

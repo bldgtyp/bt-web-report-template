@@ -178,6 +178,28 @@ assert.throws(
     ),
   /publishing\.access\.allowed_emails\.0 must match pattern/,
 );
+assert.throws(
+  () =>
+    parseProjectYaml(
+      toYaml({
+        ...baseProject,
+        publishing: { ...baseProject.publishing, access: { mode: "public" } },
+      }),
+      "project.yaml",
+    ),
+  /publishing\.access: missing required field "allowed_emails"/,
+);
+assert.throws(
+  () =>
+    parseProjectYaml(
+      toYaml({
+        ...baseProject,
+        publishing: { ...baseProject.publishing, access: { allowed_emails: [] } },
+      }),
+      "project.yaml",
+    ),
+  /publishing\.access: missing required field "mode"/,
+);
 
 // Repo-relative path violation.
 assert.throws(
