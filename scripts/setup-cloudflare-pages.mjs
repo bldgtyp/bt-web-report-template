@@ -5,6 +5,9 @@ import { pathToFileURL } from "node:url";
 import YAML from "yaml";
 
 const API_BASE_URL = "https://api.cloudflare.com/client/v4";
+const ACCESS_MODE_PUBLIC = "public";
+const ACCESS_MODE_CLOUDFLARE_OTP = "cloudflare_access_otp";
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function hostnameFromProductionUrl(productionUrl) {
   if (typeof productionUrl !== "string" || productionUrl.trim() === "") {
@@ -18,8 +21,72 @@ export function hostnameFromProductionUrl(productionUrl) {
 }
 
 export function readProductionUrl(projectYamlPath) {
+  return readProjectPublishing(projectYamlPath).productionUrl;
+}
+
+export function readProjectPublishing(projectYamlPath) {
   const project = YAML.parse(fs.readFileSync(projectYamlPath, "utf8"));
-  return project?.publishing?.production_url;
+  return {
+    productionUrl: project?.publishing?.production_url,
+    access: project?.publishing?.access,
+  };
+}
+
+export function normalizeAccessConfig(access) {
+  if (access === undefined || access === null) {
+    return { mode: ACCESS_MODE_PUBLIC, allowed_emails: [] };
+  }
+  if (typeof access !== "object" || Array.isArray(access)) {
+    throw new Error("publishing.access must be an object.");
+  }
+  if (access.mode === undefined) {
+    throw new Error("publishing.access.mode is required when publishing.access is present.");
+  }
+  if (access.allowed_emails === undefined) {
+    throw new Error("publishing.access.allowed_emails is required when publishing.access is present.");
+  }
+  if (![ACCESS_MODE_PUBLIC, ACCESS_MODE_CLOUDFLARE_OTP].includes(access.mode)) {
+    throw new Error(`publishing.access.mode must be ${ACCESS_MODE_PUBLIC} or ${ACCESS_MODE_CLOUDFLARE_OTP}.`);
+  }
+  if (!Array.isArray(access.allowed_emails)) {
+    throw new Error("publishing.access.allowed_emails must be a list.");
+  }
+
+  const allowedEmails = access.allowed_emails.map((email, index) => {
+    if (typeof email !== "string" || !EMAIL_PATTERN.test(email)) {
+      throw new Error(`publishing.access.allowed_emails[${index}] must be a valid email address.`);
+    }
+    return email;
+  });
+  if (access.mode === ACCESS_MODE_CLOUDFLARE_OTP && allowedEmails.length === 0) {
+    throw new Error("publishing.access.allowed_emails must include at least one email for cloudflare_access_otp.");
+  }
+  return { mode: access.mode, allowed_emails: allowedEmails };
+}
+
+export function accessApplicationName(hostname) {
+  return `bt-web-report ${hostname}`;
+}
+
+export function accessApplicationPayload({ hostname, access, otpIdentityProviderId }) {
+  return {
+    name: accessApplicationName(hostname),
+    type: "self_hosted",
+    domain: hostname,
+    destinations: [{ type: "public", uri: hostname }],
+    session_duration: "24h",
+    app_launcher_visible: false,
+    allowed_idps: [otpIdentityProviderId],
+    policies: [
+      {
+        name: "Allow project report readers",
+        decision: "allow",
+        precedence: 1,
+        session_duration: "24h",
+        include: access.allowed_emails.map((email) => ({ email: { email } })),
+      },
+    ],
+  };
 }
 
 export async function ensureCloudflarePages({
@@ -27,6 +94,8 @@ export async function ensureCloudflarePages({
   apiToken,
   projectName,
   productionUrl,
+  access,
+  otpIdentityProviderId,
   fetchImpl = globalThis.fetch,
   log = console.log,
   apiBaseUrl = API_BASE_URL,
@@ -45,6 +114,8 @@ export async function ensureCloudflarePages({
   }
 
   const domainName = hostnameFromProductionUrl(productionUrl);
+  const normalizedAccess = normalizeAccessConfig(access);
+  validateCloudflareAccessPreflight({ access: normalizedAccess, otpIdentityProviderId });
   const projectPath = `/pages/projects/${encodeURIComponent(projectName)}`;
   const pagesHostname = `${projectName}.pages.dev`;
 
@@ -122,7 +193,169 @@ export async function ensureCloudflarePages({
     pagesHostname,
     log,
   });
-  return { projectName, domainName, domainCreated, domainStatus, dnsRecord };
+  const accessResult =
+    access === undefined || access === null
+      ? { mode: ACCESS_MODE_PUBLIC, applicationId: null, action: "skipped" }
+      : await ensureCloudflareAccess({
+          accountId,
+          apiToken,
+          productionUrl,
+          access: normalizedAccess,
+          otpIdentityProviderId,
+          fetchImpl,
+          log,
+          apiBaseUrl,
+        });
+  return { projectName, domainName, domainCreated, domainStatus, dnsRecord, access: accessResult };
+}
+
+export function validateCloudflareAccessPreflight({ access, otpIdentityProviderId }) {
+  if (access.mode === ACCESS_MODE_CLOUDFLARE_OTP && !otpIdentityProviderId) {
+    throw new Error("CLOUDFLARE_ACCESS_OTP_IDP_ID is required when publishing.access.mode is cloudflare_access_otp.");
+  }
+}
+
+export async function ensureCloudflareAccess({
+  accountId,
+  apiToken,
+  productionUrl,
+  access,
+  otpIdentityProviderId,
+  fetchImpl = globalThis.fetch,
+  log = console.log,
+  apiBaseUrl = API_BASE_URL,
+}) {
+  const domainName = hostnameFromProductionUrl(productionUrl);
+  const normalizedAccess = normalizeAccessConfig(access);
+  validateCloudflareAccessPreflight({ access: normalizedAccess, otpIdentityProviderId });
+
+  const existingApplication = await findManagedAccessApplication({
+    accountId,
+    apiToken,
+    hostname: domainName,
+    fetchImpl,
+    apiBaseUrl,
+  });
+
+  if (normalizedAccess.mode === ACCESS_MODE_PUBLIC) {
+    if (!existingApplication) {
+      log(`Cloudflare Access gate absent: ${domainName}`);
+      return { mode: ACCESS_MODE_PUBLIC, applicationId: null, action: "none" };
+    }
+    await cloudflareRequest({
+      accountId,
+      apiToken,
+      path: `/access/apps/${encodeURIComponent(existingApplication.id)}`,
+      fetchImpl,
+      apiBaseUrl,
+      method: "DELETE",
+    });
+    log(`Cloudflare Access gate removed: ${domainName}`);
+    return { mode: ACCESS_MODE_PUBLIC, applicationId: existingApplication.id, action: "deleted" };
+  }
+
+  const body = accessApplicationPayload({
+    hostname: domainName,
+    access: normalizedAccess,
+    otpIdentityProviderId,
+  });
+  if (existingApplication) {
+    const updated = await cloudflareRequest({
+      accountId,
+      apiToken,
+      path: `/access/apps/${encodeURIComponent(existingApplication.id)}`,
+      fetchImpl,
+      apiBaseUrl,
+      method: "PUT",
+      body,
+    });
+    log(`Cloudflare Access gate updated: ${domainName}`);
+    return { mode: ACCESS_MODE_CLOUDFLARE_OTP, applicationId: updated.result.id, action: "updated" };
+  }
+
+  const created = await createAccessApplicationOrUpdateExisting({
+    accountId,
+    apiToken,
+    hostname: domainName,
+    body,
+    fetchImpl,
+    apiBaseUrl,
+  });
+  log(`Cloudflare Access gate ${created.action}: ${domainName}`);
+  return { mode: ACCESS_MODE_CLOUDFLARE_OTP, applicationId: created.response.result.id, action: created.action };
+}
+
+async function createAccessApplicationOrUpdateExisting({ accountId, apiToken, hostname, body, fetchImpl, apiBaseUrl }) {
+  try {
+    const response = await cloudflareRequest({
+      accountId,
+      apiToken,
+      path: "/access/apps",
+      fetchImpl,
+      apiBaseUrl,
+      method: "POST",
+      body,
+    });
+    return { response, action: "created" };
+  } catch (error) {
+    if (!/already exists|already have|conflict/i.test(error?.message ?? String(error))) {
+      throw error;
+    }
+    const existingApplication = await findManagedAccessApplication({
+      accountId,
+      apiToken,
+      hostname,
+      fetchImpl,
+      apiBaseUrl,
+    });
+    if (!existingApplication) {
+      throw error;
+    }
+    const response = await cloudflareRequest({
+      accountId,
+      apiToken,
+      path: `/access/apps/${encodeURIComponent(existingApplication.id)}`,
+      fetchImpl,
+      apiBaseUrl,
+      method: "PUT",
+      body,
+    });
+    return { response, action: "updated" };
+  }
+}
+
+async function findManagedAccessApplication({ accountId, apiToken, hostname, fetchImpl, apiBaseUrl }) {
+  const applications = await cloudflareRequest({
+    accountId,
+    apiToken,
+    path: `/access/apps?domain=${encodeURIComponent(hostname)}&exact=true`,
+    fetchImpl,
+    apiBaseUrl,
+  });
+  return (applications.result ?? []).find((application) => isManagedAccessApplication(application, hostname)) ?? null;
+}
+
+function isManagedAccessApplication(application, hostname) {
+  return application?.name === accessApplicationName(hostname) && applicationMatchesHostname(application, hostname);
+}
+
+function applicationMatchesHostname(application, hostname) {
+  if (application?.domain === hostname) {
+    return true;
+  }
+  return (application?.destinations ?? []).some((destination) => destinationHostname(destination?.uri) === hostname);
+}
+
+function destinationHostname(uri) {
+  if (typeof uri !== "string" || uri.trim() === "") {
+    return null;
+  }
+  try {
+    const value = uri.includes("://") ? uri : `https://${uri}`;
+    return new URL(value).hostname;
+  } catch {
+    return null;
+  }
 }
 
 export async function ensurePagesDnsRecord({
@@ -268,13 +501,18 @@ export function formatCloudflareError(method, path, status, payload) {
 
 function parseArgs(argv) {
   const args = new Map();
-  for (let index = 0; index < argv.length; index += 2) {
+  for (let index = 0; index < argv.length; index += 1) {
     const key = argv[index];
-    const value = argv[index + 1];
-    if (!key?.startsWith("--") || value === undefined) {
+    if (!key?.startsWith("--")) {
       throw new Error(`Expected --key value arguments, got: ${argv.join(" ")}`);
     }
-    args.set(key.slice(2), value);
+    const next = argv[index + 1];
+    if (next === undefined || next.startsWith("--")) {
+      args.set(key.slice(2), true);
+      continue;
+    }
+    args.set(key.slice(2), next);
+    index += 1;
   }
   return args;
 }
@@ -286,6 +524,16 @@ async function main() {
   if (!projectYamlPath) {
     throw new Error("--project-yaml is required.");
   }
+
+  const publishing = readProjectPublishing(projectYamlPath);
+  if (args.get("preflight-access")) {
+    validateCloudflareAccessPreflight({
+      access: normalizeAccessConfig(publishing.access),
+      otpIdentityProviderId: process.env.CLOUDFLARE_ACCESS_OTP_IDP_ID,
+    });
+    return;
+  }
+
   if (!projectName) {
     throw new Error("--project-name is required.");
   }
@@ -294,7 +542,9 @@ async function main() {
     accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
     apiToken: process.env.CLOUDFLARE_API_TOKEN,
     projectName,
-    productionUrl: readProductionUrl(projectYamlPath),
+    productionUrl: publishing.productionUrl,
+    access: publishing.access,
+    otpIdentityProviderId: process.env.CLOUDFLARE_ACCESS_OTP_IDP_ID,
   });
 }
 

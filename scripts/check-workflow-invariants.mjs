@@ -16,6 +16,7 @@ const moduleDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(moduleDir, "..");
 const workflowPath = resolve(repoRoot, ".github/workflows/_renderer-build.yml");
 const templateDeployWorkflowPath = resolve(repoRoot, ".github/workflows/deploy.yml");
+const perProjectDeployWorkflowPath = resolve(repoRoot, "scripts/per-project-deploy.yml");
 
 if (!existsSync(workflowPath)) {
   console.error(`check-workflow-invariants: cannot find ${workflowPath}`);
@@ -25,6 +26,9 @@ if (!existsSync(workflowPath)) {
 const doc = YAML.parse(readFileSync(workflowPath, "utf8"));
 const templateDeployDoc = existsSync(templateDeployWorkflowPath)
   ? YAML.parse(readFileSync(templateDeployWorkflowPath, "utf8"))
+  : null;
+const perProjectDeployDoc = existsSync(perProjectDeployWorkflowPath)
+  ? YAML.parse(readFileSync(perProjectDeployWorkflowPath, "utf8"))
   : null;
 
 const failures = [];
@@ -86,6 +90,9 @@ function fail(invariant, detail) {
       const run = step?.run;
       if (typeof run !== "string") continue;
       for (const { pattern, label } of networkPatterns) {
+        if (label === "setup-cloudflare-pages" && run.includes("--preflight-access")) {
+          continue;
+        }
         if (pattern.test(run) && !run.includes("retry.sh")) {
           fail(
             "network-step-must-retry",
@@ -265,6 +272,57 @@ function fail(invariant, detail) {
         "template-deploy-must-not-manage-custom-domain",
         ".github/workflows/deploy.yml must pass `manage-custom-domain: false` to _renderer-build.yml. " +
           "The template deploy builds pending seed data and must not rewire project-<number>.bldgtyp.com DNS.",
+      );
+    }
+  }
+}
+
+// --- Invariant 8 ----------------------------------------------------------
+// Access-gated reports need one additional optional secret. It has to be
+// declared on the reusable workflow, exposed at build-job env scope for both
+// the early preflight and setup step, and passed through both caller workflows.
+{
+  const secretName = "CLOUDFLARE_ACCESS_OTP_IDP_ID";
+  const workflowSecrets = doc?.on?.workflow_call?.secrets ?? {};
+  if (!(secretName in workflowSecrets)) {
+    fail(
+      "access-otp-secret-missing-from-reusable-workflow",
+      `.github/workflows/_renderer-build.yml must declare workflow_call.secrets.${secretName}.`,
+    );
+  }
+
+  const buildEnv = doc?.jobs?.build?.env ?? {};
+  if (!(secretName in buildEnv)) {
+    fail(
+      "access-otp-secret-missing-from-build-env",
+      `.github/workflows/_renderer-build.yml jobs.build.env must expose ${secretName} to setup-cloudflare-pages.mjs.`,
+    );
+  }
+
+  const preflightStep = (doc?.jobs?.build?.steps ?? []).find(
+    (step) => step?.name === "Preflight Cloudflare Access configuration",
+  );
+  const preflightRun = preflightStep?.run ?? "";
+  if (!/setup-cloudflare-pages\.mjs/.test(preflightRun) || !/--preflight-access/.test(preflightRun)) {
+    fail(
+      "access-preflight-step-missing",
+      "jobs.build must run setup-cloudflare-pages.mjs --preflight-access before type-check/build/PDF work.",
+    );
+  }
+
+  for (const [label, callerDoc] of [
+    [".github/workflows/deploy.yml", templateDeployDoc],
+    ["scripts/per-project-deploy.yml", perProjectDeployDoc],
+  ]) {
+    if (!callerDoc) {
+      fail("access-otp-caller-workflow-missing", `Cannot find ${label}.`);
+      continue;
+    }
+    const callerSecrets = callerDoc?.jobs?.deploy?.secrets ?? {};
+    if (!(secretName in callerSecrets)) {
+      fail(
+        "access-otp-secret-not-passed-by-caller",
+        `${label} must pass ${secretName} through to the reusable renderer workflow.`,
       );
     }
   }

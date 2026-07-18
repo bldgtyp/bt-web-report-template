@@ -251,6 +251,11 @@ Optional repo variable:
 
 - `CLOUDFLARE_PAGES_PROJECT` (defaults to the GitHub repo name)
 
+Optional organization or repository GitHub Actions secret for gated reports:
+
+- `CLOUDFLARE_ACCESS_OTP_IDP_ID` (required only when `project.yaml` sets
+  `publishing.access.mode: cloudflare_access_otp`)
+
 The normal project convention is repo name = Pages project name:
 `bt-proj-<number>-<name>`. The client URL remains separate:
 `https://project-<number>.bldgtyp.com`.

@@ -70,6 +70,9 @@ on:
       CLOUDFLARE_ACCOUNT_ID:
         description: "Required when run-deploy=true."
         required: false
+      CLOUDFLARE_ACCESS_OTP_IDP_ID:
+        description: "Required only when project.yaml sets publishing.access.mode=cloudflare_access_otp."
+        required: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -80,6 +83,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_ACCESS_OTP_IDP_ID: ${{ secrets.CLOUDFLARE_ACCESS_OTP_IDP_ID }}
       # MUST be at job level (not step level). pnpm scripts chain: `pnpm build`
       # internally invokes `pnpm validate` again, and any step-scoped env var
       # would NOT propagate into the inner invocation. Job-level env ensures
@@ -172,6 +176,10 @@ jobs:
       - name: Validate project metadata (against schemas source of truth)
         working-directory: runtime
         run: pnpm validate
+
+      - name: Preflight Cloudflare Access configuration
+        if: ${{ inputs.run-deploy && inputs.manage-custom-domain }}
+        run: node renderer/scripts/setup-cloudflare-pages.mjs --project-yaml project/project.yaml --preflight-access
 
       - name: Type-check
         working-directory: runtime
