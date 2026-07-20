@@ -1,7 +1,12 @@
 ---
-import { reportPageNavItems } from "../data/pages";
+import type { ReportPage } from "../data/pages";
 
-const links = reportPageNavItems.filter((item) => item.href !== "/");
+interface Props {
+  pageOrder: readonly ReportPage[];
+}
+
+const { pageOrder } = Astro.props;
+const links = pageOrder.filter((item) => item.href !== "/");
 ---
 
 <nav class="btwr-page-links" aria-label="Report pages">

@@ -92,14 +92,15 @@ export function validateCustomPages(customPages: readonly CustomPageConfig[] = [
   }
 }
 
-export function reportPageOrderFor(): readonly CoreReportPage[];
-export function reportPageOrderFor(customPages: readonly CustomPageConfig[]): readonly ReportPage[];
-export function reportPageOrderFor(customPages: readonly CustomPageConfig[] = []): readonly ReportPage[] {
-  validateCustomPages(customPages);
-  if (customPages.length === 0) {
+export function reportPageOrderFor(
+  customPages: readonly CustomPageConfig[] | undefined = [],
+): readonly ReportPage[] {
+  const configuredPages = customPages ?? [];
+  validateCustomPages(configuredPages);
+  if (configuredPages.length === 0) {
     return reportPageOrder;
   }
-  const customReportPages: CustomReportPage[] = customPages.map(({ slug, label }, index) => ({
+  const customReportPages: CustomReportPage[] = configuredPages.map(({ slug, label }, index) => ({
     kind: "custom",
     key: `custom:${slug}`,
     slug,
@@ -109,5 +110,3 @@ export function reportPageOrderFor(customPages: readonly CustomPageConfig[] = []
   }));
   return [...reportPageOrder, ...customReportPages];
 }
-
-export const reportPageNavItems = reportPageOrder.map(({ href, label }) => ({ href, label }));

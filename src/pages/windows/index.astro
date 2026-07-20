@@ -3,13 +3,14 @@ import ReportSectionList from "../../components/ReportSectionList.astro";
 import RadiationImage from "../../components/sections/RadiationImage.astro";
 import SiteShadingImages from "../../components/sections/SiteShadingImages.astro";
 import WindowThermalComfortHero from "../../components/sections/WindowThermalComfortHero.astro";
-import { reportPages } from "../../data/pages";
+import { reportPageOrderFor, reportPages } from "../../data/pages";
 import { windowsSections } from "../../data/report-sections";
 import { tocItemsFromSections, type SectionExtras } from "../../data/sections";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
+const pageOrder = reportPageOrderFor(report.project.custom_pages);
 const page = reportPages.windows;
 
 const sections = windowsSections();
@@ -29,8 +30,8 @@ const extras: Record<string, SectionExtras> = {
 <ProjectReportLayout
   report={report}
   tocItems={tocItems}
+  pageOrder={pageOrder}
   currentHref={page.href}
-  pageKicker={page.kicker}
   pageLabel={page.label}
 >
   <ReportSectionList sections={sections} extras={extras} report={report} />

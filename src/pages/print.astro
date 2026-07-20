@@ -16,13 +16,16 @@ import RadiationImage from "../components/sections/RadiationImage.astro";
 import SiteEnergyPanel from "../components/sections/SiteEnergyPanel.astro";
 import SiteShadingImages from "../components/sections/SiteShadingImages.astro";
 import WindowThermalComfortHero from "../components/sections/WindowThermalComfortHero.astro";
+import { reportPageOrderFor } from "../data/pages";
 import { loadAllPageSections } from "../data/report-sections";
 import { loadTemplateReportData } from "../data/report";
+import { resolveSectionExtras } from "../data/section-extras-registry";
 import type { SectionExtras } from "../data/sections";
 import PrintReportLayout from "../layouts/PrintReportLayout.astro";
 
 const report = await loadTemplateReportData();
-const pageGroups = loadAllPageSections();
+const pageOrder = reportPageOrderFor(report.project.custom_pages);
+const pageGroups = loadAllPageSections(pageOrder);
 
 // The same extras the four web page files register, flattened into one map —
 // section ids are unique across the report. Adding an extra to a page file
@@ -31,7 +34,7 @@ const pageGroups = loadAllPageSections();
 // Rendering with `interactive={false}` is the only other difference from the
 // web: the image figures drop their lightbox anchors. Summary also keeps its
 // heading here, which the web page suppresses.
-const extras: Record<string, SectionExtras> = {
+const coreExtras: Record<string, SectionExtras> = {
   "model-geometry": { Children: ModelGeometryExtras },
   "model-variants": { Children: ModelVariantsTables },
   "site-energy": { Children: SiteEnergyPanel },
@@ -52,10 +55,15 @@ const extras: Record<string, SectionExtras> = {
 
 <PrintReportLayout report={report}>
   <PrintCover report={report} />
-  <PrintToc />
+  <PrintToc pageGroups={pageGroups} />
   {
-    pageGroups.map(({ sections }) => (
-      <ReportSectionList sections={sections} extras={extras} report={report} interactive={false} />
+    pageGroups.map(({ page, sections }) => (
+      <ReportSectionList
+        sections={sections}
+        extras={page.kind === "custom" ? resolveSectionExtras(sections) : coreExtras}
+        report={report}
+        interactive={false}
+      />
     ))
   }
 </PrintReportLayout>

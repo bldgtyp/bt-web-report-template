@@ -18,6 +18,7 @@ export interface SectionFrontmatter {
   /** Overrides the filename-derived anchor id. Needed where an existing
    * section's rendered id never matched its filename. */
   section_id?: string;
+  extras?: unknown;
   callout_label?: string;
   callout_body?: string;
   [key: string]: unknown;
@@ -32,6 +33,7 @@ export interface SectionEntry {
   id: string;
   kicker: string;
   title: string;
+  sourcePath: string;
   frontmatter: SectionFrontmatter;
   Content: unknown;
 }
@@ -71,18 +73,20 @@ export function loadSections(modules: Record<string, SectionModule>): SectionEnt
       id: frontmatter.section_id ?? filenameSlug(path),
       kicker: frontmatter.kicker,
       title: frontmatter.title,
+      sourcePath: path,
       frontmatter,
       Content,
-      path,
     };
   });
 
-  assertUnique(entries, (entry) => entry.id, "section id");
-  assertUnique(entries, (entry) => entry.kicker, "kicker");
+  assertUniqueBySourcePath(entries, (entry) => entry.id, "section id");
+  assertUniqueBySourcePath(entries, (entry) => entry.kicker, "kicker");
 
   return entries
-    .sort((left, right) => left.kicker.localeCompare(right.kicker) || left.path.localeCompare(right.path))
-    .map(({ path: _path, ...section }) => section);
+    .sort(
+      (left, right) =>
+        left.kicker.localeCompare(right.kicker) || left.sourcePath.localeCompare(right.sourcePath),
+    );
 }
 
 /**
@@ -128,7 +132,11 @@ function filenameSlug(path: string): string {
   return path.split("/").pop()?.replace(/\.mdx$/, "") ?? path;
 }
 
-function assertUnique<T extends { path: string }>(entries: T[], key: (entry: T) => string, label: string): void {
+export function assertUniqueBySourcePath<T extends { sourcePath: string }>(
+  entries: readonly T[],
+  key: (entry: T) => string,
+  label: string,
+): void {
   const seen = new Map<string, string>();
 
   for (const entry of entries) {
@@ -136,9 +144,9 @@ function assertUnique<T extends { path: string }>(entries: T[], key: (entry: T) 
     const previous = seen.get(value);
 
     if (previous) {
-      throw new Error(`Duplicate ${label} "${value}" in "${previous}" and "${entry.path}".`);
+      throw new Error(`Duplicate ${label} "${value}" in "${previous}" and "${entry.sourcePath}".`);
     }
 
-    seen.set(value, entry.path);
+    seen.set(value, entry.sourcePath);
   }
 }

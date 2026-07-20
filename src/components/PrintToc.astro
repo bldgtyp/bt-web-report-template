@@ -1,9 +1,14 @@
 ---
 // Print table of contents, composed from the same page groups the PDF body
 // iterates — so a section a project removes disappears from both together.
-import { loadAllPageSections } from "../data/report-sections";
+import type { PageSections } from "../data/report-sections";
 
-const pageEntries = loadAllPageSections().map(({ page, sections }) => ({
+interface Props {
+  pageGroups: readonly PageSections[];
+}
+
+const { pageGroups } = Astro.props;
+const pageEntries = pageGroups.map(({ page, sections }) => ({
   kicker: page.kicker,
   label: page.label,
   // A page is linked by its first section; there is no page-level anchor.

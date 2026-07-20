@@ -31,6 +31,7 @@ describe("loadSections", () => {
     });
 
     expect(sections.map((section) => section.id)).toEqual(["recommended-assemblies", "aerobarrier"]);
+    expect(sections[0].sourcePath).toBe("../../content/envelope/assemblies.mdx");
   });
 
   it("rejects an empty content directory", () => {

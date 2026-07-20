@@ -63,19 +63,92 @@ function requirePackageScripts(root) {
   }
 }
 
-try {
-  const root = pathToFileURL(`${process.cwd()}/`);
-  const project = await readProjectFile(projectPathFromRoot(process.cwd()));
+export function validateCustomPageContent(root, customPages = []) {
+  const customRoot = new URL("content/custom/", root);
+  const registered = new Set(customPages.map(({ slug }) => slug));
+  const discovered = new Set();
+
+  if (fs.existsSync(customRoot)) {
+    for (const entry of fs.readdirSync(customRoot, { withFileTypes: true })) {
+      if (entry.isFile() && entry.name.endsWith(".mdx")) {
+        throw new Error(`custom page MDX must be inside a slug directory: content/custom/${entry.name}`);
+      }
+      if (entry.isDirectory()) {
+        discovered.add(entry.name);
+      }
+    }
+  }
+
+  for (const slug of discovered) {
+    if (!registered.has(slug)) {
+      throw new Error(`unregistered custom page content directory: content/custom/${slug}`);
+    }
+  }
+
+  for (const slug of registered) {
+    const relativeDir = `content/custom/${slug}`;
+    const pageDir = new URL(`${slug}/`, customRoot);
+    let entries;
+    try {
+      entries = fs.readdirSync(pageDir, { withFileTypes: true });
+    } catch (error) {
+      if (error?.code !== "ENOENT") {
+        throw error;
+      }
+      throw new Error(`registered custom page "${slug}" is missing content directory: ${relativeDir}`);
+    }
+
+    const nestedMdx = entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => findFirstMdx(new URL(`${entry.name}/`, pageDir), `${relativeDir}/${entry.name}`))
+      .find(Boolean);
+    if (nestedMdx) {
+      throw new Error(`nested custom page MDX is not supported: ${nestedMdx}`);
+    }
+
+    const sections = entries.filter((entry) => entry.isFile() && entry.name.endsWith(".mdx"));
+    if (sections.length === 0) {
+      throw new Error(`no top-level .mdx sections found in ${relativeDir}`);
+    }
+  }
+}
+
+function findFirstMdx(directory, relativeDir) {
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const relativePath = `${relativeDir}/${entry.name}`;
+    if (entry.isDirectory()) {
+      const nestedMdx = findFirstMdx(new URL(`${entry.name}/`, directory), relativePath);
+      if (nestedMdx) {
+        return nestedMdx;
+      }
+    } else if (entry.isFile() && entry.name.endsWith(".mdx")) {
+      return relativePath;
+    }
+  }
+  return undefined;
+}
+
+export async function validateProjectRoot(rootPath = process.cwd()) {
+  const root = pathToFileURL(`${rootPath}/`);
+  const project = await readProjectFile(projectPathFromRoot(rootPath));
   for (const sectionFile of REQUIRED_SECTION_FILES) {
     requireFile(root, sectionFile);
   }
   for (const sectionDir of REQUIRED_SECTION_DIRS) {
     requireSectionsIn(root, sectionDir);
   }
+  validateCustomPageContent(root, project.custom_pages ?? []);
   requireFile(root, "tina/config.ts");
   requirePackageScripts(root);
-  console.log(`project.yaml ok: ${project.slug} (${project.project_title})`);
-} catch (error) {
-  console.error(error instanceof Error ? error.message : error);
-  process.exit(1);
+  return project;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    const project = await validateProjectRoot();
+    console.log(`project.yaml ok: ${project.slug} (${project.project_title})`);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  }
 }

@@ -3,13 +3,14 @@ import AssemblyCards from "../../components/AssemblyCards.astro";
 import ReportSectionList from "../../components/ReportSectionList.astro";
 import AeroBarrierHero from "../../components/sections/AeroBarrierHero.astro";
 import AirtightnessChart from "../../components/sections/AirtightnessChart.astro";
-import { reportPages } from "../../data/pages";
+import { reportPageOrderFor, reportPages } from "../../data/pages";
 import { envelopeSections } from "../../data/report-sections";
 import { tocItemsFromSections, type SectionExtras } from "../../data/sections";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
+const pageOrder = reportPageOrderFor(report.project.custom_pages);
 const page = reportPages.envelope;
 
 // Presence of the .mdx files decides what renders. The glob does not recurse
@@ -29,8 +30,8 @@ const extras: Record<string, SectionExtras> = {
 <ProjectReportLayout
   report={report}
   tocItems={tocItems}
+  pageOrder={pageOrder}
   currentHref={page.href}
-  pageKicker={page.kicker}
   pageLabel={page.label}
 >
   <ReportSectionList sections={sections} extras={extras} report={report} />

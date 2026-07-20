@@ -2,11 +2,12 @@
 import Summary, { frontmatter as summary } from "../../content/summary.mdx";
 import ReportPageLinks from "../components/ReportPageLinks.astro";
 import ReportSection from "../components/ReportSection.astro";
-import { reportPages } from "../data/pages";
+import { reportPageOrderFor, reportPages } from "../data/pages";
 import { loadTemplateReportData } from "../data/report";
 import ProjectReportLayout from "../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
+const pageOrder = reportPageOrderFor(report.project.custom_pages);
 const page = reportPages.summary;
 const tocItems = [{ href: "#summary", label: summary.title, number: summary.kicker }];
 ---
@@ -14,8 +15,8 @@ const tocItems = [{ href: "#summary", label: summary.title, number: summary.kick
 <ProjectReportLayout
   report={report}
   tocItems={tocItems}
+  pageOrder={pageOrder}
   currentHref={page.href}
-  pageKicker={page.kicker}
   pageLabel={page.label}
   heroImage={summary.hero_image}
   heroImageFull={summary.hero_image_full}
@@ -30,6 +31,6 @@ const tocItems = [{ href: "#summary", label: summary.title, number: summary.kick
     show_heading={false}
     show_standalone_heading={false}
   >
-    <ReportPageLinks />
+    <ReportPageLinks pageOrder={pageOrder} />
   </ReportSection>
 </ProjectReportLayout>

@@ -7,13 +7,14 @@ import Co2EmissionsPanel from "../../components/sections/Co2EmissionsPanel.astro
 import ModelGeometryExtras from "../../components/sections/ModelGeometryExtras.astro";
 import ModelVariantsTables from "../../components/sections/ModelVariantsTables.astro";
 import SiteEnergyPanel from "../../components/sections/SiteEnergyPanel.astro";
-import { reportPages } from "../../data/pages";
+import { reportPageOrderFor, reportPages } from "../../data/pages";
 import { energyModelSections } from "../../data/report-sections";
 import { tocItemsFromSections, type SectionExtras } from "../../data/sections";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
+const pageOrder = reportPageOrderFor(report.project.custom_pages);
 const page = reportPages.energyModel;
 
 const sections = energyModelSections();
@@ -35,8 +36,8 @@ const extras: Record<string, SectionExtras> = {
 <ProjectReportLayout
   report={report}
   tocItems={tocItems}
+  pageOrder={pageOrder}
   currentHref={page.href}
-  pageKicker={page.kicker}
   pageLabel={page.label}
 >
   <ReportSectionList sections={sections} extras={extras} report={report} />

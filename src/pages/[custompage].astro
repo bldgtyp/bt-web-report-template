@@ -1,0 +1,42 @@
+---
+import ReportSectionList from "../components/ReportSectionList.astro";
+import { loadCustomPageSections, validateCustomPageModules } from "../data/custom-pages";
+import { reportPageOrderFor, type CustomReportPage } from "../data/pages";
+import { loadProjectConfig } from "../data/project";
+import { loadTemplateReportData } from "../data/report";
+import { resolveSectionExtras } from "../data/section-extras-registry";
+import { tocItemsFromSections } from "../data/sections";
+import ProjectReportLayout from "../layouts/ProjectReportLayout.astro";
+
+export async function getStaticPaths() {
+  const project = await loadProjectConfig();
+  const customPages = project.custom_pages ?? [];
+  const pageOrder = reportPageOrderFor(customPages);
+  validateCustomPageModules(customPages);
+
+  return pageOrder
+    .filter((page): page is CustomReportPage => page.kind === "custom")
+    .map((page) => ({ params: { custompage: page.slug }, props: { page } }));
+}
+
+interface Props {
+  page: CustomReportPage;
+}
+
+const { page } = Astro.props;
+const report = await loadTemplateReportData();
+const pageOrder = reportPageOrderFor(report.project.custom_pages);
+const sections = loadCustomPageSections(page.slug);
+const tocItems = tocItemsFromSections(sections);
+const extras = resolveSectionExtras(sections);
+---
+
+<ProjectReportLayout
+  report={report}
+  tocItems={tocItems}
+  pageOrder={pageOrder}
+  currentHref={page.href}
+  pageLabel={page.label}
+>
+  <ReportSectionList sections={sections} extras={extras} report={report} />
+</ProjectReportLayout>

@@ -11,8 +11,15 @@
 // any export from this module loads all four directories.
 
 import Summary, { frontmatter as summaryFrontmatter } from "../../content/summary.mdx";
-import { reportPageOrder, type CoreReportPage, type CoreReportPageKey } from "./pages";
-import { loadSections, type SectionEntry, type SectionFrontmatter, type SectionModule } from "./sections";
+import { loadCustomPageSections } from "./custom-pages";
+import type { CoreReportPageKey, ReportPage } from "./pages";
+import {
+  assertUniqueBySourcePath,
+  loadSections,
+  type SectionEntry,
+  type SectionFrontmatter,
+  type SectionModule,
+} from "./sections";
 
 // Astro types MDX frontmatter as Record<string, any>, so the static Summary
 // import needs an explicit narrowing; the globbed sections get theirs from the
@@ -20,7 +27,7 @@ import { loadSections, type SectionEntry, type SectionFrontmatter, type SectionM
 const summary = summaryFrontmatter as SectionFrontmatter;
 
 export interface PageSections {
-  page: CoreReportPage;
+  page: ReportPage;
   sections: SectionEntry[];
 }
 
@@ -47,6 +54,7 @@ export const summarySection = (): SectionEntry => ({
   id: "summary",
   kicker: summary.kicker,
   title: summary.title,
+  sourcePath: "../../content/summary.mdx",
   frontmatter: summary,
   Content: Summary,
 });
@@ -60,13 +68,26 @@ const sectionsByPage: Record<CoreReportPageKey, () => SectionEntry[]> = {
 };
 
 /**
- * All five groups in page order — the order the PDF and its TOC follow.
- * Order comes from `reportPageOrder` so it cannot drift from the site nav.
+ * All page groups in the caller's per-report order — the order the PDF and
+ * its TOC follow.
  *
  * Every group is guaranteed non-empty: `loadSections` throws on an empty
  * directory, and Summary is a single static section. Callers may rely on
  * `sections[0]` existing.
  */
-export function loadAllPageSections(): PageSections[] {
-  return reportPageOrder.map((page) => ({ page, sections: sectionsByPage[page.key]() }));
+export function loadAllPageSections(pageOrder: readonly ReportPage[]): PageSections[] {
+  const groups = pageOrder.map((page) => ({
+    page,
+    sections: page.kind === "custom" ? loadCustomPageSections(page.slug) : sectionsByPage[page.key](),
+  }));
+  assertGloballyUniqueSectionIds(groups);
+  return groups;
+}
+
+export function assertGloballyUniqueSectionIds(groups: readonly PageSections[]): void {
+  assertUniqueBySourcePath(
+    groups.flatMap(({ sections }) => sections),
+    (section) => section.id,
+    "report section id",
+  );
 }

@@ -5,7 +5,7 @@ import printCss from "../styles/print.css?raw";
 import tokensCss from "../styles/tokens.css?raw";
 
 import PdfDownload from "../components/PdfDownload.astro";
-import { reportPageNavItems } from "../data/pages";
+import type { ReportPage } from "../data/pages";
 import type { TemplateReportData } from "../data/report";
 import chartInteractionsJs from "../scripts/chart-interactions.js?raw";
 import projectCss from "../styles/project.css?raw";
@@ -23,8 +23,8 @@ interface TocItem {
 interface Props {
   report: TemplateReportData;
   tocItems: TocItem[];
+  pageOrder: readonly ReportPage[];
   currentHref: string;
-  pageKicker: string;
   pageLabel: string;
   heroImage?: string;
   heroImageFull?: string;
@@ -35,8 +35,8 @@ interface Props {
 const {
   report,
   tocItems,
+  pageOrder,
   currentHref,
-  pageKicker,
   pageLabel,
   heroImage,
   heroImageFull,
@@ -57,9 +57,9 @@ const title = `${pageLabel} | ${report.project.project_title} | ${phase}`;
 const showHero = currentHref === "/";
 const showToc = currentHref !== "/";
 const initialTocHref = tocItems[0]?.href;
-const navIndex = reportPageNavItems.findIndex((item) => item.href === currentHref);
-const nextPage = navIndex >= 0 ? reportPageNavItems[(navIndex + 1) % reportPageNavItems.length] : undefined;
-const nextIsWrap = navIndex === reportPageNavItems.length - 1;
+const navIndex = pageOrder.findIndex((item) => item.href === currentHref);
+const nextPage = navIndex >= 0 ? pageOrder[(navIndex + 1) % pageOrder.length] : undefined;
+const nextIsWrap = navIndex === pageOrder.length - 1;
 const faviconHref =
   'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><path fill="%233E93AE" d="M6 28V12l12-7 12 7v16h-7V16H13v12H6Z"/></svg>';
 ---
@@ -121,7 +121,7 @@ const faviconHref =
         </div>
         <nav class="btwr-masthead__nav" aria-label="Primary report pages">
           {
-            reportPageNavItems.map((item) => (
+            pageOrder.map((item) => (
               <a href={item.href} aria-current={item.href === currentHref ? "page" : undefined}>
                 {item.label}
               </a>
@@ -139,7 +139,7 @@ const faviconHref =
           </summary>
           <nav aria-label="Primary report pages mobile menu">
             {
-              reportPageNavItems.map((item) => (
+              pageOrder.map((item) => (
                 <a href={item.href} aria-current={item.href === currentHref ? "page" : undefined}>
                   {item.label}
                 </a>
