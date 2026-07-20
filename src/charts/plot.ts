@@ -17,6 +17,12 @@ export interface PlotSeriesDatum {
   units?: string;
 }
 
+export interface TimeSeriesDatum {
+  timestamp: Date;
+  value: number;
+  series: string;
+}
+
 const INTERACTIVE_MARK_CLASS = "btwr-chart-mark";
 
 export async function renderPlotSvg(options: PlotOptions): Promise<string> {
@@ -133,6 +139,71 @@ export function lineChart(
         r: 3,
         className: `${INTERACTIVE_MARK_CLASS} btwr-chart-mark--dot`,
         ariaLabel: (datum: PlotSeriesDatum) => tooltipText(datum, options.units).replace("\n", ", "),
+      }),
+    ],
+  });
+}
+
+export function timeSeriesChart(
+  data: TimeSeriesDatum[],
+  options: {
+    yLabel: string;
+    colorDomain: string[];
+    colorRange: string[];
+    outageStart: Date;
+    outageEnd: Date;
+    threshold?: number;
+    thresholdLabel?: string;
+  },
+): Promise<string> {
+  return renderPlotSvg({
+    height: 420,
+    x: {
+      label: "Simulation time (UTC)",
+      type: "utc",
+    },
+    y: {
+      label: options.yLabel,
+      grid: true,
+    },
+    color: {
+      legend: false,
+      domain: options.colorDomain,
+      range: options.colorRange,
+    },
+    marks: [
+      Plot.rectX([{ start: options.outageStart, end: options.outageEnd }], {
+        x1: "start",
+        x2: "end",
+        fill: "var(--btwr-color-accent)",
+        fillOpacity: 0.08,
+      }),
+      ...(options.threshold === undefined
+        ? []
+        : [
+            Plot.ruleY([options.threshold], {
+              stroke: "var(--btwr-color-highlight)",
+              strokeDasharray: "6,4",
+              strokeWidth: 2,
+            }),
+            Plot.text(
+              [{ timestamp: options.outageStart, value: options.threshold, label: options.thresholdLabel ?? "Limit" }],
+              {
+                x: "timestamp",
+                y: "value",
+                text: "label",
+                dx: 6,
+                dy: -8,
+                fill: "var(--btwr-color-highlight)",
+                textAnchor: "start",
+              },
+            ),
+          ]),
+      Plot.lineY(data, {
+        x: "timestamp",
+        y: "value",
+        stroke: "series",
+        strokeWidth: 2,
       }),
     ],
   });

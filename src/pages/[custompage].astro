@@ -4,6 +4,7 @@ import { loadCustomPageSections, validateCustomPageModules } from "../data/custo
 import { reportPageOrderFor, type CustomReportPage } from "../data/pages";
 import { loadProjectConfig } from "../data/project";
 import { loadTemplateReportData } from "../data/report";
+import { sectionExtrasRegistry } from "../data/section-extras-components";
 import { resolveSectionExtras } from "../data/section-extras-registry";
 import { tocItemsFromSections } from "../data/sections";
 import ProjectReportLayout from "../layouts/ProjectReportLayout.astro";
@@ -28,7 +29,7 @@ const report = await loadTemplateReportData();
 const pageOrder = reportPageOrderFor(report.project.custom_pages);
 const sections = loadCustomPageSections(page.slug);
 const tocItems = tocItemsFromSections(sections);
-const extras = resolveSectionExtras(sections);
+const extras = resolveSectionExtras(sections, sectionExtrasRegistry);
 ---
 
 <ProjectReportLayout

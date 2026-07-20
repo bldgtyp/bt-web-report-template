@@ -11,11 +11,9 @@ export interface SectionExtrasRegistry {
   readonly [name: string]: SectionExtraRegistration | undefined;
 }
 
-export const sectionExtrasRegistry: SectionExtrasRegistry = {};
-
 export function resolveSectionExtras(
   sections: readonly SectionEntry[],
-  registry: SectionExtrasRegistry = sectionExtrasRegistry,
+  registry: SectionExtrasRegistry,
 ): Record<string, SectionExtras> {
   const resolved: Record<string, SectionExtras> = {};
   const validNames = Object.keys(registry).sort();

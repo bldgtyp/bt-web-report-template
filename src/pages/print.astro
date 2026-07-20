@@ -19,6 +19,7 @@ import WindowThermalComfortHero from "../components/sections/WindowThermalComfor
 import { reportPageOrderFor } from "../data/pages";
 import { loadAllPageSections } from "../data/report-sections";
 import { loadTemplateReportData } from "../data/report";
+import { sectionExtrasRegistry } from "../data/section-extras-components";
 import { resolveSectionExtras } from "../data/section-extras-registry";
 import type { SectionExtras } from "../data/sections";
 import PrintReportLayout from "../layouts/PrintReportLayout.astro";
@@ -60,7 +61,7 @@ const coreExtras: Record<string, SectionExtras> = {
     pageGroups.map(({ page, sections }) => (
       <ReportSectionList
         sections={sections}
-        extras={page.kind === "custom" ? resolveSectionExtras(sections) : coreExtras}
+        extras={page.kind === "custom" ? resolveSectionExtras(sections, sectionExtrasRegistry) : coreExtras}
         report={report}
         interactive={false}
       />
