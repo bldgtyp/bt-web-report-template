@@ -103,6 +103,18 @@ instead, such as `4322` or `4323`.
   has one MDX file that owns its title, section number, editorial heading, and
   prose; Astro routes only compose those sections with charts, tables, cards,
   and other data-driven components.
+- **Which sections a page renders is decided by which files exist.** Each page
+  globs its content directory (`content/energy-model/`, `content/envelope/`,
+  `content/windows/`, `content/mechanical/`), so adding or deleting a prose
+  `.mdx` adds or removes that section from the page, its TOC, the print body,
+  and the print TOC — no renderer change. Sections sort by their `kicker`
+  string, which is also what the TOC displays, so renumber the remaining
+  kickers after a deletion to keep them contiguous. An anchor defaults to the
+  filename slug; set the optional `section_id` frontmatter key only to preserve
+  an existing deep link. A section that injects a chart or table also needs an
+  entry in that page's extras registry, which is renderer code.
+  `content/summary.mdx` is imported statically (it feeds the layout hero) and
+  is required, as is the currently-orphaned `content/appendix.mdx`.
 - Put client-visible images and diagrams in `public/assets/`.
 - Splash page hero images live at `public/assets/cover/hero.optimized.png` for the
   initial display image and `public/assets/cover/hero.full.png` for the
