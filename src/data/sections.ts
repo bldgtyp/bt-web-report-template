@@ -4,7 +4,8 @@
 // directory: pages hand an eager `import.meta.glob` record to `loadSections`
 // and get back an ordered list. Delete a file from a project repo and the
 // section, its page-TOC entry, and its print counterparts all disappear with
-// no renderer edit. See planning/features/per-project-sections.
+// no renderer edit. See the README's content section, and the design record in
+// planning/archive/dated/2026-07-20/per-project-sections/ (workspace-local).
 //
 // Ordering is by frontmatter `kicker` — the zero-padded string already shown
 // in the TOC and section headers. This is deliberately different from the
