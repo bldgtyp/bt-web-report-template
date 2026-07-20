@@ -21,11 +21,12 @@ interface Props {
   frontmatter: SiteShadingFrontmatter;
   interactive?: boolean;
   /** Grid aria-label. Explicit because web and print currently disagree on the
-   * wording; kept a caller decision rather than derived from `interactive`. */
+   * wording; kept a caller decision rather than derived from `interactive`.
+   * Defaults to the web wording — print passes its own. */
   label?: string;
 }
 
-const { frontmatter, interactive = true, label = "Site-shading images" } = Astro.props;
+const { frontmatter, interactive = true, label = "Site-shading image placeholders" } = Astro.props;
 
 const images = [
   {

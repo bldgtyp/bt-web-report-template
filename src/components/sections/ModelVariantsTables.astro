@@ -1,0 +1,22 @@
+---
+// Extras for the `model-variants` section: the four per-variant comparison
+// tables, stacked.
+import BuildingMetricsTable from "../tables/BuildingMetricsTable.astro";
+import EnvelopeInputsByVariantTable from "../EnvelopeInputsByVariantTable.astro";
+import KeyResultsTable from "../KeyResultsTable.astro";
+import MechanicalInputsByVariantTable from "../MechanicalInputsByVariantTable.astro";
+import type { TemplateReportData } from "../../data/report";
+
+interface Props {
+  report: TemplateReportData;
+}
+
+const { report } = Astro.props;
+---
+
+<div class="btwr-component-stack">
+  <KeyResultsTable data={report} caption="Key results by variant" />
+  <BuildingMetricsTable data={report} caption="Geometry metrics by variant" />
+  <EnvelopeInputsByVariantTable data={report} />
+  <MechanicalInputsByVariantTable data={report} />
+</div>

@@ -1,0 +1,14 @@
+---
+// Extras adapter for the `building-airtightness` section: the registry hands
+// every component `report`, while the chart's own API takes `data`.
+import AirtightnessHeatLossChart from "../../charts/AirtightnessHeatLossChart.astro";
+import type { TemplateReportData } from "../../data/report";
+
+interface Props {
+  report: TemplateReportData;
+}
+
+const { report } = Astro.props;
+---
+
+<AirtightnessHeatLossChart data={report} />

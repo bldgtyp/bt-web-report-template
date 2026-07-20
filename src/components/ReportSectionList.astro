@@ -1,0 +1,36 @@
+---
+// Renders a loaded section list with its per-page extras registry.
+//
+// This is the one place that knows how a registry entry becomes markup, so the
+// web pages and print.astro compose sections identically and cannot drift.
+// Every extras component receives `report`, `frontmatter`, and `interactive`;
+// components ignore the props they don't declare.
+import type { SectionEntry, SectionExtras } from "../data/sections";
+import { sectionProps } from "../data/sections";
+import type { TemplateReportData } from "../data/report";
+import ReportSection from "./ReportSection.astro";
+
+interface Props {
+  sections: SectionEntry[];
+  extras?: Record<string, SectionExtras>;
+  report: TemplateReportData;
+  /** Print passes false to drop lightbox anchors from image figures. */
+  interactive?: boolean;
+}
+
+const { sections, extras = {}, report, interactive = true } = Astro.props;
+---
+
+{
+  sections.map((section) => {
+    const { Before, Children } = extras[section.id] ?? {};
+    const extraProps = { report, frontmatter: section.frontmatter, interactive };
+
+    return (
+      <ReportSection {...sectionProps(section)}>
+        {Before && <Before slot="before-content" {...extraProps} />}
+        {Children && <Children {...extraProps} />}
+      </ReportSection>
+    );
+  })
+}

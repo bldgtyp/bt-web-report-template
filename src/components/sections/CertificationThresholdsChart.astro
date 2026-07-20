@@ -1,0 +1,13 @@
+---
+// Extras for the `passive-house-thresholds` section.
+import CertificationChart from "../../charts/CertificationChart.astro";
+import type { TemplateReportData } from "../../data/report";
+
+interface Props {
+  report: TemplateReportData;
+}
+
+const { report } = Astro.props;
+---
+
+<CertificationChart data={report} title="Passive House thresholds" />

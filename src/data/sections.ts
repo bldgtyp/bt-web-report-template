@@ -84,6 +84,24 @@ export function loadSections(modules: Record<string, SectionModule>): SectionEnt
     .map(({ path: _path, ...section }) => section);
 }
 
+/**
+ * A page's bespoke trimmings, keyed by section id.
+ *
+ * The glob supplies the set and order of sections; this supplies the charts,
+ * tables, and figures a given section injects. `Before` fills the
+ * `before-content` slot, `Children` the default slot, and both receive
+ * `report` and `frontmatter`. A section with no entry renders as prose only —
+ * which is what lets a project delete its `.mdx` and have the section vanish.
+ * A leftover entry for a deleted section is simply never looked up.
+ *
+ * Components are `any` because Astro component types aren't expressible here;
+ * `ReportSection`'s own `Content` prop has the same constraint.
+ */
+export interface SectionExtras {
+  Before?: any;
+  Children?: any;
+}
+
 /** Derive TOC entries from a loaded section list so no page hand-maintains one. */
 export function tocItemsFromSections(sections: SectionEntry[]): SectionTocItem[] {
   return sections.map((section) => ({

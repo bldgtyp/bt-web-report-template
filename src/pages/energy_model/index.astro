@@ -1,42 +1,34 @@
 ---
-import BuildingMetricsTable from "../../components/tables/BuildingMetricsTable.astro";
-import CertificationChart from "../../charts/CertificationChart.astro";
-import ClimateMonthlyChart from "../../charts/ClimateMonthlyChart.astro";
-import SiteEnergyChart from "../../charts/SiteEnergyChart.astro";
-
-import ClimateData, { frontmatter as climateData } from "../../../content/energy-model/climate-data.mdx";
-import Co2Emissions, { frontmatter as co2Emissions } from "../../../content/energy-model/co2-emissions.mdx";
-import ModelGeometry, { frontmatter as modelGeometry } from "../../../content/energy-model/model-geometry.mdx";
-import ModelVariants, { frontmatter as modelVariants } from "../../../content/energy-model/model-variants.mdx";
-import PassiveHouseCertifications, {
-  frontmatter as passiveHouseCertifications,
-} from "../../../content/energy-model/passive-house-certifications.mdx";
-import PassiveHouseThresholds, {
-  frontmatter as passiveHouseThresholds,
-} from "../../../content/energy-model/passive-house-thresholds.mdx";
-import SiteEnergy, { frontmatter as siteEnergy } from "../../../content/energy-model/site-energy.mdx";
-import Co2EmissionsChart from "../../components/Co2EmissionsChart.astro";
-import KeyResultsTable from "../../components/KeyResultsTable.astro";
-import EnvelopeInputsByVariantTable from "../../components/EnvelopeInputsByVariantTable.astro";
-import MechanicalInputsByVariantTable from "../../components/MechanicalInputsByVariantTable.astro";
 import PassiveHouseCertificationsInfo from "../../components/PassiveHouseCertificationsInfo.astro";
-import RecommendedGeometryMetrics from "../../components/RecommendedGeometryMetrics.astro";
-import ReportSection from "../../components/ReportSection.astro";
+import ReportSectionList from "../../components/ReportSectionList.astro";
+import CertificationThresholdsChart from "../../components/sections/CertificationThresholdsChart.astro";
+import ClimateDataChart from "../../components/sections/ClimateDataChart.astro";
+import Co2EmissionsPanel from "../../components/sections/Co2EmissionsPanel.astro";
+import ModelGeometryExtras from "../../components/sections/ModelGeometryExtras.astro";
+import ModelVariantsTables from "../../components/sections/ModelVariantsTables.astro";
+import SiteEnergyPanel from "../../components/sections/SiteEnergyPanel.astro";
 import { reportPages } from "../../data/pages";
+import { loadSections, tocItemsFromSections, type SectionExtras } from "../../data/sections";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.energyModel;
-const tocItems = [
-  { href: "#model-geometry", label: modelGeometry.title, number: modelGeometry.kicker },
-  { href: "#model-variants", label: modelVariants.title, number: modelVariants.kicker },
-  { href: "#site-energy", label: siteEnergy.title, number: siteEnergy.kicker },
-  { href: "#co2-emissions", label: co2Emissions.title, number: co2Emissions.kicker },
-  { href: "#passive-house-thresholds", label: passiveHouseThresholds.title, number: passiveHouseThresholds.kicker },
-  { href: "#climate-data", label: climateData.title, number: climateData.kicker },
-  { href: "#passive-house-certifications", label: passiveHouseCertifications.title, number: passiveHouseCertifications.kicker },
-];
+
+const sections = loadSections(import.meta.glob("../../../content/energy-model/*.mdx", { eager: true }));
+const tocItems = tocItemsFromSections(sections);
+
+// Every section on this page carries a chart or table, so all seven appear
+// here. Adding a new one is renderer work by definition.
+const extras: Record<string, SectionExtras> = {
+  "model-geometry": { Children: ModelGeometryExtras },
+  "model-variants": { Children: ModelVariantsTables },
+  "site-energy": { Children: SiteEnergyPanel },
+  "co2-emissions": { Children: Co2EmissionsPanel },
+  "passive-house-thresholds": { Children: CertificationThresholdsChart },
+  "climate-data": { Children: ClimateDataChart },
+  "passive-house-certifications": { Children: PassiveHouseCertificationsInfo },
+};
 ---
 
 <ProjectReportLayout
@@ -46,89 +38,5 @@ const tocItems = [
   pageKicker={page.kicker}
   pageLabel={page.label}
 >
-  <ReportSection
-    id="model-geometry"
-    Content={ModelGeometry}
-    kicker={modelGeometry.kicker}
-    title={modelGeometry.title}
-  >
-    <figure class="btwr-geometry-figure">
-      <a
-        href="/assets/model-geometry/iso-dimensions.full.png"
-        data-btwr-full-src="/assets/model-geometry/iso-dimensions.full.png"
-        data-btwr-caption="Isometric building geometry with dimension annotations."
-      >
-        <img
-          src="/assets/model-geometry/iso-dimensions.optimized.png"
-          width="1200"
-          height="927"
-          alt="Isometric building geometry diagram with dimension annotations."
-        />
-      </a>
-    </figure>
-    <RecommendedGeometryMetrics data={report} />
-  </ReportSection>
-
-  <ReportSection
-    id="model-variants"
-    Content={ModelVariants}
-    kicker={modelVariants.kicker}
-    title={modelVariants.title}
-  >
-    <div class="btwr-component-stack">
-      <KeyResultsTable data={report} caption="Key results by variant" />
-      <BuildingMetricsTable data={report} caption="Geometry metrics by variant" />
-      <EnvelopeInputsByVariantTable data={report} />
-      <MechanicalInputsByVariantTable data={report} />
-    </div>
-  </ReportSection>
-
-  <ReportSection
-    id="site-energy"
-    Content={SiteEnergy}
-    kicker={siteEnergy.kicker}
-    title={siteEnergy.title}
-  >
-    <div class="btwr-component-stack">
-      <SiteEnergyChart data={report} title="Annual site energy" />
-    </div>
-  </ReportSection>
-
-  <ReportSection
-    id="co2-emissions"
-    Content={Co2Emissions}
-    kicker={co2Emissions.kicker}
-    title={co2Emissions.title}
-  >
-    <div class="btwr-component-stack">
-      <Co2EmissionsChart data={report} title="Annual CO2e emissions due to operational energy consumption" />
-    </div>
-  </ReportSection>
-
-  <ReportSection
-    id="passive-house-thresholds"
-    Content={PassiveHouseThresholds}
-    kicker={passiveHouseThresholds.kicker}
-    title={passiveHouseThresholds.title}
-  >
-    <CertificationChart data={report} title="Passive House thresholds" />
-  </ReportSection>
-
-  <ReportSection
-    id="climate-data"
-    Content={ClimateData}
-    kicker={climateData.kicker}
-    title={climateData.title}
-  >
-    <ClimateMonthlyChart data={report} title="Monthly climate profile" />
-  </ReportSection>
-
-  <ReportSection
-    id="passive-house-certifications"
-    Content={PassiveHouseCertifications}
-    kicker={passiveHouseCertifications.kicker}
-    title={passiveHouseCertifications.title}
-  >
-    <PassiveHouseCertificationsInfo />
-  </ReportSection>
+  <ReportSectionList sections={sections} extras={extras} report={report} />
 </ProjectReportLayout>

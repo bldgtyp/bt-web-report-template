@@ -1,41 +1,23 @@
 ---
-import AppliancesAndVenting, {
-  frontmatter as appliancesAndVenting,
-} from "../../../content/mechanical/appliances-and-venting.mdx";
-import BuildingMonitoring, { frontmatter as buildingMonitoring } from "../../../content/mechanical/building-monitoring.mdx";
-import FreshAirFlowRates, {
-  frontmatter as freshAirFlowRates,
-} from "../../../content/mechanical/fresh-air-flow-rates.mdx";
-import FreshAirVentilation, {
-  frontmatter as freshAirVentilation,
-} from "../../../content/mechanical/fresh-air-ventilation.mdx";
-import PassiveHouseVentilationRequirements, {
-  frontmatter as passiveHouseVentilationRequirements,
-} from "../../../content/mechanical/passive-house-ventilation-requirements.mdx";
-import VentilationSystemBalancing, {
-  frontmatter as ventilationSystemBalancing,
-} from "../../../content/mechanical/ventilation-system-balancing.mdx";
-import MechanicalPlanCards from "../../components/MechanicalPlanCards.astro";
-import MechanicalPanels from "../../components/MechanicalPanels.astro";
-import ReportSection from "../../components/ReportSection.astro";
+import ReportSectionList from "../../components/ReportSectionList.astro";
+import FreshAirFlowRatesExtras from "../../components/sections/FreshAirFlowRatesExtras.astro";
 import { reportPages } from "../../data/pages";
+import { loadSections, tocItemsFromSections, type SectionExtras } from "../../data/sections";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.mechanical;
-const tocItems = [
-  { href: "#fresh-air-ventilation", label: freshAirVentilation.title, number: freshAirVentilation.kicker },
-  { href: "#fresh-air-flow-rates", label: freshAirFlowRates.title, number: freshAirFlowRates.kicker },
-  { href: "#ventilation-system-balancing", label: ventilationSystemBalancing.title, number: ventilationSystemBalancing.kicker },
-  {
-    href: "#ventilation-system-passive-house-requirements",
-    label: passiveHouseVentilationRequirements.title,
-    number: passiveHouseVentilationRequirements.kicker,
-  },
-  { href: "#appliances-and-venting", label: appliancesAndVenting.title, number: appliancesAndVenting.kicker },
-  { href: "#building-monitoring", label: buildingMonitoring.title, number: buildingMonitoring.kicker },
-];
+
+// Presence of the .mdx files decides what renders. The glob does not recurse
+// into `mechanical/plans/`, which MechanicalPlanCards globs separately.
+const sections = loadSections(import.meta.glob("../../../content/mechanical/*.mdx", { eager: true }));
+const tocItems = tocItemsFromSections(sections);
+
+// The other five sections are prose-only and already fully project-editable.
+const extras: Record<string, SectionExtras> = {
+  "fresh-air-flow-rates": { Children: FreshAirFlowRatesExtras },
+};
 ---
 
 <ProjectReportLayout
@@ -45,43 +27,5 @@ const tocItems = [
   pageKicker={page.kicker}
   pageLabel={page.label}
 >
-  <ReportSection
-    id="fresh-air-ventilation"
-    Content={FreshAirVentilation}
-    kicker={freshAirVentilation.kicker}
-    title={freshAirVentilation.title}
-  />
-  <ReportSection
-    id="fresh-air-flow-rates"
-    Content={FreshAirFlowRates}
-    kicker={freshAirFlowRates.kicker}
-    title={freshAirFlowRates.title}
-  >
-    <MechanicalPanels />
-    <MechanicalPlanCards />
-  </ReportSection>
-  <ReportSection
-    id="ventilation-system-balancing"
-    Content={VentilationSystemBalancing}
-    kicker={ventilationSystemBalancing.kicker}
-    title={ventilationSystemBalancing.title}
-  />
-  <ReportSection
-    id="ventilation-system-passive-house-requirements"
-    Content={PassiveHouseVentilationRequirements}
-    kicker={passiveHouseVentilationRequirements.kicker}
-    title={passiveHouseVentilationRequirements.title}
-  />
-  <ReportSection
-    id="appliances-and-venting"
-    Content={AppliancesAndVenting}
-    kicker={appliancesAndVenting.kicker}
-    title={appliancesAndVenting.title}
-  />
-  <ReportSection
-    id="building-monitoring"
-    Content={BuildingMonitoring}
-    kicker={buildingMonitoring.kicker}
-    title={buildingMonitoring.title}
-  />
+  <ReportSectionList sections={sections} extras={extras} report={report} />
 </ProjectReportLayout>

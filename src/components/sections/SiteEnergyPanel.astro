@@ -1,0 +1,15 @@
+---
+// Extras for the `site-energy` section.
+import SiteEnergyChart from "../../charts/SiteEnergyChart.astro";
+import type { TemplateReportData } from "../../data/report";
+
+interface Props {
+  report: TemplateReportData;
+}
+
+const { report } = Astro.props;
+---
+
+<div class="btwr-component-stack">
+  <SiteEnergyChart data={report} title="Annual site energy" />
+</div>

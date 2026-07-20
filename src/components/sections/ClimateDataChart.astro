@@ -1,0 +1,13 @@
+---
+// Extras for the `climate-data` section.
+import ClimateMonthlyChart from "../../charts/ClimateMonthlyChart.astro";
+import type { TemplateReportData } from "../../data/report";
+
+interface Props {
+  report: TemplateReportData;
+}
+
+const { report } = Astro.props;
+---
+
+<ClimateMonthlyChart data={report} title="Monthly climate profile" />

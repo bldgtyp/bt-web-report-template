@@ -1,0 +1,15 @@
+---
+// Extras for the `co2-emissions` section.
+import Co2EmissionsChart from "../Co2EmissionsChart.astro";
+import type { TemplateReportData } from "../../data/report";
+
+interface Props {
+  report: TemplateReportData;
+}
+
+const { report } = Astro.props;
+---
+
+<div class="btwr-component-stack">
+  <Co2EmissionsChart data={report} title="Annual CO2e emissions due to operational energy consumption" />
+</div>

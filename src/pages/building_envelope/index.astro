@@ -1,29 +1,28 @@
 ---
-import AeroBarrier, { frontmatter as aeroBarrier } from "../../../content/envelope/aerobarrier.mdx";
-import Airtightness, { frontmatter as airtightness } from "../../../content/envelope/airtightness.mdx";
-import Assemblies, { frontmatter as assemblies } from "../../../content/envelope/assemblies.mdx";
-import MasonryRowhousePrimer, {
-  frontmatter as masonryRowhousePrimer,
-} from "../../../content/envelope/masonry-rowhouse-airsealing-primer.mdx";
-import AirtightnessHeatLossChart from "../../charts/AirtightnessHeatLossChart.astro";
 import AssemblyCards from "../../components/AssemblyCards.astro";
-import ReportSection from "../../components/ReportSection.astro";
+import ReportSectionList from "../../components/ReportSectionList.astro";
+import AeroBarrierHero from "../../components/sections/AeroBarrierHero.astro";
+import AirtightnessChart from "../../components/sections/AirtightnessChart.astro";
 import { reportPages } from "../../data/pages";
+import { loadSections, tocItemsFromSections, type SectionExtras } from "../../data/sections";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.envelope;
-const tocItems = [
-  { href: "#recommended-assemblies", label: assemblies.title, number: assemblies.kicker },
-  { href: "#building-airtightness", label: airtightness.title, number: airtightness.kicker },
-  {
-    href: "#masonry-rowhouse-airsealing-primer",
-    label: masonryRowhousePrimer.title,
-    number: masonryRowhousePrimer.kicker,
-  },
-  { href: "#aerobarrier", label: aeroBarrier.title, number: aeroBarrier.kicker },
-];
+
+// Presence of the .mdx files decides what renders. The glob does not recurse
+// into `envelope/assemblies/`, which AssemblyCards globs separately.
+const sections = loadSections(import.meta.glob("../../../content/envelope/*.mdx", { eager: true }));
+const tocItems = tocItemsFromSections(sections);
+
+// Sections absent from this map render as prose only — the masonry primer is
+// the archetype, and deleting its file removes the section entirely.
+const extras: Record<string, SectionExtras> = {
+  "recommended-assemblies": { Children: AssemblyCards },
+  "building-airtightness": { Children: AirtightnessChart },
+  aerobarrier: { Before: AeroBarrierHero },
+};
 ---
 
 <ProjectReportLayout
@@ -33,38 +32,5 @@ const tocItems = [
   pageKicker={page.kicker}
   pageLabel={page.label}
 >
-  <ReportSection
-    id="recommended-assemblies"
-    Content={Assemblies}
-    kicker={assemblies.kicker}
-    title={assemblies.title}
-    callout_label={assemblies.callout_label}
-    callout_body={assemblies.callout_body}
-  >
-    <AssemblyCards />
-  </ReportSection>
-  <ReportSection
-    id="building-airtightness"
-    Content={Airtightness}
-    kicker={airtightness.kicker}
-    title={airtightness.title}
-  >
-    <AirtightnessHeatLossChart data={report} />
-  </ReportSection>
-  <ReportSection
-    id="masonry-rowhouse-airsealing-primer"
-    Content={MasonryRowhousePrimer}
-    kicker={masonryRowhousePrimer.kicker}
-    title={masonryRowhousePrimer.title}
-  />
-  <ReportSection id="aerobarrier" Content={AeroBarrier} kicker={aeroBarrier.kicker} title={aeroBarrier.title}>
-    <figure class="btwr-section-hero" slot="before-content">
-      <img
-        src="/assets/envelope/aerobarrier.jpg"
-        width="1200"
-        height="500"
-        alt="AeroBarrier spray nozzle applying aerosolized sealant inside a framed building."
-      />
-    </figure>
-  </ReportSection>
+  <ReportSectionList sections={sections} extras={extras} report={report} />
 </ProjectReportLayout>

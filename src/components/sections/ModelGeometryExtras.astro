@@ -1,0 +1,17 @@
+---
+// Extras for the `model-geometry` section: the isometric figure plus the
+// recommended-variant metrics.
+import RecommendedGeometryMetrics from "../RecommendedGeometryMetrics.astro";
+import type { TemplateReportData } from "../../data/report";
+import ModelGeometryFigure from "./ModelGeometryFigure.astro";
+
+interface Props {
+  report: TemplateReportData;
+  interactive?: boolean;
+}
+
+const { report, interactive = true } = Astro.props;
+---
+
+<ModelGeometryFigure interactive={interactive} />
+<RecommendedGeometryMetrics data={report} />
