@@ -4,14 +4,15 @@ import RadiationImage from "../../components/sections/RadiationImage.astro";
 import SiteShadingImages from "../../components/sections/SiteShadingImages.astro";
 import WindowThermalComfortHero from "../../components/sections/WindowThermalComfortHero.astro";
 import { reportPages } from "../../data/pages";
-import { loadSections, tocItemsFromSections, type SectionExtras } from "../../data/sections";
+import { windowsSections } from "../../data/report-sections";
+import { tocItemsFromSections, type SectionExtras } from "../../data/sections";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.windows;
 
-const sections = loadSections(import.meta.glob("../../../content/windows/*.mdx", { eager: true }));
+const sections = windowsSections();
 const tocItems = tocItemsFromSections(sections);
 
 // Every section here carries imagery driven by its own frontmatter. The web

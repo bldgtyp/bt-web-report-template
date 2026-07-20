@@ -2,7 +2,8 @@
 import ReportSectionList from "../../components/ReportSectionList.astro";
 import FreshAirFlowRatesExtras from "../../components/sections/FreshAirFlowRatesExtras.astro";
 import { reportPages } from "../../data/pages";
-import { loadSections, tocItemsFromSections, type SectionExtras } from "../../data/sections";
+import { mechanicalSections } from "../../data/report-sections";
+import { tocItemsFromSections, type SectionExtras } from "../../data/sections";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
@@ -11,7 +12,7 @@ const page = reportPages.mechanical;
 
 // Presence of the .mdx files decides what renders. The glob does not recurse
 // into `mechanical/plans/`, which MechanicalPlanCards globs separately.
-const sections = loadSections(import.meta.glob("../../../content/mechanical/*.mdx", { eager: true }));
+const sections = mechanicalSections();
 const tocItems = tocItemsFromSections(sections);
 
 // The other five sections are prose-only and already fully project-editable.

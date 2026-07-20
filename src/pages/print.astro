@@ -1,338 +1,61 @@
 ---
-import Summary, { frontmatter as summary } from "../../content/summary.mdx";
-
-import ClimateData, { frontmatter as climateData } from "../../content/energy-model/climate-data.mdx";
-import Co2Emissions, { frontmatter as co2Emissions } from "../../content/energy-model/co2-emissions.mdx";
-import ModelGeometry, { frontmatter as modelGeometry } from "../../content/energy-model/model-geometry.mdx";
-import ModelVariants, { frontmatter as modelVariants } from "../../content/energy-model/model-variants.mdx";
-import PassiveHouseCertifications, {
-  frontmatter as passiveHouseCertifications,
-} from "../../content/energy-model/passive-house-certifications.mdx";
-import PassiveHouseThresholds, {
-  frontmatter as passiveHouseThresholds,
-} from "../../content/energy-model/passive-house-thresholds.mdx";
-import SiteEnergy, { frontmatter as siteEnergy } from "../../content/energy-model/site-energy.mdx";
-
-import AeroBarrier, { frontmatter as aeroBarrier } from "../../content/envelope/aerobarrier.mdx";
-import Airtightness, { frontmatter as airtightness } from "../../content/envelope/airtightness.mdx";
-import Assemblies, { frontmatter as assemblies } from "../../content/envelope/assemblies.mdx";
-import MasonryRowhousePrimer, {
-  frontmatter as masonryRowhousePrimer,
-} from "../../content/envelope/masonry-rowhouse-airsealing-primer.mdx";
-
-import SiteShading, { frontmatter as siteShading } from "../../content/windows/site-shading.mdx";
-import SummerRadiation, { frontmatter as summerRadiation } from "../../content/windows/summer-radiation.mdx";
-import WindowThermalComfort, {
-  frontmatter as windowThermalComfort,
-} from "../../content/windows/window-thermal-comfort.mdx";
-import WinterRadiation, { frontmatter as winterRadiation } from "../../content/windows/winter-radiation.mdx";
-
-import AppliancesAndVenting, {
-  frontmatter as appliancesAndVenting,
-} from "../../content/mechanical/appliances-and-venting.mdx";
-import BuildingMonitoring, {
-  frontmatter as buildingMonitoring,
-} from "../../content/mechanical/building-monitoring.mdx";
-import FreshAirFlowRates, {
-  frontmatter as freshAirFlowRates,
-} from "../../content/mechanical/fresh-air-flow-rates.mdx";
-import FreshAirVentilation, {
-  frontmatter as freshAirVentilation,
-} from "../../content/mechanical/fresh-air-ventilation.mdx";
-import PassiveHouseVentilationRequirements, {
-  frontmatter as passiveHouseVentilationRequirements,
-} from "../../content/mechanical/passive-house-ventilation-requirements.mdx";
-import VentilationSystemBalancing, {
-  frontmatter as ventilationSystemBalancing,
-} from "../../content/mechanical/ventilation-system-balancing.mdx";
-
-import CertificationChart from "../charts/CertificationChart.astro";
-import ClimateMonthlyChart from "../charts/ClimateMonthlyChart.astro";
-import SiteEnergyChart from "../charts/SiteEnergyChart.astro";
-import AirtightnessHeatLossChart from "../charts/AirtightnessHeatLossChart.astro";
-
 import AssemblyCards from "../components/AssemblyCards.astro";
-import Co2EmissionsChart from "../components/Co2EmissionsChart.astro";
-import EnvelopeInputsByVariantTable from "../components/EnvelopeInputsByVariantTable.astro";
-import KeyResultsTable from "../components/KeyResultsTable.astro";
-import MechanicalInputsByVariantTable from "../components/MechanicalInputsByVariantTable.astro";
-import MechanicalPanels from "../components/MechanicalPanels.astro";
-import MechanicalPlanCards from "../components/MechanicalPlanCards.astro";
 import PassiveHouseCertificationsInfo from "../components/PassiveHouseCertificationsInfo.astro";
 import PrintCover from "../components/PrintCover.astro";
 import PrintToc from "../components/PrintToc.astro";
-import RecommendedGeometryMetrics from "../components/RecommendedGeometryMetrics.astro";
-import ReportSection from "../components/ReportSection.astro";
-
-import BuildingMetricsTable from "../components/tables/BuildingMetricsTable.astro";
-
+import ReportSectionList from "../components/ReportSectionList.astro";
+import AeroBarrierHero from "../components/sections/AeroBarrierHero.astro";
+import AirtightnessChart from "../components/sections/AirtightnessChart.astro";
+import CertificationThresholdsChart from "../components/sections/CertificationThresholdsChart.astro";
+import ClimateDataChart from "../components/sections/ClimateDataChart.astro";
+import Co2EmissionsPanel from "../components/sections/Co2EmissionsPanel.astro";
+import FreshAirFlowRatesExtras from "../components/sections/FreshAirFlowRatesExtras.astro";
+import ModelGeometryExtras from "../components/sections/ModelGeometryExtras.astro";
+import ModelVariantsTables from "../components/sections/ModelVariantsTables.astro";
+import RadiationImage from "../components/sections/RadiationImage.astro";
+import SiteEnergyPanel from "../components/sections/SiteEnergyPanel.astro";
+import SiteShadingImages from "../components/sections/SiteShadingImages.astro";
+import WindowThermalComfortHero from "../components/sections/WindowThermalComfortHero.astro";
+import { loadAllPageSections } from "../data/report-sections";
 import { loadTemplateReportData } from "../data/report";
+import type { SectionExtras } from "../data/sections";
 import PrintReportLayout from "../layouts/PrintReportLayout.astro";
 
-import windowThermalComfortDiagram from "../assets/windows/window-tc-diagram.png";
-
 const report = await loadTemplateReportData();
-const imageSize = { width: 1200, height: 927 };
+const pageGroups = loadAllPageSections();
 
-const siteShadingImages = [
-  {
-    image: siteShading.sun_path_plan_image,
-    imageFull: siteShading.sun_path_plan_image_full,
-    alt: siteShading.sun_path_plan_alt,
-    caption: siteShading.sun_path_plan_caption,
-  },
-  {
-    image: siteShading.sun_path_iso_image,
-    imageFull: siteShading.sun_path_iso_image_full,
-    alt: siteShading.sun_path_iso_alt,
-    caption: siteShading.sun_path_iso_caption,
-  },
-].filter(({ image }) => image);
-
-const radiationImages = {
-  winter: {
-    image: winterRadiation.radiation_image,
-    imageFull: winterRadiation.radiation_image_full,
-    alt: winterRadiation.radiation_alt,
-    caption: winterRadiation.radiation_caption,
-  },
-  summer: {
-    image: summerRadiation.radiation_image,
-    imageFull: summerRadiation.radiation_image_full,
-    alt: summerRadiation.radiation_alt,
-    caption: summerRadiation.radiation_caption,
-  },
+// The same extras the four web page files register, flattened into one map —
+// section ids are unique across the report. Adding an extra to a page file
+// means adding it here too; the fixture PDF diff is what catches the omission.
+//
+// Rendering with `interactive={false}` is the only other difference from the
+// web: the image figures drop their lightbox anchors. Summary also keeps its
+// heading here, which the web page suppresses.
+const extras: Record<string, SectionExtras> = {
+  "model-geometry": { Children: ModelGeometryExtras },
+  "model-variants": { Children: ModelVariantsTables },
+  "site-energy": { Children: SiteEnergyPanel },
+  "co2-emissions": { Children: Co2EmissionsPanel },
+  "passive-house-thresholds": { Children: CertificationThresholdsChart },
+  "climate-data": { Children: ClimateDataChart },
+  "passive-house-certifications": { Children: PassiveHouseCertificationsInfo },
+  "recommended-assemblies": { Children: AssemblyCards },
+  "building-airtightness": { Children: AirtightnessChart },
+  aerobarrier: { Before: AeroBarrierHero },
+  "window-thermal-comfort": { Before: WindowThermalComfortHero },
+  "site-shading": { Children: SiteShadingImages, props: { label: "Site-shading images" } },
+  "winter-radiation": { Children: RadiationImage },
+  "summer-radiation": { Children: RadiationImage },
+  "fresh-air-flow-rates": { Children: FreshAirFlowRatesExtras },
 };
 ---
 
 <PrintReportLayout report={report}>
   <PrintCover report={report} />
   <PrintToc />
-
-  <ReportSection
-    id="summary"
-    Content={Summary}
-    kicker={summary.kicker}
-    title={summary.title}
-    callout_label={summary.callout_label}
-    callout_body={summary.callout_body}
-  />
-
-  <ReportSection
-    id="model-geometry"
-    Content={ModelGeometry}
-    kicker={modelGeometry.kicker}
-    title={modelGeometry.title}
-  >
-    <figure class="btwr-geometry-figure">
-      <img
-        src="/assets/model-geometry/iso-dimensions.optimized.png"
-        width="1200"
-        height="927"
-        alt="Isometric building geometry diagram with dimension annotations."
-      />
-    </figure>
-    <RecommendedGeometryMetrics data={report} />
-  </ReportSection>
-
-  <ReportSection
-    id="model-variants"
-    Content={ModelVariants}
-    kicker={modelVariants.kicker}
-    title={modelVariants.title}
-  >
-    <div class="btwr-component-stack">
-      <KeyResultsTable data={report} caption="Key results by variant" />
-      <BuildingMetricsTable data={report} caption="Geometry metrics by variant" />
-      <EnvelopeInputsByVariantTable data={report} />
-      <MechanicalInputsByVariantTable data={report} />
-    </div>
-  </ReportSection>
-
-  <ReportSection id="site-energy" Content={SiteEnergy} kicker={siteEnergy.kicker} title={siteEnergy.title}>
-    <div class="btwr-component-stack">
-      <SiteEnergyChart data={report} title="Annual site energy" />
-    </div>
-  </ReportSection>
-
-  <ReportSection
-    id="co2-emissions"
-    Content={Co2Emissions}
-    kicker={co2Emissions.kicker}
-    title={co2Emissions.title}
-  >
-    <div class="btwr-component-stack">
-      <Co2EmissionsChart data={report} title="Annual CO2e emissions due to operational energy consumption" />
-    </div>
-  </ReportSection>
-
-  <ReportSection
-    id="passive-house-thresholds"
-    Content={PassiveHouseThresholds}
-    kicker={passiveHouseThresholds.kicker}
-    title={passiveHouseThresholds.title}
-  >
-    <CertificationChart data={report} title="Passive House thresholds" />
-  </ReportSection>
-
-  <ReportSection id="climate-data" Content={ClimateData} kicker={climateData.kicker} title={climateData.title}>
-    <ClimateMonthlyChart data={report} title="Monthly climate profile" />
-  </ReportSection>
-
-  <ReportSection
-    id="passive-house-certifications"
-    Content={PassiveHouseCertifications}
-    kicker={passiveHouseCertifications.kicker}
-    title={passiveHouseCertifications.title}
-  >
-    <PassiveHouseCertificationsInfo />
-  </ReportSection>
-
-  <ReportSection
-    id="recommended-assemblies"
-    Content={Assemblies}
-    kicker={assemblies.kicker}
-    title={assemblies.title}
-    callout_label={assemblies.callout_label}
-    callout_body={assemblies.callout_body}
-  >
-    <AssemblyCards />
-  </ReportSection>
-
-  <ReportSection
-    id="building-airtightness"
-    Content={Airtightness}
-    kicker={airtightness.kicker}
-    title={airtightness.title}
-  >
-    <AirtightnessHeatLossChart data={report} />
-  </ReportSection>
-
-  <ReportSection
-    id="masonry-rowhouse-airsealing-primer"
-    Content={MasonryRowhousePrimer}
-    kicker={masonryRowhousePrimer.kicker}
-    title={masonryRowhousePrimer.title}
-  />
-
-  <ReportSection id="aerobarrier" Content={AeroBarrier} kicker={aeroBarrier.kicker} title={aeroBarrier.title}>
-    <figure class="btwr-section-hero" slot="before-content">
-      <img
-        src="/assets/envelope/aerobarrier.jpg"
-        width="1200"
-        height="500"
-        alt="AeroBarrier spray nozzle applying aerosolized sealant inside a framed building."
-      />
-    </figure>
-  </ReportSection>
-
-  <ReportSection
-    id="window-thermal-comfort"
-    Content={WindowThermalComfort}
-    kicker={windowThermalComfort.kicker}
-    title={windowThermalComfort.title}
-  >
-    <figure class="btwr-section-hero" slot="before-content">
-      <img
-        src={windowThermalComfortDiagram.src}
-        width={windowThermalComfortDiagram.width}
-        height={windowThermalComfortDiagram.height}
-        alt="Thermal comfort diagram comparing higher radiant losses at double glazing with lower radiant losses at triple glazing."
-      />
-    </figure>
-  </ReportSection>
-
-  <ReportSection id="site-shading" Content={SiteShading} kicker={siteShading.kicker} title={siteShading.title}>
-    <div class="btwr-window-image-grid" aria-label="Site-shading images">
-      {
-        siteShadingImages.map(({ image, alt, caption }) => (
-          <figure class="btwr-window-image-slot">
-            <img src={image} width={imageSize.width} height={imageSize.height} alt={alt ?? ""} loading="lazy" />
-            {caption && <figcaption>{caption}</figcaption>}
-          </figure>
-        ))
-      }
-    </div>
-  </ReportSection>
-
-  <ReportSection
-    id="winter-radiation"
-    Content={WinterRadiation}
-    kicker={winterRadiation.kicker}
-    title={winterRadiation.title}
-  >
-    <figure class="btwr-window-image-slot btwr-window-image-slot--wide">
-      <img
-        src={radiationImages.winter.image}
-        width={imageSize.width}
-        height={imageSize.height}
-        alt={radiationImages.winter.alt ?? ""}
-        loading="lazy"
-      />
-      {radiationImages.winter.caption && <figcaption>{radiationImages.winter.caption}</figcaption>}
-    </figure>
-  </ReportSection>
-
-  <ReportSection
-    id="summer-radiation"
-    Content={SummerRadiation}
-    kicker={summerRadiation.kicker}
-    title={summerRadiation.title}
-  >
-    <figure class="btwr-window-image-slot btwr-window-image-slot--wide">
-      <img
-        src={radiationImages.summer.image}
-        width={imageSize.width}
-        height={imageSize.height}
-        alt={radiationImages.summer.alt ?? ""}
-        loading="lazy"
-      />
-      {radiationImages.summer.caption && <figcaption>{radiationImages.summer.caption}</figcaption>}
-    </figure>
-  </ReportSection>
-
-  <ReportSection
-    id="fresh-air-ventilation"
-    Content={FreshAirVentilation}
-    kicker={freshAirVentilation.kicker}
-    title={freshAirVentilation.title}
-  />
-
-  <ReportSection
-    id="fresh-air-flow-rates"
-    Content={FreshAirFlowRates}
-    kicker={freshAirFlowRates.kicker}
-    title={freshAirFlowRates.title}
-  >
-    <MechanicalPanels />
-    <MechanicalPlanCards />
-  </ReportSection>
-
-  <ReportSection
-    id="ventilation-system-balancing"
-    Content={VentilationSystemBalancing}
-    kicker={ventilationSystemBalancing.kicker}
-    title={ventilationSystemBalancing.title}
-  />
-
-  <ReportSection
-    id="ventilation-system-passive-house-requirements"
-    Content={PassiveHouseVentilationRequirements}
-    kicker={passiveHouseVentilationRequirements.kicker}
-    title={passiveHouseVentilationRequirements.title}
-  />
-
-  <ReportSection
-    id="appliances-and-venting"
-    Content={AppliancesAndVenting}
-    kicker={appliancesAndVenting.kicker}
-    title={appliancesAndVenting.title}
-  />
-
-  <ReportSection
-    id="building-monitoring"
-    Content={BuildingMonitoring}
-    kicker={buildingMonitoring.kicker}
-    title={buildingMonitoring.title}
-  />
+  {
+    pageGroups.map(({ sections }) => (
+      <ReportSectionList sections={sections} extras={extras} report={report} interactive={false} />
+    ))
+  }
 </PrintReportLayout>

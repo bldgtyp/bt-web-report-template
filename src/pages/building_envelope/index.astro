@@ -4,7 +4,8 @@ import ReportSectionList from "../../components/ReportSectionList.astro";
 import AeroBarrierHero from "../../components/sections/AeroBarrierHero.astro";
 import AirtightnessChart from "../../components/sections/AirtightnessChart.astro";
 import { reportPages } from "../../data/pages";
-import { loadSections, tocItemsFromSections, type SectionExtras } from "../../data/sections";
+import { envelopeSections } from "../../data/report-sections";
+import { tocItemsFromSections, type SectionExtras } from "../../data/sections";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
@@ -13,7 +14,7 @@ const page = reportPages.envelope;
 
 // Presence of the .mdx files decides what renders. The glob does not recurse
 // into `envelope/assemblies/`, which AssemblyCards globs separately.
-const sections = loadSections(import.meta.glob("../../../content/envelope/*.mdx", { eager: true }));
+const sections = envelopeSections();
 const tocItems = tocItemsFromSections(sections);
 
 // Sections absent from this map render as prose only — the masonry primer is

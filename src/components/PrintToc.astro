@@ -1,98 +1,16 @@
 ---
-import { frontmatter as summary } from "../../content/summary.mdx";
-import { frontmatter as modelGeometry } from "../../content/energy-model/model-geometry.mdx";
-import { frontmatter as modelVariants } from "../../content/energy-model/model-variants.mdx";
-import { frontmatter as siteEnergy } from "../../content/energy-model/site-energy.mdx";
-import { frontmatter as co2Emissions } from "../../content/energy-model/co2-emissions.mdx";
-import { frontmatter as passiveHouseThresholds } from "../../content/energy-model/passive-house-thresholds.mdx";
-import { frontmatter as climateData } from "../../content/energy-model/climate-data.mdx";
-import { frontmatter as passiveHouseCertifications } from "../../content/energy-model/passive-house-certifications.mdx";
-import { frontmatter as assemblies } from "../../content/envelope/assemblies.mdx";
-import { frontmatter as airtightness } from "../../content/envelope/airtightness.mdx";
-import { frontmatter as masonryRowhousePrimer } from "../../content/envelope/masonry-rowhouse-airsealing-primer.mdx";
-import { frontmatter as aeroBarrier } from "../../content/envelope/aerobarrier.mdx";
-import { frontmatter as windowThermalComfort } from "../../content/windows/window-thermal-comfort.mdx";
-import { frontmatter as siteShading } from "../../content/windows/site-shading.mdx";
-import { frontmatter as winterRadiation } from "../../content/windows/winter-radiation.mdx";
-import { frontmatter as summerRadiation } from "../../content/windows/summer-radiation.mdx";
-import { frontmatter as freshAirVentilation } from "../../content/mechanical/fresh-air-ventilation.mdx";
-import { frontmatter as freshAirFlowRates } from "../../content/mechanical/fresh-air-flow-rates.mdx";
-import { frontmatter as ventilationSystemBalancing } from "../../content/mechanical/ventilation-system-balancing.mdx";
-import { frontmatter as passiveHouseVentilationRequirements } from "../../content/mechanical/passive-house-ventilation-requirements.mdx";
-import { frontmatter as appliancesAndVenting } from "../../content/mechanical/appliances-and-venting.mdx";
-import { frontmatter as buildingMonitoring } from "../../content/mechanical/building-monitoring.mdx";
-import { reportPages } from "../data/pages";
+// Print table of contents, composed from the same page groups the PDF body
+// iterates — so a section a project removes disappears from both together.
+import { loadAllPageSections } from "../data/report-sections";
 
-interface SectionEntry {
-  anchor: string;
-  kicker: string;
-  title: string;
-}
-
-interface PageEntry {
-  kicker: string;
-  label: string;
-  anchor: string;
-  sections: SectionEntry[];
-}
-
-const pageEntries: PageEntry[] = [
-  {
-    kicker: reportPages.summary.kicker,
-    label: reportPages.summary.label,
-    anchor: "#summary",
-    sections: [{ anchor: "#summary", kicker: summary.kicker, title: summary.title }],
-  },
-  {
-    kicker: reportPages.energyModel.kicker,
-    label: reportPages.energyModel.label,
-    anchor: "#model-geometry",
-    sections: [
-      { anchor: "#model-geometry", kicker: modelGeometry.kicker, title: modelGeometry.title },
-      { anchor: "#model-variants", kicker: modelVariants.kicker, title: modelVariants.title },
-      { anchor: "#site-energy", kicker: siteEnergy.kicker, title: siteEnergy.title },
-      { anchor: "#co2-emissions", kicker: co2Emissions.kicker, title: co2Emissions.title },
-      { anchor: "#passive-house-thresholds", kicker: passiveHouseThresholds.kicker, title: passiveHouseThresholds.title },
-      { anchor: "#climate-data", kicker: climateData.kicker, title: climateData.title },
-      { anchor: "#passive-house-certifications", kicker: passiveHouseCertifications.kicker, title: passiveHouseCertifications.title },
-    ],
-  },
-  {
-    kicker: reportPages.envelope.kicker,
-    label: reportPages.envelope.label,
-    anchor: "#recommended-assemblies",
-    sections: [
-      { anchor: "#recommended-assemblies", kicker: assemblies.kicker, title: assemblies.title },
-      { anchor: "#building-airtightness", kicker: airtightness.kicker, title: airtightness.title },
-      { anchor: "#masonry-rowhouse-airsealing-primer", kicker: masonryRowhousePrimer.kicker, title: masonryRowhousePrimer.title },
-      { anchor: "#aerobarrier", kicker: aeroBarrier.kicker, title: aeroBarrier.title },
-    ],
-  },
-  {
-    kicker: reportPages.windows.kicker,
-    label: reportPages.windows.label,
-    anchor: "#window-thermal-comfort",
-    sections: [
-      { anchor: "#window-thermal-comfort", kicker: windowThermalComfort.kicker, title: windowThermalComfort.title },
-      { anchor: "#site-shading", kicker: siteShading.kicker, title: siteShading.title },
-      { anchor: "#winter-radiation", kicker: winterRadiation.kicker, title: winterRadiation.title },
-      { anchor: "#summer-radiation", kicker: summerRadiation.kicker, title: summerRadiation.title },
-    ],
-  },
-  {
-    kicker: reportPages.mechanical.kicker,
-    label: reportPages.mechanical.label,
-    anchor: "#fresh-air-ventilation",
-    sections: [
-      { anchor: "#fresh-air-ventilation", kicker: freshAirVentilation.kicker, title: freshAirVentilation.title },
-      { anchor: "#fresh-air-flow-rates", kicker: freshAirFlowRates.kicker, title: freshAirFlowRates.title },
-      { anchor: "#ventilation-system-balancing", kicker: ventilationSystemBalancing.kicker, title: ventilationSystemBalancing.title },
-      { anchor: "#ventilation-system-passive-house-requirements", kicker: passiveHouseVentilationRequirements.kicker, title: passiveHouseVentilationRequirements.title },
-      { anchor: "#appliances-and-venting", kicker: appliancesAndVenting.kicker, title: appliancesAndVenting.title },
-      { anchor: "#building-monitoring", kicker: buildingMonitoring.kicker, title: buildingMonitoring.title },
-    ],
-  },
-];
+const pageEntries = loadAllPageSections().map(({ page, sections }) => ({
+  kicker: page.kicker,
+  label: page.label,
+  // A page is linked by its first section; there is no page-level anchor.
+  // Groups are always non-empty — see loadAllPageSections.
+  anchor: `#${sections[0].id}`,
+  sections,
+}));
 ---
 
 <section class="btwr-print-toc" aria-label="Table of contents">
@@ -112,7 +30,7 @@ const pageEntries: PageEntry[] = [
             <ol class="btwr-print-toc__sections">
               {page.sections.map((section) => (
                 <li>
-                  <a class="btwr-print-toc__entry btwr-print-toc__entry--section" href={section.anchor}>
+                  <a class="btwr-print-toc__entry btwr-print-toc__entry--section" href={`#${section.id}`}>
                     <span class="btwr-print-toc__kicker">{section.kicker}</span>
                     <span class="btwr-print-toc__label">{section.title}</span>
                   </a>

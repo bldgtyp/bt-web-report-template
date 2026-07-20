@@ -23,8 +23,8 @@ const { sections, extras = {}, report, interactive = true } = Astro.props;
 
 {
   sections.map((section) => {
-    const { Before, Children } = extras[section.id] ?? {};
-    const extraProps = { report, frontmatter: section.frontmatter, interactive };
+    const { Before, Children, props } = extras[section.id] ?? {};
+    const extraProps = { report, frontmatter: section.frontmatter, interactive, ...props };
 
     return (
       <ReportSection {...sectionProps(section)}>

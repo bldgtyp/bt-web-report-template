@@ -3,30 +3,25 @@ import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 import { readProjectFile, projectPathFromRoot } from "../src/data/project-schema.mjs";
 
-const REQUIRED_SECTION_FILES = [
-  "content/summary.mdx",
-  "content/energy-model/model-geometry.mdx",
-  "content/energy-model/model-variants.mdx",
-  "content/energy-model/site-energy.mdx",
-  "content/energy-model/co2-emissions.mdx",
-  "content/energy-model/passive-house-thresholds.mdx",
-  "content/energy-model/climate-data.mdx",
-  "content/energy-model/passive-house-certifications.mdx",
-  "content/envelope/assemblies.mdx",
-  "content/envelope/airtightness.mdx",
-  "content/envelope/masonry-rowhouse-airsealing-primer.mdx",
-  "content/envelope/aerobarrier.mdx",
-  "content/windows/window-thermal-comfort.mdx",
-  "content/windows/site-shading.mdx",
-  "content/windows/winter-radiation.mdx",
-  "content/windows/summer-radiation.mdx",
-  "content/mechanical/fresh-air-ventilation.mdx",
-  "content/mechanical/fresh-air-flow-rates.mdx",
-  "content/mechanical/ventilation-system-balancing.mdx",
-  "content/mechanical/passive-house-ventilation-requirements.mdx",
-  "content/mechanical/appliances-and-venting.mdx",
-  "content/mechanical/building-monitoring.mdx",
-  "content/appendix.mdx",
+// Which .mdx files a project ships is up to the project — the renderer globs
+// each directory and renders what it finds. So this validates the two things
+// that are still structurally required, not a section inventory.
+//
+// `summary.mdx` is a genuine hard dependency: the Summary page imports it
+// statically and reads hero props off its frontmatter. `appendix.mdx` is
+// orphaned (rendered by no page) but still required here, deliberately —
+// dropping it is a separate cleanup decision, not part of making sections
+// removable.
+const REQUIRED_SECTION_FILES = ["content/summary.mdx", "content/appendix.mdx"];
+
+// Each report page renders whatever it finds in its directory, but an empty
+// directory means a failed scrape or a broken content symlink, so it is an
+// error here as well as in the loader.
+const REQUIRED_SECTION_DIRS = [
+  "content/energy-model",
+  "content/envelope",
+  "content/windows",
+  "content/mechanical",
 ];
 
 const REQUIRED_PACKAGE_SCRIPTS = ["dev:editor", "build:editor", "check:editor"];
@@ -34,6 +29,27 @@ const REQUIRED_PACKAGE_SCRIPTS = ["dev:editor", "build:editor", "check:editor"];
 function requireFile(root, relativePath) {
   if (!fs.existsSync(new URL(relativePath, root))) {
     throw new Error(`missing required file: ${relativePath}`);
+  }
+}
+
+function requireSectionsIn(root, relativeDir) {
+  const dirUrl = new URL(`${relativeDir}/`, root);
+
+  if (!fs.existsSync(dirUrl)) {
+    throw new Error(`missing required directory: ${relativeDir}`);
+  }
+
+  // Non-recursive on purpose: `envelope/assemblies/` and `mechanical/plans/`
+  // are card directories, not sections.
+  const sections = fs
+    .readdirSync(dirUrl, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".mdx"));
+
+  if (sections.length === 0) {
+    throw new Error(
+      `no .mdx sections found in ${relativeDir} — expected at least one; ` +
+        "an empty content directory usually means a failed scrape or a broken content symlink.",
+    );
   }
 }
 
@@ -52,6 +68,9 @@ try {
   const project = await readProjectFile(projectPathFromRoot(process.cwd()));
   for (const sectionFile of REQUIRED_SECTION_FILES) {
     requireFile(root, sectionFile);
+  }
+  for (const sectionDir of REQUIRED_SECTION_DIRS) {
+    requireSectionsIn(root, sectionDir);
   }
   requireFile(root, "tina/config.ts");
   requirePackageScripts(root);

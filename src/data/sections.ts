@@ -100,6 +100,18 @@ export function loadSections(modules: Record<string, SectionModule>): SectionEnt
 export interface SectionExtras {
   Before?: any;
   Children?: any;
+  /**
+   * Static props for this entry, merged over the standard ones. Reach for a
+   * component before reaching for this: nothing checks these against the
+   * target component's prop names, so a typo silently falls back to the
+   * component's default.
+   *
+   * Exactly one user today — print's site-shading `label`, which exists only
+   * to preserve a web/print wording divergence that looks like drift. Delete
+   * this field along with that override once the wording is reconciled
+   * (see decisions.md D7 amendment).
+   */
+  props?: Record<string, unknown>;
 }
 
 /** Derive TOC entries from a loaded section list so no page hand-maintains one. */

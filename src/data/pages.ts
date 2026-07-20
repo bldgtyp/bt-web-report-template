@@ -38,10 +38,17 @@ export const reportPages = {
   },
 } as const satisfies Record<string, ReportPage>;
 
-export const reportPageNavItems = [
+/**
+ * The report's page order — nav order and print/PDF order are the same order.
+ * Everything that needs it derives from this array, so there is one place to
+ * reorder pages.
+ */
+export const reportPageOrder: ReportPage[] = [
   reportPages.summary,
   reportPages.energyModel,
   reportPages.envelope,
   reportPages.windows,
   reportPages.mechanical,
-].map(({ href, label }) => ({ href, label }));
+];
+
+export const reportPageNavItems = reportPageOrder.map(({ href, label }) => ({ href, label }));

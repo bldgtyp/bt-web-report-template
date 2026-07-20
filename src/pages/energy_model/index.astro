@@ -8,14 +8,15 @@ import ModelGeometryExtras from "../../components/sections/ModelGeometryExtras.a
 import ModelVariantsTables from "../../components/sections/ModelVariantsTables.astro";
 import SiteEnergyPanel from "../../components/sections/SiteEnergyPanel.astro";
 import { reportPages } from "../../data/pages";
-import { loadSections, tocItemsFromSections, type SectionExtras } from "../../data/sections";
+import { energyModelSections } from "../../data/report-sections";
+import { tocItemsFromSections, type SectionExtras } from "../../data/sections";
 import { loadTemplateReportData } from "../../data/report";
 import ProjectReportLayout from "../../layouts/ProjectReportLayout.astro";
 
 const report = await loadTemplateReportData();
 const page = reportPages.energyModel;
 
-const sections = loadSections(import.meta.glob("../../../content/energy-model/*.mdx", { eager: true }));
+const sections = energyModelSections();
 const tocItems = tocItemsFromSections(sections);
 
 // Every section on this page carries a chart or table, so all seven appear
