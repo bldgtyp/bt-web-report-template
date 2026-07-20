@@ -1,0 +1,24 @@
+---
+// Isometric geometry figure for the `model-geometry` section.
+// `interactive={false}` (print) drops the lightbox anchor. The caption is a
+// lightbox label only — this figure renders no <figcaption>.
+import { SECTION_IMAGE_SIZE } from "./image-size";
+import LightboxAnchor from "./LightboxAnchor.astro";
+
+interface Props {
+  interactive?: boolean;
+}
+
+const { interactive = true } = Astro.props;
+
+const image = "/assets/model-geometry/iso-dimensions.optimized.png";
+const imageFull = "/assets/model-geometry/iso-dimensions.full.png";
+const caption = "Isometric building geometry with dimension annotations.";
+const alt = "Isometric building geometry diagram with dimension annotations.";
+---
+
+<figure class="btwr-geometry-figure">
+  <LightboxAnchor href={imageFull} caption={caption} interactive={interactive}>
+    <img src={image} width={SECTION_IMAGE_SIZE.width} height={SECTION_IMAGE_SIZE.height} alt={alt} />
+  </LightboxAnchor>
+</figure>

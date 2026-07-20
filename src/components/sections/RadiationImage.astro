@@ -1,0 +1,37 @@
+---
+// Wide radiation-study figure, built from the section's own frontmatter. Used
+// by both `winter-radiation` and `summer-radiation`; `interactive={false}`
+// (print) drops the lightbox anchor.
+import type { SectionFrontmatter } from "../../data/sections";
+import { SECTION_IMAGE_SIZE } from "./image-size";
+import LightboxAnchor from "./LightboxAnchor.astro";
+
+/** Frontmatter keys mirror the `radiationFields` set in tina/config.ts. */
+interface RadiationFrontmatter extends SectionFrontmatter {
+  radiation_image?: string;
+  radiation_image_full?: string;
+  radiation_alt?: string;
+  radiation_caption?: string;
+}
+
+interface Props {
+  frontmatter: RadiationFrontmatter;
+  interactive?: boolean;
+}
+
+const { frontmatter, interactive = true } = Astro.props;
+const { radiation_image: image, radiation_image_full, radiation_alt, radiation_caption: caption } = frontmatter;
+---
+
+<figure class="btwr-window-image-slot btwr-window-image-slot--wide">
+  <LightboxAnchor href={radiation_image_full ?? image ?? ""} caption={caption} interactive={interactive}>
+    <img
+      src={image}
+      width={SECTION_IMAGE_SIZE.width}
+      height={SECTION_IMAGE_SIZE.height}
+      alt={radiation_alt ?? ""}
+      loading="lazy"
+    />
+  </LightboxAnchor>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

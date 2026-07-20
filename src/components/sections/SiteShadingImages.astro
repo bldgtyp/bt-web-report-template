@@ -1,0 +1,63 @@
+---
+// Sun-path image grid for the `site-shading` section, built from the section's
+// own frontmatter. `interactive={false}` (print) drops the lightbox anchors.
+import type { SectionFrontmatter } from "../../data/sections";
+import { SECTION_IMAGE_SIZE } from "./image-size";
+import LightboxAnchor from "./LightboxAnchor.astro";
+
+/** Frontmatter keys mirror the `siteShadingFields` set in tina/config.ts. */
+interface SiteShadingFrontmatter extends SectionFrontmatter {
+  sun_path_plan_image?: string;
+  sun_path_plan_image_full?: string;
+  sun_path_plan_alt?: string;
+  sun_path_plan_caption?: string;
+  sun_path_iso_image?: string;
+  sun_path_iso_image_full?: string;
+  sun_path_iso_alt?: string;
+  sun_path_iso_caption?: string;
+}
+
+interface Props {
+  frontmatter: SiteShadingFrontmatter;
+  interactive?: boolean;
+  /** Grid aria-label. Explicit because web and print currently disagree on the
+   * wording; kept a caller decision rather than derived from `interactive`. */
+  label?: string;
+}
+
+const { frontmatter, interactive = true, label = "Site-shading images" } = Astro.props;
+
+const images = [
+  {
+    image: frontmatter.sun_path_plan_image,
+    imageFull: frontmatter.sun_path_plan_image_full,
+    alt: frontmatter.sun_path_plan_alt,
+    caption: frontmatter.sun_path_plan_caption,
+  },
+  {
+    image: frontmatter.sun_path_iso_image,
+    imageFull: frontmatter.sun_path_iso_image_full,
+    alt: frontmatter.sun_path_iso_alt,
+    caption: frontmatter.sun_path_iso_caption,
+  },
+].filter((entry): entry is typeof entry & { image: string } => Boolean(entry.image));
+---
+
+<div class="btwr-window-image-grid" aria-label={label}>
+  {
+    images.map(({ image, imageFull, alt, caption }) => (
+      <figure class="btwr-window-image-slot">
+        <LightboxAnchor href={imageFull ?? image} caption={caption} interactive={interactive}>
+          <img
+            src={image}
+            width={SECTION_IMAGE_SIZE.width}
+            height={SECTION_IMAGE_SIZE.height}
+            alt={alt ?? ""}
+            loading="lazy"
+          />
+        </LightboxAnchor>
+        {caption && <figcaption>{caption}</figcaption>}
+      </figure>
+    ))
+  }
+</div>

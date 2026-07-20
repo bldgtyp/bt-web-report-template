@@ -36,6 +36,14 @@ const reportSectionFields: TinaField[] = [
     required: true,
   },
   {
+    // Optional anchor-id override. Present so the editor round-trips it
+    // instead of stripping it on save; defaults to the filename slug.
+    type: "string",
+    name: "section_id",
+    label: "Anchor id (advanced)",
+    description: "Leave blank to use the filename. Only set where an existing deep link must keep working.",
+  },
+  {
     type: "string",
     name: "title",
     label: "Section title",

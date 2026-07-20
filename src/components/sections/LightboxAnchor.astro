@@ -1,0 +1,22 @@
+---
+// Wraps a figure's image in the lightbox anchor that `chart-interactions.js`
+// binds to. Print passes `interactive={false}` and gets the bare image, so the
+// image markup itself is written once per figure rather than once per branch.
+interface Props {
+  href: string;
+  caption?: string;
+  interactive?: boolean;
+}
+
+const { href, caption, interactive = true } = Astro.props;
+---
+
+{
+  interactive ? (
+    <a href={href} data-btwr-full-src={href} data-btwr-caption={caption ?? ""}>
+      <slot />
+    </a>
+  ) : (
+    <slot />
+  )
+}
