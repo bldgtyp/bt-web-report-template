@@ -49,6 +49,7 @@ function toYaml(project) {
 assert.equal(parseProjectYaml(toYaml(baseProject), "project.yaml").slug, "project-2606");
 assert.equal(parseProjectYaml(toYaml(baseProject), "project.yaml").building.total_num_occupants, 4);
 assert.equal(parseProjectYaml(toYaml(baseProject), "project.yaml").publishing.access, undefined);
+assert.deepEqual(parseProjectYaml(toYaml(baseProject), "project.yaml").custom_pages, undefined);
 assert.equal(
   parseProjectYaml(toYaml({ ...baseProject, slug: "2606-vandam" }), "project.yaml").slug,
   "2606-vandam",
@@ -83,6 +84,35 @@ const withOtpAccess = parseProjectYaml(
 );
 assert.equal(withOtpAccess.publishing.access.mode, "cloudflare_access_otp");
 assert.deepEqual(withOtpAccess.publishing.access.allowed_emails, ["ed@bldgtyp.com", "john@bldgtyp.com"]);
+
+// Happy path: optional custom pages accepts one or two entries.
+const withCustomPages = parseProjectYaml(
+  toYaml({
+    ...baseProject,
+    custom_pages: [
+      { slug: "resilience", label: "Resilience" },
+      { slug: "design-notes", label: "Design Notes" },
+    ],
+  }),
+  "project.yaml",
+);
+assert.deepEqual(withCustomPages.custom_pages, [
+  { slug: "resilience", label: "Resilience" },
+  { slug: "design-notes", label: "Design Notes" },
+]);
+
+for (const custom_pages of [
+  [
+    { slug: "resilience", label: "Resilience" },
+    { slug: "durability", label: "Durability" },
+    { slug: "design-notes", label: "Design Notes" },
+  ],
+  [{ slug: "Resilience", label: "Resilience" }],
+  [{ slug: "resilience", label: "   " }],
+  [{ slug: "resilience", label: "Resilience", route: "/resilience/" }],
+]) {
+  assert.throws(() => parseProjectYaml(toYaml({ ...baseProject, custom_pages }), "project.yaml"), /custom_pages/);
+}
 
 // Happy path: optional narrative round-trips through ajv.
 const withNarrative = parseProjectYaml(

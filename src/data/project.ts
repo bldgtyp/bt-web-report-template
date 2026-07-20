@@ -78,6 +78,11 @@ export interface Narrative {
   user_defined?: Record<string, string | null>;
 }
 
+export interface CustomPageConfig {
+  slug: string;
+  label: string;
+}
+
 export interface ProjectConfig {
   schema_version: string;
   slug: string;
@@ -114,6 +119,7 @@ export interface ProjectConfig {
       allowed_emails: string[];
     };
   };
+  custom_pages?: CustomPageConfig[];
   narrative: Narrative;
 }
 

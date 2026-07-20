@@ -11,7 +11,7 @@
 // any export from this module loads all four directories.
 
 import Summary, { frontmatter as summaryFrontmatter } from "../../content/summary.mdx";
-import { reportPageOrder, type ReportPage } from "./pages";
+import { reportPageOrder, type CoreReportPage, type CoreReportPageKey } from "./pages";
 import { loadSections, type SectionEntry, type SectionFrontmatter, type SectionModule } from "./sections";
 
 // Astro types MDX frontmatter as Record<string, any>, so the static Summary
@@ -20,7 +20,7 @@ import { loadSections, type SectionEntry, type SectionFrontmatter, type SectionM
 const summary = summaryFrontmatter as SectionFrontmatter;
 
 export interface PageSections {
-  page: ReportPage;
+  page: CoreReportPage;
   sections: SectionEntry[];
 }
 
@@ -51,7 +51,7 @@ export const summarySection = (): SectionEntry => ({
   Content: Summary,
 });
 
-const sectionsByPage: Record<ReportPage["key"], () => SectionEntry[]> = {
+const sectionsByPage: Record<CoreReportPageKey, () => SectionEntry[]> = {
   summary: () => [summarySection()],
   energyModel: energyModelSections,
   envelope: envelopeSections,
