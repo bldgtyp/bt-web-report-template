@@ -20,13 +20,9 @@ interface SiteShadingFrontmatter extends SectionFrontmatter {
 interface Props {
   frontmatter: SiteShadingFrontmatter;
   interactive?: boolean;
-  /** Grid aria-label. Explicit because web and print currently disagree on the
-   * wording; kept a caller decision rather than derived from `interactive`.
-   * Defaults to the web wording — print passes its own. */
-  label?: string;
 }
 
-const { frontmatter, interactive = true, label = "Site-shading image placeholders" } = Astro.props;
+const { frontmatter, interactive = true } = Astro.props;
 
 const images = [
   {
@@ -44,7 +40,7 @@ const images = [
 ].filter((entry): entry is typeof entry & { image: string } => Boolean(entry.image));
 ---
 
-<div class="btwr-window-image-grid" aria-label={label}>
+<div class="btwr-window-image-grid" aria-label="Site-shading images">
   {
     images.map(({ image, imageFull, alt, caption }) => (
       <figure class="btwr-window-image-slot">
