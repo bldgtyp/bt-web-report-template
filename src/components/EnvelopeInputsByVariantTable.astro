@@ -1,6 +1,6 @@
 ---
 import DataState from "./DataState.astro";
-import { cellNumber, cellText, formatCell, formatValue } from "../data/rows";
+import { cellNumber, cellText, formatCell, formatFixedValue, formatValue } from "../data/rows";
 import type { CsvRow } from "../data/csv";
 
 import type { TemplateReportData } from "../data/report";
@@ -14,7 +14,7 @@ interface InputRow {
   label: string;
   units: string;
   fieldId: string;
-  format?: "r-value" | "u-value" | "percent-increase" | "plain";
+  format?: "r-value" | "u-value" | "percent-increase" | "fixed-two-decimal" | "plain";
 }
 
 const { data, caption = "Envelope Inputs By Variant" } = Astro.props;
@@ -59,6 +59,7 @@ const inputRows: InputRow[] = [
     label: "Envelope Air Leakage Rate (q50)",
     units: "cfm/ft2",
     fieldId: "report_inputs.envelope_air_leakage_rate_q50",
+    format: "fixed-two-decimal",
   },
   {
     label: "Window U-value (Installed)",
@@ -93,6 +94,9 @@ function formatInputValue(row: CsvRow | undefined, format: InputRow["format"]): 
   }
   if (format === "percent-increase") {
     return `+${formatValue(numeric * 100)} %`;
+  }
+  if (format === "fixed-two-decimal") {
+    return formatFixedValue(numeric, 2);
   }
   return formatValue(numeric);
 }

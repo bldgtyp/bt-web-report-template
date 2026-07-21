@@ -176,6 +176,19 @@ export function formatValue(value: number | null, units?: string): string {
   return units ? `${formatted} ${units}` : formatted;
 }
 
+export function formatFixedValue(value: number | null, fractionDigits: number, units?: string): string {
+  if (value === null) {
+    return "—";
+  }
+
+  const formatted = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(value);
+
+  return units ? `${formatted} ${units}` : formatted;
+}
+
 export function formatCell(value: CsvCell, units?: string): string {
   if (typeof value === "number") {
     return formatValue(value, units);

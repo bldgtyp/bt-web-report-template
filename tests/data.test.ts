@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { coerceCsvCell, parseCsv } from "../src/data/csv";
 import { loadTemplateReportData } from "../src/data/report";
 import { loadReportData } from "../src/data/report-loader";
-import { formatValue, labelize, siteEnergyGroupForEndUse, siteEnergyGroups, variantColorMap } from "../src/data/rows";
+import { formatFixedValue, formatValue, labelize, siteEnergyGroupForEndUse, siteEnergyGroups, variantColorMap } from "../src/data/rows";
 
 describe("CSV helpers", () => {
   it("coerces numeric fields while preserving blank fields", () => {
@@ -176,6 +176,8 @@ describe("row formatting helpers", () => {
     expect(labelize("per_demand")).toBe("PER Demand");
     expect(labelize("dhw")).toBe("DHW");
     expect(formatValue(3124.3805, "ft2")).toBe("3,124 ft2");
+    expect(formatFixedValue(0.064, 2)).toBe("0.06");
+    expect(formatFixedValue(0.2, 2)).toBe("0.20");
   });
 
   it("creates stable variant-color maps from manifest order", () => {
