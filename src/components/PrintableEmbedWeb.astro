@@ -1,0 +1,11 @@
+---
+import { validatePrintableEmbedProps } from "./printable-embed";
+
+const { id, title } = validatePrintableEmbedProps(Astro.props);
+---
+
+<div class="btwr-printable-embed btwr-printable-embed--web" data-btwr-embed-id={id} role="group" aria-label={title}>
+  <div class="btwr-printable-embed__interactive">
+    <slot />
+  </div>
+</div>

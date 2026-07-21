@@ -25,6 +25,7 @@
     "test:ci": "scripts/ci-emulate.sh",
     "test:workflows": "node scripts/check-workflow-invariants.mjs",
     "test:integration": "vitest run tests/report-pdf.test.ts",
+    "test:printable-embed": "node scripts/test-printable-embed-fixture.mjs",
     "test:unit": "vitest run --exclude tests/report-pdf.test.ts",
     "test": "vitest run",
     "smoke:fixture": "node scripts/smoke-fixture-data.mjs"

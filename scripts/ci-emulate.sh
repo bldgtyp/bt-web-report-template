@@ -177,6 +177,11 @@ node scripts/build-pdf.mjs
 step "8. Tests (mirrors CI 'Tests' — integration only; renderer unit tests run via 'pnpm test:unit' in the workspace)"
 pnpm test:integration
 
+if [ "$PROJECT_DIR" = "$RENDERER_DIR" ]; then
+  step "9. Test printable embed fixture (template self-test only)"
+  (cd "$RENDERER_DIR" && pnpm test:printable-embed)
+fi
+
 echo
 echo "================================================================================"
 echo "  CI-EMULATE: ALL STEPS PASSED"

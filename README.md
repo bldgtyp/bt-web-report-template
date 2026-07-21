@@ -211,6 +211,45 @@ Section rules:
   imports. Keep reusable prose-facing values in `project.yaml` rather than
   hardcoding them in MDX.
 
+### Project-authored interactive embeds
+
+Use the global `<PrintableEmbed>` component when a custom page owns an
+interactive web representation and its source application can also emit a
+deterministic static print asset. This is a generic web/print switch, not a
+chart registry: data, semantics, interactive markup, and SVG/PNG generation
+remain project-owned.
+
+```mdx
+<PrintableEmbed
+  id="summer-heat-index"
+  title="Summer Heat Index by zone"
+  printSrc="/assets/resilience/summer-heat-index.svg"
+  width={1200}
+  height={675}
+>
+  <!-- project-authored interactive HTML -->
+</PrintableEmbed>
+```
+
+- `id`, `title`, `printSrc`, `width`, and `height` are required. Use a stable
+  embed ID and an accessible title that also works as the static image's alt
+  text.
+- `printSrc` must be a root-relative URL to a project-owned public asset. Put
+  reproducibly generated print assets under `public/assets/<slug>/`.
+- `width` and `height` are the print asset's positive-integer intrinsic pixel
+  dimensions. They reserve the aspect ratio without inline styles.
+- Normal web routes emit only the authored children; the print asset does not
+  participate in layout or the accessibility tree. `/print` emits only the
+  static image, so Paged.js never sees the interactive DOM.
+- `btwr build-pdf <project>` fails if the static asset is missing or
+  unreadable. The diagnostic names the custom-page slug, embed ID, and asset
+  URL.
+
+Do not use `<PrintableEmbed>` to move a reusable platform chart into project
+code. A shared chart/table still belongs in the extras registry below. Do not
+hand-maintain screenshots; the specialist source application must produce the
+static asset through a declared, reproducible step.
+
 ### Charts, tables, and other extras
 
 A project may request only components already owned and whitelisted by the
@@ -351,7 +390,7 @@ data server on port `4001`.
 This is Tina's basic local form editor. It writes MDX/frontmatter files and the
 Astro report preview should hot-reload after saves, but Tina visual/live preview
 is not wired in v1. See
-`../context/plans/2026-05-13/phase-6-tinacms-integration.html#visual-live-preview-future-slice`
+`../planning/archive/dated/2026-05-13/phase-6-tinacms-integration.html#visual-live-preview-future-slice`
 for the future investigation notes.
 
 PHPP-derived files in `data/` are deliberately not part of the editor schema.

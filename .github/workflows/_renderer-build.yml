@@ -229,6 +229,11 @@ jobs:
         # unit-test job to the template repo's ci.yml.
         run: pnpm test:integration
 
+      - name: Test printable embed fixture
+        if: ${{ inputs.project-repo == github.repository }}
+        working-directory: renderer
+        run: pnpm test:printable-embed
+
       - name: Resolve Cloudflare project name
         id: cf
         if: ${{ inputs.run-deploy }}

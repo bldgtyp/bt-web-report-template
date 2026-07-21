@@ -9,7 +9,7 @@ const { href = "/report.pdf" } = Astro.props;
 // `astro build` in CI and ships dist/report.pdf with the Cloudflare deploy. It
 // does NOT exist under `astro dev` (the Manager's "Dev preview"), so a plain
 // link there 404s. Render a disabled pending state in dev instead.
-// See context/plans/2026-05-22/pdf-export.html#download-button.
+// See planning/archive/dated/2026-05-22/pdf-export.html#download-button.
 const pdfAvailable = !import.meta.env.DEV;
 ---
 

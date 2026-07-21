@@ -1,7 +1,10 @@
 // Paged.js bootstrapper for the /print route.
 // Set ?paged=0 in the URL to skip pagination during dev iteration.
 
+import { assertPrintableEmbedAssetsReadable } from "./printable-embed-assets";
+
 export const PAGED_STATE_ATTR = "data-paged-rendered";
+export const PAGED_ERROR_ATTR = "data-paged-error";
 export const PAGED_STATE = {
   ready: "true",
   skipped: "skipped",
@@ -32,9 +35,7 @@ async function waitForFonts(): Promise<void> {
 }
 
 async function waitForImages(): Promise<void> {
-  const pending = Array.from(document.images).filter(
-    (img) => !(img.complete && img.naturalWidth > 0),
-  );
+  const pending = Array.from(document.images).filter((img) => !img.complete);
   if (pending.length === 0) {
     return;
   }
@@ -45,19 +46,34 @@ async function waitForImages(): Promise<void> {
     img.decoding = "sync";
   }
   await Promise.all(
-    pending.map(
-      (img) =>
-        new Promise<void>((resolve) => {
-          img.addEventListener("load", () => resolve(), { once: true });
-          img.addEventListener("error", () => resolve(), { once: true });
-        }),
-    ),
+    pending.map((img) => waitForImage(img)),
   );
+}
+
+function waitForImage(image: HTMLImageElement): Promise<void> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      image.removeEventListener("load", finish);
+      image.removeEventListener("error", finish);
+      resolve();
+    };
+    image.addEventListener("load", finish, { once: true });
+    image.addEventListener("error", finish, { once: true });
+    if (image.complete) {
+      finish();
+    }
+  });
 }
 
 async function paginate(): Promise<void> {
   await waitForDom();
   await Promise.all([waitForFonts(), waitForImages()]);
+  assertPrintableEmbedAssetsReadable(document);
   const paged = await import("pagedjs");
   registerCustomHandlers(paged);
   const previewer = new paged.Previewer();
@@ -108,6 +124,8 @@ if (isPrintRoute()) {
   } else {
     paginate().catch((error) => {
       console.error("[paged-init] pagination failed", error);
+      const message = error instanceof Error ? error.message : String(error);
+      document.documentElement.setAttribute(PAGED_ERROR_ATTR, message);
       document.documentElement.setAttribute(PAGED_STATE_ATTR, PAGED_STATE.error);
     });
   }
