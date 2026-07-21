@@ -1438,6 +1438,28 @@
   max-width: 100%;
 }
 
+.btwr-printable-embed {
+  width: 100%;
+  max-width: 100%;
+  margin: var(--btwr-space-6) 0;
+}
+
+.btwr-printable-embed__interactive {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.btwr-printable-embed--print {
+  break-inside: avoid;
+}
+
+.btwr-printable-embed--print img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
 @media (max-width: 720px) {
   .btwr-section-heading h2,
   .btwr-section-heading__standalone {

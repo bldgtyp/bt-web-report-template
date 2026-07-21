@@ -2,15 +2,15 @@
 // Builds dist/report.pdf from the rendered /print route via Paged.js +
 // headless Chromium + pdf-lib for metadata.
 
-import { createReadStream, existsSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
-import { createServer } from "node:http";
-import { extname, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 
 import { chromium } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
 
 import { projectPathFromRoot, readProjectFile } from "../src/data/project-schema.mjs";
+import { startDistServer } from "./dist-server.mjs";
 
 const PAGED_READY_TIMEOUT_MS = 120_000;
 const NETWORK_IDLE_TIMEOUT_MS = 60_000;
@@ -27,32 +27,8 @@ if (!existsSync(indexPath) || !existsSync(printIndexPath)) {
 
 await mkdir(distDir, { recursive: true });
 
-const server = createServer((request, response) => {
-  const requestUrl = new URL(request.url ?? "/", "http://127.0.0.1");
-  let pathname = requestUrl.pathname;
-  if (pathname.endsWith("/")) {
-    pathname += "index.html";
-  }
-  const filePath = resolve(distDir, `.${pathname}`);
-
-  if (!filePath.startsWith(distDir) || !existsSync(filePath)) {
-    response.writeHead(404);
-    response.end("Not found");
-    return;
-  }
-
-  response.setHeader("Content-Type", contentType(filePath));
-  createReadStream(filePath).pipe(response);
-});
-
-const [, browser] = await Promise.all([
-  new Promise((resolveListen) => server.listen(0, "127.0.0.1", resolveListen)),
-  chromium.launch(),
-]);
-
-const address = server.address();
-const port = typeof address === "object" && address ? address.port : 0;
-const printUrl = `http://127.0.0.1:${port}/print/`;
+const [distServer, browser] = await Promise.all([startDistServer(distDir), chromium.launch()]);
+const printUrl = `${distServer.baseUrl}/print/`;
 
 try {
   const context = await browser.newContext();
@@ -80,13 +56,14 @@ try {
     { timeout: PAGED_READY_TIMEOUT_MS },
   );
 
-  const pagedState = await page.evaluate(() =>
-    document.documentElement.getAttribute("data-paged-rendered"),
-  );
+  const { pagedState, pagedError } = await page.evaluate(() => ({
+    pagedState: document.documentElement.getAttribute("data-paged-rendered"),
+    pagedError: document.documentElement.getAttribute("data-paged-error"),
+  }));
   if (pagedState !== "true") {
     throw new Error(
       `Paged.js did not complete cleanly (state=${pagedState}). ` +
-        "See preceding [build-pdf] page/console error logs.",
+        (pagedError || "See preceding [build-pdf] page/console error logs."),
     );
   }
 
@@ -110,35 +87,7 @@ try {
   console.log(`[build-pdf] wrote ${outputPath}`);
 } finally {
   await browser.close();
-  await new Promise((resolveClose) => server.close(resolveClose));
-}
-
-function contentType(filePath) {
-  switch (extname(filePath)) {
-    case ".css":
-      return "text/css";
-    case ".js":
-    case ".mjs":
-      return "text/javascript";
-    case ".svg":
-      return "image/svg+xml";
-    case ".png":
-      return "image/png";
-    case ".jpg":
-    case ".jpeg":
-      return "image/jpeg";
-    case ".webp":
-      return "image/webp";
-    case ".woff2":
-      return "font/woff2";
-    case ".woff":
-      return "font/woff";
-    case ".json":
-      return "application/json";
-    case ".html":
-    default:
-      return "text/html";
-  }
+  await distServer.close();
 }
 
 async function applyPdfMetadata(pdfBytes) {

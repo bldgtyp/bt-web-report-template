@@ -21,6 +21,18 @@ export interface CustomReportPage extends ReportPageBase {
 
 export type ReportPage = CoreReportPage | CustomReportPage;
 
+export interface ReportPageContext {
+  id: string;
+  kind: ReportPage["kind"];
+}
+
+export function reportPageContext(page: ReportPage): ReportPageContext {
+  return {
+    id: page.kind === "custom" ? page.slug : page.key,
+    kind: page.kind,
+  };
+}
+
 export const reportPages = {
   summary: {
     kind: "core",

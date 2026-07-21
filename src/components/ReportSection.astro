@@ -1,7 +1,10 @@
 ---
 import SectionHeading from "./SectionHeading.astro";
+import PrintableEmbedPrint from "./PrintableEmbedPrint.astro";
+import PrintableEmbedWeb from "./PrintableEmbedWeb.astro";
 import Var from "./Var.astro";
 import VarLink from "./VarLink.astro";
+import type { ReportPageContext } from "../data/pages";
 
 interface Props {
   id: string;
@@ -12,6 +15,8 @@ interface Props {
   callout_body?: string;
   show_heading?: boolean;
   show_standalone_heading?: boolean;
+  interactive?: boolean;
+  pageContext?: ReportPageContext;
 }
 
 const {
@@ -23,15 +28,23 @@ const {
   callout_body,
   show_heading = true,
   show_standalone_heading = true,
+  interactive = true,
+  pageContext,
 } = Astro.props;
 
 // Shortcodes available to every MDX section. Add new shortcodes here, not
 // per-page, so authors get a consistent surface across the report.
-const mdxComponents = { Var, VarLink };
+const mdxComponents = {
+  PrintableEmbed: interactive ? PrintableEmbedWeb : PrintableEmbedPrint,
+  Var,
+  VarLink,
+};
 ---
 
 <section
   class="btwr-section"
+  data-btwr-page-id={pageContext?.id}
+  data-btwr-page-kind={pageContext?.kind}
   aria-labelledby={show_heading || show_standalone_heading ? id : undefined}
   aria-label={!show_heading && !show_standalone_heading ? title : undefined}
 >

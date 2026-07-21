@@ -1,0 +1,20 @@
+---
+kicker: "01"
+title: "Printable Embed Fixture"
+---
+
+This fixture uses native HTML rather than a chart library so the shared
+contract cannot depend on Plotly or any other renderer.
+
+<PrintableEmbed
+  id="comfort-bands"
+  title="Illustrative indoor comfort bands"
+  printSrc="/assets/printable-embed/comfort-bands.svg"
+  width={1200}
+  height={675}
+>
+  <details data-fixture-interactive>
+    <summary>Explore the web representation</summary>
+    <p>The authored interactive representation is available only on the web route.</p>
+  </details>
+</PrintableEmbed>

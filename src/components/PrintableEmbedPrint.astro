@@ -1,0 +1,13 @@
+---
+import { validatePrintableEmbedProps } from "./printable-embed";
+
+const { id, title, printSrc, width, height } = validatePrintableEmbedProps(Astro.props);
+---
+
+<figure
+  class="btwr-printable-embed btwr-printable-embed--print"
+  data-btwr-printable-embed
+  data-btwr-embed-id={id}
+>
+  <img src={printSrc} alt={title} width={width} height={height} loading="eager" decoding="sync" />
+</figure>
