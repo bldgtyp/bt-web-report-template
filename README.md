@@ -126,16 +126,211 @@ instead, such as `4322` or `4323`.
 - Treat `data/` as generated PHPP output. Run `btwr scrape <project-path>`.
 - Keep `.bldgtyp/config.local.yaml` local-only for machine-specific notes.
 
+## Custom Pages
+
+Custom pages let one project append up to two project-specific top-level pages
+without putting renderer code in the project repo. Use them for exceptional
+material that deserves its own primary-navigation page, such as Resilience,
+not for an ordinary section that belongs on an existing core page.
+
+### Contract and boundaries
+
+- `project.yaml` may omit `custom_pages` or register one or two entries. Each
+  entry has exactly `slug` and `label`; `schema_version` remains `0.2.0`.
+- A slug starts with a lowercase letter and then uses only lowercase letters,
+  digits, and single hyphens: `resilience`, `design-notes`. Do not use route
+  names reserved by the renderer: `energy_model`, `building_envelope`,
+  `windows`, `mechanical`, `print`, `admin`, or `assets`.
+- Slugs are unique. The route is derived as `/<slug>/`; authors do not specify
+  a separate route.
+- Registration and content are a bijection. Every registered slug must have a
+  non-empty `content/custom/<slug>/` directory, and every directory directly
+  under `content/custom/` must be registered.
+- Custom-page section MDX is non-recursive. Put each `.mdx` directly in its
+  slug directory; nested custom-page MDX is rejected.
+- Registration order is page order. The five core pages stay `00`–`04`;
+  custom pages append as `05` and `06`. That same order drives the Summary
+  cards, desktop/mobile navigation, next-page links, print TOC, and PDF body.
+- Project repos remain content-only. Do not add Astro/TypeScript, `src/`,
+  `package.json`, or components to obtain custom behavior.
+- Tina does not manage `content/custom/` in v1. Edit custom-page MDX directly.
+
+### Create a prose-only page
+
+Register the page in `project.yaml`:
+
+```yaml
+schema_version: 0.2.0
+# existing project keys...
+custom_pages:
+  - slug: design-notes
+    label: Design Notes
+```
+
+Create one or more top-level section files:
+
+```text
+content/custom/design-notes/
+├── overview.mdx
+└── recommendations.mdx
+```
+
+Every section requires a unique `kicker` and a `title`:
+
+```mdx
+---
+kicker: "01"
+title: "Overview"
+---
+
+This page records project-specific design guidance.
+
+The certification target is <Var k="narrative.certification.target" />.
+
+![Coordination diagram](/assets/design-notes/coordination-diagram.png)
+
+[Download the supporting calculation](/downloads/design-notes/calculation.pdf)
+```
+
+Put images and PDFs under `public/assets/<slug>/` and canonical downloadable
+inputs/outputs under `public/downloads/<slug>/`. Reference them with root-based
+URLs beginning `/assets/` or `/downloads/`. Do not put specialist inputs in
+scrape-owned `data/`; `btwr scrape` replaces that directory.
+
+Section rules:
+
+- Sections sort lexically by the displayed, zero-padded `kicker` (`"01"`,
+  `"02"`, …). Kickers must be unique; keep them contiguous by convention.
+- The section anchor defaults to `<page-slug>-<filename>`, for example
+  `design-notes-overview`. Optional `section_id` overrides the filename part,
+  but the renderer still prefixes the page slug. Use it only to preserve an
+  intentional deep link.
+- `callout_label` plus `callout_body` frontmatter adds the standard callout.
+  Both values are required for the callout to render.
+- `<Var k="..." />` and `<VarLink hrefKey="...">...</VarLink>` work without
+  imports. Keep reusable prose-facing values in `project.yaml` rather than
+  hardcoding them in MDX.
+
+### Charts, tables, and other extras
+
+A project may request only components already owned and whitelisted by the
+shared template:
+
+```mdx
+---
+kicker: "02"
+title: "Summer Heat Index"
+extras:
+  - HeatIndexChart
+---
+```
+
+The current registry is
+`src/data/section-extras-components.ts`. Supported names are:
+
+| Extra | Slot | Required project inputs |
+| --- | --- | --- |
+| `HeatIndexChart` | `Children` | Valid `public/downloads/resilience/resilience.json` and `summer-heat-index.csv` |
+| `SetTemperatureChart` | `Children` | Valid `public/downloads/resilience/resilience.json` and `winter-set.csv` |
+
+`extras` must be a list of unique registered names, with at most one component
+per slot (`Before` or `Children`). The Resilience components are specialist
+components with a strict provenance/data contract; they are not generic CSV
+charts.
+
+If a new page needs a new chart/table/figure, stop project authoring and change
+the platform first:
+
+1. Add the data loader and component under the template's `src/data/` and
+   `src/charts/` or `src/components/` directories.
+2. Register a stable public name and slot in
+   `src/data/section-extras-components.ts`.
+3. Add loader/registry failure tests plus web and print/PDF verification.
+4. Merge and verify the template before changing the project.
+5. Run `btwr pin <project> --renderer <template-sha> --schemas <schemas-sha>`;
+   commit both workflow pin changes with the project content.
+
+Never import a project-local component from MDX, add executable project code,
+or turn the registry into an arbitrary component/plugin loader.
+
+### Authoring and release protocol
+
+1. Start from a clean project worktree and confirm the current pins with
+   `btwr pin <project> --show`.
+2. Register the page and add its content directory in the same change. Add
+   assets/downloads and provenance metadata without hand-editing calculated
+   source values.
+3. Run `btwr preview <project>` and inspect the Summary card, direct route,
+   desktop/mobile nav, on-page TOC, previous/next wrap, images, downloads, and
+   responsive chart containment.
+4. Run `btwr build-pdf <project>`. This validates `project.yaml`, the
+   registration/content correspondence, section frontmatter, extras, the
+   static route, print composition, and the client PDF.
+5. Inspect the generated PDF for TOC order, headings, page breaks, clipping,
+   and download/source wording. Cross-check any displayed metric against its
+   committed source file.
+6. Commit on a project branch, push, and require PR CI to pass. CI adds schema
+   validation, type-check, Tina audit, build, PDF, and integration tests.
+7. Merge/deploy only after the content and any client-facing conclusions are
+   accepted. Verify the production `/<slug>/`, `report.pdf`, and downloads;
+   for gated reports, confirm the Cloudflare Access redirect still applies.
+
+For routine project authoring, do not change the template. For a platform
+change to the custom-page mechanism, also build a project with no
+`custom_pages` and confirm its routes, navigation, and PDF remain unchanged.
+
+### Rename, reorder, or remove
+
+- Reordering `custom_pages` changes navigation order and page kickers. Review
+  the web report and PDF before publishing.
+- Renaming a slug changes the route and every prefixed section anchor. There
+  is no automatic redirect; treat a published rename as a breaking link.
+- To remove a page, delete its `project.yaml` entry and its
+  `content/custom/<slug>/` directory in the same commit. Leaving either side
+  behind fails validation by design.
+- Deleting a section removes it from the page, on-page TOC, print body, and
+  print TOC. Renumber the remaining section kickers if needed.
+
+### Reference implementation
+
+The first complete example is
+[`bldgtyp-projects/bt-proj-2613-ayers-home` at `f05ebf0`](https://github.com/bldgtyp-projects/bt-proj-2613-ayers-home/tree/f05ebf08c0b792abc644f5a5b775fc2c60fad98f):
+
+- `project.yaml` registers `resilience`;
+- `content/custom/resilience/` contains three ordered MDX sections;
+- `public/downloads/resilience/` contains the provenance sidecar and exact
+  chart inputs; and
+- both project workflows pin the supporting template and schemas SHAs.
+
+In the platform workspace, the implementation history and the strict
+Resilience specialist-data contract are archived under
+`planning/archive/dated/2026-07-20/custom-pages/`.
+
+### Common validation failures
+
+| Error text | Fix |
+| --- | --- |
+| `registered custom page "<slug>" is missing content directory` | Create `content/custom/<slug>/` or remove the registration. |
+| `no top-level .mdx sections found in content/custom/<slug>` | Add at least one direct child `.mdx` file. |
+| `unregistered custom page content directory` | Register that slug or remove the orphan directory. |
+| `nested custom page MDX is not supported` | Move section MDX to the slug directory's top level. |
+| `Custom page slug "<slug>" is duplicated` | Keep one registration per slug. |
+| `collides with a reserved route` | Choose a non-reserved slug. |
+| `missing the required "kicker"` / `Duplicate kicker` | Add a unique zero-padded section kicker. |
+| `unknown extra` | Use a current registry name or implement/release the template component first. |
+| `both use the Children slot` | Request no more than one extra per slot. |
+
 ## Report Routes
 
-The renderer publishes the client report as five pages, matching the legacy BT
-report structure:
+The renderer always publishes five core pages, matching the legacy BT report
+structure, then appends any registered custom pages:
 
 - `/` - Summary / splash entry point
 - `/energy_model/` - Energy Model
 - `/building_envelope/` - Envelope
 - `/windows/` - Windows
 - `/mechanical/` - Mechanical
+- `/<custom-page-slug>/` - optional custom page (`05` or `06`)
 
 The masthead is cross-page navigation. The right rail is the table of contents
 for the current page.
