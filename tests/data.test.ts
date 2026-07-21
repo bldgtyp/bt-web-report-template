@@ -42,7 +42,7 @@ describe("loadReportData", () => {
     expect(data.buildingMetrics).toHaveLength(60);
     expect(data.certification).toHaveLength(85);
     expect(data.energy).toHaveLength(410);
-    expect(data.variants).toHaveLength(865);
+    expect(data.variants).toHaveLength(870);
   });
 
   it("loads the Linde secondary fixture", async () => {
@@ -57,6 +57,14 @@ describe("loadReportData", () => {
       "as_drawn",
     ]);
     expect(data.roomAirflows).toHaveLength(29);
+    expect(
+      data.variants.some(
+        (row) =>
+          row.section === "envelope" &&
+          row.field_id === "envelope.assembly_08" &&
+          row.phpp_label === "R-VT - Vaulted",
+      ),
+    ).toBe(true);
   });
 
   it("returns empty arrays for missing optional CSV files", async () => {
