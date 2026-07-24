@@ -169,6 +169,56 @@ describe("loadReportData", () => {
       ["right", false],
     ]);
   });
+
+  it("rejects a project recommended variant that is not a scraped variant ID", async () => {
+    const root = await mkdtemp(join(tmpdir(), "btwr-template-"));
+    await mkdir(join(root, "data"));
+    await writeFile(
+      join(root, "project.yaml"),
+      [
+        'schema_version: "0.2.0"',
+        'slug: "project-0000"',
+        'project_title: "Example Passive House Report"',
+        'client_name: "Example Client"',
+        'building_name: "Example Residence"',
+        'phase: "Design Analysis"',
+        'report_date: "2026-05-13"',
+        'prepared_by: "BLDGTYP"',
+        'contact_email: "info@bldgtyp.com"',
+        'target_standard: "Passive House"',
+        'certification_program: "Design analysis only"',
+        'certification_path: "Not submitted"',
+        'recommended_variant_id: "passive house"',
+        "building:",
+        '  address: "123 Example Street"',
+        '  city: "Brooklyn"',
+        '  state: "NY"',
+        '  climate_zone: "ASHRAE 4A"',
+        '  building_type: "single-family residential"',
+        "  total_num_occupants: 4",
+        "source_files:",
+        '  phpp_path: ""',
+        '  data_dir: "data"',
+        '  assets_dir: "public/assets"',
+        "publishing:",
+        '  production_url: "https://project-0000.bldgtyp.com"',
+        '  cloudflare_pages_project: "bt-proj-0000-example-report"',
+        "",
+      ].join("\n"),
+    );
+    await writeFile(
+      join(root, "data", "manifest.json"),
+      JSON.stringify({
+        status: "ok",
+        recommended_variant_id: "passive_house",
+        variants: [{ id: "passive_house", name: "Passive House", order: 0, recommended: true }],
+      }),
+    );
+
+    await expect(loadTemplateReportData(root)).rejects.toThrow(
+      "project.yaml recommended_variant_id 'passive house' does not match a scraped variant ID. Available IDs: passive_house.",
+    );
+  });
 });
 
 describe("row formatting helpers", () => {
