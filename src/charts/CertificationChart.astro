@@ -3,6 +3,7 @@ import DataState from "../components/DataState.astro";
 import type { ReportData } from "../data/report-loader";
 import { cellNumber, cellText, formatValue } from "../data/rows";
 import { axisGridBackground, linearAxis } from "./chart-axis";
+import { certificationTarget } from "./certification-target";
 
 interface Props {
   data: ReportData;
@@ -13,54 +14,38 @@ interface Props {
 
 const { data, subtitle: subtitleProp, title = "Certification results vs limits", variantId } = Astro.props;
 const variants = variantId ? data.variantOrder.filter((variant) => variant.id === variantId) : data.variantOrder;
-const nonzeroMetricLimits = (metricId: string): number[] =>
-  data.certification
-    .filter((row) => cellText(row, "metric") === metricId && cellText(row, "role") === "limit")
-    .map((row) => cellNumber(row, "value") ?? 0)
-    .filter((value) => value > 0);
-
-const inferredPeakHeatLoadLimit = (() => {
-  const heatDemandLimits = nonzeroMetricLimits("heat_demand");
-  if (heatDemandLimits.length === 0) {
-    return null;
-  }
-  return (Math.min(...heatDemandLimits) / 15) * 10;
-})();
+const target = certificationTarget(data, variantId);
 
 const thresholdMetrics = [
   {
     color: "var(--btwr-chart-heating)",
     id: "heat_demand",
-    targetMode: "chart",
     title: "Annual Heating Energy Demand",
     targetLabel: "PH-Limit",
   },
   {
     color: "var(--btwr-chart-cooling)",
     id: "total_cooling_demand",
-    targetMode: "chart",
     title: "Annual Total Cooling Energy Demand",
     targetLabel: "PH-Limit",
   },
   {
     color: "var(--btwr-chart-heating)",
-    fallbackLimit: inferredPeakHeatLoadLimit,
     id: "peak_heat_load",
-    targetMode: "chart",
     title: "Peak Heating Load",
     targetLabel: "PH-Limit",
   },
   {
     color: "var(--btwr-chart-cooling)",
     id: "peak_cooling_load",
-    targetMode: "row",
     title: "Peak Sensible Cooling Load",
     targetLabel: "PH-Limit",
   },
-];
+] as const;
 
 const chartRows = thresholdMetrics
   .map((metric) => {
+    const limit = target.limits[metric.id];
     const variantRows = variants
       .map((variant) => {
         const resultRow = data.certification.find(
@@ -69,21 +54,13 @@ const chartRows = thresholdMetrics
             cellText(candidate, "metric") === metric.id &&
             cellText(candidate, "role") === "result",
         );
-        const limitRow = data.certification.find(
-          (candidate) =>
-            cellText(candidate, "variant_id") === variant.id &&
-            cellText(candidate, "metric") === metric.id &&
-            cellText(candidate, "role") === "limit",
-        );
         const result = resultRow ? cellNumber(resultRow, "value") : null;
-        const rawLimit = limitRow ? cellNumber(limitRow, "value") : null;
-        const limit = rawLimit !== null && rawLimit > 0 ? rawLimit : (metric.fallbackLimit ?? rawLimit);
 
         return {
           label: variant.name,
           limit,
           result,
-          units: cellText(resultRow ?? limitRow ?? {}, "units"),
+          units: cellText(resultRow ?? {}, "units"),
           variantId: variant.id,
         };
       })
@@ -92,37 +69,32 @@ const chartRows = thresholdMetrics
     const axis = linearAxis(maxValue * 1.12, 3);
     const ticks = axis.max > 0 ? [0, axis.max / 2, axis.max] : axis.ticks;
     const units = variantRows.find((row) => row.units)?.units ?? "";
-    const chartLimit =
-      metric.targetMode === "chart"
-        ? variantRows.find((row) => row.limit !== null && row.limit > 0)?.limit ?? null
-        : null;
-    const chartLimitOffset = chartLimit !== null && chartLimit > 0 && axis.max > 0 ? `${(chartLimit / axis.max) * 100}%` : null;
+    const chartLimitOffset = limit !== null && axis.max > 0 ? `${(limit / axis.max) * 100}%` : null;
     const plottedRows = variantRows.map((row) => ({
       ...row,
-      limitOffset:
-        metric.targetMode === "row" && row.limit !== null && row.limit > 0 && axis.max > 0
-          ? `${(row.limit / axis.max) * 100}%`
-          : null,
       resultWidth: row.result !== null && axis.max > 0 ? `${(row.result / axis.max) * 100}%` : null,
     }));
-    const firstLimitIndex = plottedRows.findIndex((row) => row.limitOffset !== null);
 
     return {
       ...metric,
       axis,
       axisStyle: `--btwr-axis-grid: ${axisGridBackground(ticks.slice(1, -1).map((tick) => `${(tick / axis.max) * 100}%`))};`,
       chartLimitOffset,
+      limit,
       ticks,
       units,
-      variantRows: plottedRows.map((row, index) => ({
-        ...row,
-        showLimitLabel: index === firstLimitIndex,
-      })),
+      variantRows: plottedRows,
     };
   })
   .filter((row) => row.variantRows.length > 0);
 
-const subtitle = subtitleProp ?? (variantId ? "Selected variant shown against target." : "Modeled variants shown in PHPP order.");
+const subtitle =
+  subtitleProp ??
+  (variantId
+    ? "Selected variant shown against its target."
+    : target.variantName
+      ? `Modeled variants shown in PHPP order. Limits use ${target.variantName}.`
+      : "Modeled variants shown in PHPP order.");
 ---
 
 {
@@ -136,7 +108,12 @@ const subtitle = subtitleProp ?? (variantId ? "Selected variant shown against ta
       </div>
       <div class="btwr-threshold-grid">
         {chartRows.map((row) => (
-          <figure class="btwr-chart-frame btwr-chart-frame--compact btwr-threshold-card" data-chart={`certification-${row.id}`}>
+          <figure
+            class="btwr-chart-frame btwr-chart-frame--compact btwr-threshold-card"
+            data-chart={`certification-${row.id}`}
+            data-limit-value={row.limit ?? undefined}
+            data-target-variant={target.variantId ?? undefined}
+          >
             <div class="btwr-chart-frame__header">
               <h3>{row.title}</h3>
               <p class="btwr-chart-frame__subtitle">{row.units ? `Values in ${row.units}.` : "Values by modeled variant."}</p>
@@ -162,15 +139,6 @@ const subtitle = subtitleProp ?? (variantId ? "Selected variant shown against ta
                   <div class="btwr-threshold-bars__row">
                     <div class="btwr-threshold-bars__label">{variantRow.label}</div>
                     <div class="btwr-threshold-bars__track">
-                      {variantRow.limitOffset ? (
-                        <span
-                          class="btwr-threshold-bars__limit"
-                          aria-hidden="true"
-                          style={`--btwr-limit-offset: ${variantRow.limitOffset};`}
-                        >
-                          {variantRow.showLimitLabel ? <span>{row.targetLabel}</span> : null}
-                        </span>
-                      ) : null}
                       {variantRow.resultWidth ? (
                         <span
                           class="btwr-threshold-bars__segment btwr-chart-mark"

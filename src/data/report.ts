@@ -9,6 +9,16 @@ export interface TemplateReportData extends ReportData {
 export async function loadTemplateReportData(root = process.cwd()): Promise<TemplateReportData> {
   const project = await loadProjectConfig(root);
   const report = await loadReportData(projectDataDir(project, root));
+  if (
+    project.recommended_variant_id &&
+    report.variantOrder.length > 0 &&
+    !report.variantOrder.some((variant) => variant.id === project.recommended_variant_id)
+  ) {
+    const availableIds = report.variantOrder.map((variant) => variant.id).join(", ");
+    throw new Error(
+      `project.yaml recommended_variant_id '${project.recommended_variant_id}' does not match a scraped variant ID. Available IDs: ${availableIds}.`,
+    );
+  }
   const recommendedVariantId = project.recommended_variant_id ?? report.manifest.recommended_variant_id;
   const variantOrder = report.variantOrder.map((variant) => ({
     ...variant,
