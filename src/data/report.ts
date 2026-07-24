@@ -11,6 +11,7 @@ export async function loadTemplateReportData(root = process.cwd()): Promise<Temp
   const report = await loadReportData(projectDataDir(project, root));
   if (
     project.recommended_variant_id &&
+    report.variantOrder.length > 0 &&
     !report.variantOrder.some((variant) => variant.id === project.recommended_variant_id)
   ) {
     const availableIds = report.variantOrder.map((variant) => variant.id).join(", ");

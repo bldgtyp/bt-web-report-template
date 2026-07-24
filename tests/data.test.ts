@@ -170,7 +170,7 @@ describe("loadReportData", () => {
     ]);
   });
 
-  it("rejects a project recommended variant that is not a scraped variant ID", async () => {
+  it("validates a project recommended variant once scraped variant IDs exist", async () => {
     const root = await mkdtemp(join(tmpdir(), "btwr-template-"));
     await mkdir(join(root, "data"));
     await writeFile(
@@ -218,6 +218,19 @@ describe("loadReportData", () => {
     await expect(loadTemplateReportData(root)).rejects.toThrow(
       "project.yaml recommended_variant_id 'passive house' does not match a scraped variant ID. Available IDs: passive_house.",
     );
+
+    await writeFile(
+      join(root, "data", "manifest.json"),
+      JSON.stringify({
+        status: "pending",
+        variants: [],
+      }),
+    );
+
+    await expect(loadTemplateReportData(root)).resolves.toMatchObject({
+      manifest: { recommended_variant_id: "passive house" },
+      variantOrder: [],
+    });
   });
 });
 
