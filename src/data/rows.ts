@@ -3,6 +3,9 @@ import type { ReportVariant } from "./manifest";
 
 const VARIANT_COLOR_COUNT = 8;
 
+/** Placeholder rendered for a cell with no PHPP value. */
+export const MISSING_VALUE = "—";
+
 export interface EndUseGroup {
   id: string;
   label: string;
@@ -160,6 +163,16 @@ export function sortByVariantOrder<T extends { variantId: string }>(items: T[], 
 
 export function uniqueStrings(values: string[]): string[] {
   return [...new Set(values.filter(Boolean))];
+}
+
+/**
+ * Flag every cell whose formatted value differs from the one immediately before it,
+ * so a reader scanning a variant-inputs row can see exactly where an input changes.
+ * The first column is never flagged (nothing precedes it), and a missing value is
+ * never flagged — an absent input is not a design change.
+ */
+export function markValueChanges(values: string[]): boolean[] {
+  return values.map((value, index) => index > 0 && value !== MISSING_VALUE && value !== values[index - 1]);
 }
 
 export function formatValue(value: number | null, units?: string): string {

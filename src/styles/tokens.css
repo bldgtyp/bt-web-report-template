@@ -39,6 +39,7 @@
   --btwr-color-accent-soft: var(--accent-light);
   --btwr-color-highlight: var(--highlight);
   --btwr-color-highlight-soft: var(--highlight-light);
+  --btwr-color-highlight-strong: var(--highlight-dark);
   --btwr-color-success: var(--accent-dark);
   --btwr-color-warning: var(--highlight-dark);
   --btwr-color-danger: var(--highlight-darker);
