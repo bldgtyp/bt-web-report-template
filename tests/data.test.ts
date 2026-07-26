@@ -7,7 +7,15 @@ import { fileURLToPath } from "node:url";
 import { coerceCsvCell, parseCsv } from "../src/data/csv";
 import { loadTemplateReportData } from "../src/data/report";
 import { loadReportData } from "../src/data/report-loader";
-import { formatFixedValue, formatValue, labelize, siteEnergyGroupForEndUse, siteEnergyGroups, variantColorMap } from "../src/data/rows";
+import {
+  formatFixedValue,
+  formatValue,
+  labelize,
+  markValueChanges,
+  siteEnergyGroupForEndUse,
+  siteEnergyGroups,
+  variantColorMap,
+} from "../src/data/rows";
 
 describe("CSV helpers", () => {
   it("coerces numeric fields while preserving blank fields", () => {
@@ -241,6 +249,19 @@ describe("row formatting helpers", () => {
     expect(formatValue(3124.3805, "ft2")).toBe("3,124 ft2");
     expect(formatFixedValue(0.064, 2)).toBe("0.06");
     expect(formatFixedValue(0.2, 2)).toBe("0.20");
+  });
+
+  it("marks the first cell of each run where a variant input changes", () => {
+    expect(markValueChanges(["0.4", "0.4", "0.4", "0.4", "0.3"])).toEqual([false, false, false, false, true]);
+    expect(markValueChanges(["0.4", "0.4", "0.3", "0.3", "0.1"])).toEqual([false, false, true, false, true]);
+    expect(markValueChanges(["R-20", "R-40", "R-20"])).toEqual([false, true, true]);
+    expect(markValueChanges(["0.4"])).toEqual([false]);
+    expect(markValueChanges([])).toEqual([]);
+  });
+
+  it("never marks a missing variant input as a change", () => {
+    expect(markValueChanges(["0.4", "—", "—", "0.3"])).toEqual([false, false, false, true]);
+    expect(markValueChanges(["—", "—"])).toEqual([false, false]);
   });
 
   it("creates stable variant-color maps from manifest order", () => {

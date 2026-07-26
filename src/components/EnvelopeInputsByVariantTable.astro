@@ -1,6 +1,6 @@
 ---
 import DataState from "./DataState.astro";
-import { cellNumber, cellText, formatCell, formatFixedValue, formatValue } from "../data/rows";
+import { cellNumber, cellText, formatCell, formatFixedValue, formatValue, markValueChanges, MISSING_VALUE } from "../data/rows";
 import type { CsvRow } from "../data/csv";
 
 import type { TemplateReportData } from "../data/report";
@@ -78,7 +78,7 @@ function rowFor(fieldId: string, variantId: string) {
 
 function formatInputValue(row: CsvRow | undefined, format: InputRow["format"]): string {
   if (!row) {
-    return "—";
+    return MISSING_VALUE;
   }
 
   const numeric = cellNumber(row, "value");
@@ -101,14 +101,21 @@ function formatInputValue(row: CsvRow | undefined, format: InputRow["format"]): 
   return formatValue(numeric);
 }
 
-const rows = inputRows.map((input) => ({
-  ...input,
-  values: new Map(
-    data.variantOrder.map((variant) => [variant.id, formatInputValue(rowFor(input.fieldId, variant.id), input.format)]),
-  ),
-}));
+const rows = inputRows.map((input) => {
+  const values = data.variantOrder.map((variant) => formatInputValue(rowFor(input.fieldId, variant.id), input.format));
+  const changes = markValueChanges(values);
+  return {
+    ...input,
+    cells: data.variantOrder.map((variant, index) => ({
+      variant,
+      value: values[index],
+      changed: changes[index],
+      previousVariantName: index > 0 ? data.variantOrder[index - 1].name : "",
+    })),
+  };
+});
 const recommendedName = data.variantOrder.find((variant) => variant.recommended)?.name ?? "the recommended variant";
-const hasRows = rows.some((row) => [...row.values.values()].some((value) => value !== "—"));
+const hasRows = rows.some((row) => row.cells.some((cell) => cell.value !== MISSING_VALUE));
 ---
 
 {
@@ -142,9 +149,15 @@ const hasRows = rows.some((row) => [...row.values.values()].some((value) => valu
                 <span>{row.label}</span>
                 <small class="btwr-table__metric-unit">{row.units}</small>
               </th>
-              {data.variantOrder.map((variant) => (
-                <td class={`btwr-cell-number ${variant.recommended ? "btwr-col-recommended" : ""}`}>
-                  {row.values.get(variant.id)}
+              {row.cells.map((cell) => (
+                <td class={`btwr-cell-number ${cell.variant.recommended ? "btwr-col-recommended" : ""}`}>
+                  {cell.changed ? (
+                    <mark class="btwr-value-changed" title={`Changed from ${cell.previousVariantName}`}>
+                      {cell.value}
+                    </mark>
+                  ) : (
+                    cell.value
+                  )}
                 </td>
               ))}
             </tr>

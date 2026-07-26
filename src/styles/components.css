@@ -706,6 +706,17 @@
   background: var(--btwr-table-recommended-hover-bg);
 }
 
+/* Variant-inputs tables mark the first cell of each run where an input changes
+   from the variant to its left, so the reader can scan for what actually moved. */
+.btwr-variant-inputs-table .btwr-value-changed {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--btwr-radius-sm);
+  background: var(--btwr-color-highlight-soft);
+  color: var(--btwr-color-highlight-strong);
+  font-weight: 700;
+}
+
 .btwr-table__title {
   display: block;
   margin-bottom: var(--btwr-space-2);
