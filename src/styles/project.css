@@ -201,6 +201,56 @@
   margin: var(--btwr-space-5) 0;
 }
 
+/* "Simple" table treatment for markdown pipe-tables authored in MDX prose.
+   The data-driven components use .btwr-table; prose tables get a lighter
+   version of the same language: label-font uppercase headers, token borders,
+   tabular numerals. Alignment set in the markdown (`---:`) wins over the
+   left-align default because it arrives as an inline attribute/style. */
+.btwr-prose table {
+  width: 100%;
+  margin: var(--btwr-space-5) 0;
+  border-collapse: collapse;
+  border-top: 2px solid var(--btwr-color-border-strong);
+  color: var(--btwr-color-text);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.btwr-prose table th,
+.btwr-prose table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--btwr-color-border);
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.btwr-prose table th:first-child,
+.btwr-prose table td:first-child {
+  padding-left: 0;
+}
+
+.btwr-prose table th:last-child,
+.btwr-prose table td:last-child {
+  padding-right: 0;
+}
+
+.btwr-prose table thead th {
+  border-bottom: 1px solid var(--btwr-color-border-strong);
+  color: var(--btwr-color-subtle);
+  font-family: var(--btwr-font-label);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.btwr-prose table tbody tr:first-child th,
+.btwr-prose table tbody tr:first-child td {
+  padding-top: 0.75rem;
+}
+
 .btwr-callout {
   display: grid;
   gap: var(--btwr-space-1);

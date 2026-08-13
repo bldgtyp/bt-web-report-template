@@ -55,6 +55,31 @@ function energyCodeTargetLabel(project: ProjectConfig | undefined): string {
   return energyCode.zone ? `${energyCode.name} / ${energyCode.zone}` : energyCode.name;
 }
 
+// The target labels render rotated, hanging down from the top of the plot. A
+// label longer than the plot height (~52 chars at this font size) runs off the
+// bottom of the chart, so wrap long labels into balanced lines on whitespace.
+function wrapChartLabel(label: string, maxChars = 52): string[] {
+  if (label.length <= maxChars) {
+    return [label];
+  }
+  const lineCount = Math.ceil(label.length / maxChars);
+  const targetLength = Math.ceil(label.length / lineCount);
+  const lines: string[] = [];
+  let current = "";
+  for (const word of label.split(" ")) {
+    if (current && current.length + 1 + word.length > targetLength && lines.length < lineCount - 1) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = current ? `${current} ${word}` : word;
+    }
+  }
+  if (current) {
+    lines.push(current);
+  }
+  return lines;
+}
+
 const vv = variantInput("airtightness.vv");
 const vn50 = variantInput("airtightness.vn50");
 const coeffE = variantInput("airtightness.wind_protection_coefficient_e");
@@ -99,6 +124,9 @@ const typicalY = y(yMax * 0.16);
 const yGridLines = yTicks.filter((tick) => tick > 0);
 const xGridLines = xTicks.filter((tick) => tick > 0);
 const targetLabelTopY = margin.top + 8;
+const targetLabelLineSpacing = 13;
+const phTargetLabelLines = wrapChartLabel(`Target: ${passiveHouseTargetAch} ACH@50`);
+const codeTargetLabelLines = wrapChartLabel(`${energyCodeLabel}: ${energyCodeTargetAch} ACH@50`);
 ---
 
 {
@@ -165,12 +193,24 @@ const targetLabelTopY = margin.top + 8;
               <text x="8" y="-10">{`${recommended?.name ?? "Recommended"}: ${formatValue(recommendedPoint.ach)} ACH`}</text>
             </g>
           ) : null}
-          <text class="btwr-airtightness-chart__target-label" text-anchor="end" transform={`translate(${x(passiveHouseTargetAch) - 10} ${targetLabelTopY}) rotate(-90)`}>
-            {`Target: ${passiveHouseTargetAch} ACH@50`}
-          </text>
-          <text class="btwr-airtightness-chart__target-label" text-anchor="end" transform={`translate(${x(energyCodeTargetAch) - 10} ${targetLabelTopY}) rotate(-90)`}>
-            {`${energyCodeLabel}: ${energyCodeTargetAch} ACH@50`}
-          </text>
+          {phTargetLabelLines.map((line, index) => (
+            <text
+              class="btwr-airtightness-chart__target-label"
+              text-anchor="end"
+              transform={`translate(${x(passiveHouseTargetAch) - 10 - targetLabelLineSpacing * (phTargetLabelLines.length - 1 - index)} ${targetLabelTopY}) rotate(-90)`}
+            >
+              {line}
+            </text>
+          ))}
+          {codeTargetLabelLines.map((line, index) => (
+            <text
+              class="btwr-airtightness-chart__target-label"
+              text-anchor="end"
+              transform={`translate(${x(energyCodeTargetAch) - 10 - targetLabelLineSpacing * (codeTargetLabelLines.length - 1 - index)} ${targetLabelTopY}) rotate(-90)`}
+            >
+              {line}
+            </text>
+          ))}
           <line class="btwr-airtightness-chart__axis" x1={margin.left} y1={margin.top} x2={margin.left} y2={margin.top + plotHeight} />
           <line class="btwr-airtightness-chart__axis" x1={margin.left} y1={margin.top + plotHeight} x2={margin.left + plotWidth} y2={margin.top + plotHeight} />
           {yTicks.map((tick) => (
