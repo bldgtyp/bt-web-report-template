@@ -16,7 +16,11 @@ const pdfPath = resolve(repoRoot, "dist", "report.pdf");
 const LETTER_WIDTH_PTS = 612;
 const LETTER_HEIGHT_PTS = 792;
 const MIN_PAGES = 20;
-const MAX_PAGES = 80;
+// Guards against runaway pagination (a broken page-break rule can loop into
+// thousands of pages), not against long reports. Projects with many variants,
+// assembly cards, and resilience chart pages legitimately run past 80: 2615
+// Tano Road sits at 83. Keep the ceiling well clear of real report lengths.
+const MAX_PAGES = 120;
 const MIN_BYTES = 200_000;
 const LETTER_TOLERANCE_PTS = 1;
 
