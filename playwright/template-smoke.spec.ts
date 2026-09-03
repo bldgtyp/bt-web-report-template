@@ -4,7 +4,22 @@ import { resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
+import { parse as parseYaml } from "yaml";
+
 import { parseCsv } from "../src/data/csv";
+
+// The footer prints `report_date` from project.yaml verbatim, so read it from
+// there rather than pinning a literal that goes stale the next time the
+// fixture project is re-dated. Null when the key is absent, in which case the
+// layout falls back to the manifest's generated_at.
+function projectReportDate(): string | null {
+  const projectPath = resolve(process.cwd(), "project.yaml");
+  if (!existsSync(projectPath)) {
+    return null;
+  }
+  const project = parseYaml(readFileSync(projectPath, "utf8")) as { report_date?: string };
+  return project.report_date ?? null;
+}
 
 // The schedule must render every scraped room, so the expectation is the
 // scrape itself rather than a number copied into the test. Returns null when
@@ -21,8 +36,11 @@ function scrapedRoomNames(): string[] | null {
   return rooms.length > 0 ? rooms : null;
 }
 
-const reportPages = [
-  { path: "/", navLabel: "Summary", heading: "Executive summary" },
+const reportPages: { path: string; navLabel: string; heading: string | null }[] = [
+  // The summary page renders its section with show_heading and
+  // show_standalone_heading both false (src/pages/index.astro), so its only
+  // heading is the layout's project-titled H1, which varies per project.
+  { path: "/", navLabel: "Summary", heading: null },
   { path: "/energy_model/", navLabel: "Energy Model", heading: "Model Geometry" },
   { path: "/building_envelope/", navLabel: "Envelope", heading: "Recommended Assemblies" },
   { path: "/windows/", navLabel: "Windows", heading: "Window Thermal Comfort" },
@@ -76,8 +94,16 @@ for (const reportPage of reportPages) {
 
     await expect(page.locator(".btwr-brand-lockup strong")).toHaveText("BLDGTYP");
     await expect(page.locator(".btwr-masthead").getByText("Report date")).toHaveCount(0);
-    await expect(page.locator(".btwr-report-footer")).toContainText("Report date 2026-05-13");
-    await expect(page.getByRole("heading", { name: reportPage.heading })).toBeVisible();
+    const reportDate = projectReportDate();
+    if (reportDate) {
+      await expect(page.locator(".btwr-report-footer time")).toHaveAttribute("datetime", reportDate);
+    }
+    await expect(page.locator(".btwr-report-footer")).toContainText("Report date");
+    if (reportPage.heading) {
+      await expect(page.getByRole("heading", { name: reportPage.heading })).toBeVisible();
+    } else {
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    }
     await expect(page.locator(".btwr-report-grid")).toHaveCSS("display", "grid");
 
     const dimensions = await page.evaluate(() => ({
@@ -111,7 +137,10 @@ for (const reportPage of reportPages) {
     if (reportPage.path === "/") {
       await expect(page.locator("h1").first()).toBeVisible();
       await expect(page.locator(".btwr-hero")).toHaveCSS("display", "grid");
-      await expect(page.locator(".btwr-hero__report-date")).toHaveText("Report date 2026-05-13");
+      await expect(page.locator(".btwr-hero__report-date")).toContainText("Report date");
+      if (reportDate) {
+        await expect(page.locator(".btwr-hero__report-date time")).toHaveAttribute("datetime", reportDate);
+      }
     } else if (dimensions.innerWidth > 1180) {
       await expect(page.locator(".btwr-hero__report-date")).toHaveCount(0);
       await expect(page.locator(".btwr-toc")).toBeVisible();
@@ -195,6 +224,10 @@ test("energy model page renders available PHPP data state", async ({ page }) => 
 });
 
 test("mechanical page renders starter plan cards after airflow table", async ({ page }) => {
+  // Without scraped data the schedule renders a pending state rather than a
+  // table, and there is no table for the cards to sit after.
+  test.skip(scrapedRoomNames() === null, "no scraped room-airflow data in data/");
+
   await page.goto("/mechanical/");
 
   const airflowTable = page.locator('[data-table="room-airflows"]');
@@ -277,13 +310,23 @@ test("envelope masonry primer download keeps its PDF filename", async ({ page })
 });
 
 test("stacked-bar axis thins tick labels when the axis track is narrow", async ({ page }) => {
-  await page.setViewportSize({ width: 1100, height: 900 });
+  // Thinning is a container query on the axis itself: every other tick is
+  // hidden at 34rem and under. 800px of viewport puts the track near 27rem,
+  // clear of that boundary. A wider viewport is not necessarily a wider
+  // track — at 1100px the report grid has already dropped to one column and
+  // handed the chart *more* width than it has at 1200px.
+  await page.setViewportSize({ width: 800, height: 900 });
   await page.goto("/energy_model/");
 
   const hasPendingData = (await page.getByText("Site energy chart pending").count()) > 0;
   if (hasPendingData) {
     test.skip(true, "Fixture data is pending, so no chart axis is rendered.");
   }
+
+  const axisTrackRem = await page
+    .locator('[data-chart="site-energy"] .btwr-site-energy-bars__axis')
+    .first()
+    .evaluate((axis) => axis.getBoundingClientRect().width / Number.parseFloat(getComputedStyle(document.documentElement).fontSize));
 
   const tickMetrics = await page.locator('[data-chart="site-energy"] .btwr-site-energy-bars__axis span').evaluateAll((ticks) =>
     ticks.map((tick) => {
@@ -299,6 +342,9 @@ test("stacked-bar axis thins tick labels when the axis track is narrow", async (
   );
   const visibleTicks = tickMetrics.filter((tick) => tick.visible);
 
+  // Asserted so that a layout change which widens the track past 34rem fails
+  // here, naming the cause, rather than as an unexplained tick-list diff.
+  expect(axisTrackRem).toBeLessThanOrEqual(34);
   expect(visibleTicks.map((tick) => tick.text)).toEqual(["0", "10,000", "20,000"]);
   expect(visibleTicks.length).toBeLessThan(tickMetrics.length);
   for (let index = 1; index < visibleTicks.length; index += 1) {
