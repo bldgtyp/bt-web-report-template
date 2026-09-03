@@ -61,6 +61,11 @@
     break-inside: auto;
   }
 
+  .btwr-table caption,
+  .btwr-table thead {
+    break-after: avoid;
+  }
+
   .btwr-table thead {
     display: table-header-group;
   }

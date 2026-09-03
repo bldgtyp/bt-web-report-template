@@ -115,7 +115,7 @@ const hasRows = rows.some((row) => [...row.values.values()].some((value) => valu
   data.manifest.status === "pending" || !hasRows ? (
     <DataState state="pending" title="Energy table pending" message="No energy summary rows are available yet." />
   ) : (
-    <div class="btwr-table-wrap">
+    <div class="btwr-table-wrap btwr-table-wrap--long">
       <table class="btwr-table btwr-energy-summary-table" data-table="energy-summary">
         <caption>
           <strong class="btwr-table__title">{caption}</strong>

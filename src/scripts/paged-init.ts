@@ -82,22 +82,33 @@ async function paginate(): Promise<void> {
 }
 
 function registerCustomHandlers(paged: typeof import("pagedjs")): void {
-  // Paged.js 0.4 drops <thead> on split-table continuations; this handler
-  // clones the source thead back so column headers repeat on every page a
-  // table covers.
-  //
-  // It runs on `renderNode` — while the page is still being laid out — not on
-  // `afterPageLayout`. Paged.js decides how many rows fit by measuring the
-  // page as it renders, so a header added after that decision is pure extra
-  // height: the last row of every continuation page ends up pushed past the
-  // page box and clipped out of the PDF. Inserting it as the continuation
-  // table is rebuilt means the row that no longer fits is carried to the next
-  // page instead of disappearing.
   const TABLE_PARTS = new Set(["TABLE", "THEAD", "TBODY", "TFOOT", "TR", "TD", "TH"]);
 
   const elementFor = (node: Node): HTMLElement | null =>
     node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement;
 
+  // Paged.js indexes rendered nodes by data-ref/id to find where the next
+  // source node belongs; a duplicated ref would misdirect that lookup.
+  function detachedClone(source: Element): HTMLElement {
+    const clone = source.cloneNode(true) as HTMLElement;
+    for (const element of [clone, ...clone.querySelectorAll("[data-ref], [id]")]) {
+      element.removeAttribute("data-ref");
+      element.removeAttribute("id");
+    }
+    return clone;
+  }
+
+  // Paged.js 0.4 drops the <caption> and <thead> when it continues a table on
+  // the next page, so a reader meets a wall of unlabelled rows. This handler
+  // clones both back onto every continuation.
+  //
+  // It runs on `renderNode` — while the page is still being laid out — not on
+  // `afterPageLayout`. Paged.js decides how many rows fit by measuring the
+  // page as it renders, so anything added after that decision is pure extra
+  // height: the last row of every continuation page ends up pushed past the
+  // page box and clipped out of the PDF. Inserting as the continuation table
+  // is rebuilt means the row that no longer fits is carried to the next page
+  // instead of disappearing.
   class RepeatTableHeader extends paged.Handler {
     renderNode(clone: Node, node: Node): void {
       const cloneElement = elementFor(clone);
@@ -105,28 +116,65 @@ function registerCustomHandlers(paged: typeof import("pagedjs")): void {
         return;
       }
       const splitTable = cloneElement.closest<HTMLTableElement>("table[data-split-from]");
-      if (!splitTable || splitTable.querySelector("thead")) {
+      if (!splitTable) {
         return;
       }
-      const sourceThead = elementFor(node)?.closest("table")?.querySelector("thead");
-      if (!sourceThead) {
+      const sourceTable = elementFor(node)?.closest("table");
+      if (!sourceTable) {
         return;
       }
-      const repeated = sourceThead.cloneNode(true) as HTMLElement;
-      // Paged.js indexes rendered nodes by data-ref/id to find where the next
-      // source node belongs; a duplicated ref would misdirect that lookup.
-      repeated.removeAttribute("id");
-      repeated.removeAttribute("data-ref");
-      for (const descendant of repeated.querySelectorAll("[data-ref], [id]")) {
-        descendant.removeAttribute("data-ref");
-        descendant.removeAttribute("id");
+
+      if (!splitTable.querySelector("caption")) {
+        const sourceCaption = sourceTable.querySelector("caption");
+        const sourceTitle = sourceCaption?.querySelector(".btwr-table__title");
+        if (sourceCaption && sourceTitle) {
+          // Title only. Repeating the subtitle on every page of a long
+          // schedule is noise, and "(continued)" is what tells the reader
+          // this is the same table rather than a new one.
+          const repeated = detachedClone(sourceCaption);
+          repeated.querySelector(".btwr-table__subtitle")?.remove();
+          const title = repeated.querySelector(".btwr-table__title");
+          if (title) {
+            title.textContent = `${sourceTitle.textContent?.trim() ?? ""} (continued)`;
+          }
+          repeated.setAttribute("data-btwr-repeated-caption", "true");
+          splitTable.insertBefore(repeated, splitTable.firstChild);
+        }
       }
-      repeated.setAttribute("data-btwr-repeated-header", "true");
-      splitTable.insertBefore(repeated, splitTable.firstChild);
+
+      if (!splitTable.querySelector("thead")) {
+        const sourceThead = sourceTable.querySelector("thead");
+        if (sourceThead) {
+          const repeated = detachedClone(sourceThead);
+          repeated.setAttribute("data-btwr-repeated-header", "true");
+          const caption = splitTable.querySelector("caption");
+          splitTable.insertBefore(repeated, caption ? caption.nextSibling : splitTable.firstChild);
+        }
+      }
     }
   }
 
-  paged.registerHandlers(RepeatTableHeader);
+  // A fragmentable table can leave its opening box on the previous page with
+  // no rows in it: sometimes a bare 2px sliver that prints as a stray rule
+  // under whatever came before, sometimes the caption alone with every row
+  // overleaf. `break-after: avoid` on the caption and thead walks the break
+  // back where it can, but once Paged.js has chosen a row as the break token
+  // those hints no longer apply, so the leftover is removed here.
+  //
+  // Safe to do after layout, unlike adding content: the fragment carries
+  // nothing the continuation does not repeat, and dropping it only frees
+  // space at the foot of a page that is already paginated.
+  class DropRowlessTableFragment extends paged.Handler {
+    afterPageLayout(pageElement: HTMLElement): void {
+      for (const wrap of pageElement.querySelectorAll(".btwr-table-wrap")) {
+        if (!wrap.querySelector("tbody tr")) {
+          wrap.remove();
+        }
+      }
+    }
+  }
+
+  paged.registerHandlers(RepeatTableHeader, DropRowlessTableFragment);
 }
 
 if (isPrintRoute()) {

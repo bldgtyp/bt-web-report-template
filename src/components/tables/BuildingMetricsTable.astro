@@ -47,7 +47,7 @@ const rows = metrics
   data.manifest.status === "pending" || rows.length === 0 ? (
     <DataState state="pending" title="Building metrics pending" message="No building-metrics rows are available yet." />
   ) : (
-    <div class="btwr-table-wrap">
+    <div class="btwr-table-wrap btwr-table-wrap--long">
       <table class="btwr-table" data-table="building-metrics">
         <caption>
           <strong class="btwr-table__title">{caption}</strong>
