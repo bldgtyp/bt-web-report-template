@@ -85,33 +85,44 @@ function registerCustomHandlers(paged: typeof import("pagedjs")): void {
   // Paged.js 0.4 drops <thead> on split-table continuations; this handler
   // clones the source thead back so column headers repeat on every page a
   // table covers.
+  //
+  // It runs on `renderNode` — while the page is still being laid out — not on
+  // `afterPageLayout`. Paged.js decides how many rows fit by measuring the
+  // page as it renders, so a header added after that decision is pure extra
+  // height: the last row of every continuation page ends up pushed past the
+  // page box and clipped out of the PDF. Inserting it as the continuation
+  // table is rebuilt means the row that no longer fits is carried to the next
+  // page instead of disappearing.
+  const TABLE_PARTS = new Set(["TABLE", "THEAD", "TBODY", "TFOOT", "TR", "TD", "TH"]);
+
+  const elementFor = (node: Node): HTMLElement | null =>
+    node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement;
+
   class RepeatTableHeader extends paged.Handler {
-    afterPageLayout(
-      pageElement: HTMLElement,
-      _page: unknown,
-      _breakToken: unknown,
-      chunker: { source: HTMLElement },
-    ): void {
-      const splitTables = pageElement.querySelectorAll<HTMLTableElement>(
-        "table[data-split-from]",
-      );
-      for (const splitTable of splitTables) {
-        if (splitTable.querySelector("thead")) {
-          continue;
-        }
-        const originalId = splitTable.getAttribute("data-split-from");
-        if (!originalId) {
-          continue;
-        }
-        const original = chunker.source.querySelector<HTMLTableElement>(
-          `[data-ref="${originalId}"], #${CSS.escape(originalId)}`,
-        );
-        const thead = original?.querySelector("thead");
-        if (!thead) {
-          continue;
-        }
-        splitTable.insertBefore(thead.cloneNode(true), splitTable.firstChild);
+    renderNode(clone: Node, node: Node): void {
+      const cloneElement = elementFor(clone);
+      if (!cloneElement || !TABLE_PARTS.has(cloneElement.tagName)) {
+        return;
       }
+      const splitTable = cloneElement.closest<HTMLTableElement>("table[data-split-from]");
+      if (!splitTable || splitTable.querySelector("thead")) {
+        return;
+      }
+      const sourceThead = elementFor(node)?.closest("table")?.querySelector("thead");
+      if (!sourceThead) {
+        return;
+      }
+      const repeated = sourceThead.cloneNode(true) as HTMLElement;
+      // Paged.js indexes rendered nodes by data-ref/id to find where the next
+      // source node belongs; a duplicated ref would misdirect that lookup.
+      repeated.removeAttribute("id");
+      repeated.removeAttribute("data-ref");
+      for (const descendant of repeated.querySelectorAll("[data-ref], [id]")) {
+        descendant.removeAttribute("data-ref");
+        descendant.removeAttribute("id");
+      }
+      repeated.setAttribute("data-btwr-repeated-header", "true");
+      splitTable.insertBefore(repeated, splitTable.firstChild);
     }
   }
 

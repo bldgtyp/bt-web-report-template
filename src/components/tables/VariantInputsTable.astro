@@ -8,7 +8,6 @@ interface Props {
   sections?: string[];
   caption?: string;
   captionSubtitle?: string;
-  limit?: number;
   showSource?: boolean;
 }
 
@@ -17,7 +16,6 @@ const {
   sections = ["geometry", "certification_limits"],
   caption = "Variant inputs by variant",
   captionSubtitle = "This table lists selected model inputs for each variant tested as part of this investigation. Values from the recommended variant are highlighted.",
-  limit = 28,
   showSource = true,
 } = Astro.props;
 const sectionSet = new Set(sections);
@@ -38,7 +36,8 @@ for (const row of data.variants) {
     });
   }
 }
-const rows = [...rowKeys.values()].slice(0, limit).map((key) => {
+// Every matching input row is rendered; see RoomAirflowTable for why no cap.
+const rows = [...rowKeys.values()].map((key) => {
   const values = new Map(
     data.variantOrder.map((variant) => {
       const row = data.variants.find(
@@ -55,7 +54,7 @@ const rows = [...rowKeys.values()].slice(0, limit).map((key) => {
   data.manifest.status === "pending" || rows.length === 0 ? (
     <DataState state="pending" title="Variant inputs pending" message="No matching variant input rows are available yet." />
   ) : (
-    <div class="btwr-table-wrap">
+    <div class="btwr-table-wrap btwr-table-wrap--long">
       <table class="btwr-table" data-table="variant-inputs">
         <caption>
           <strong class="btwr-table__title">{caption}</strong>
