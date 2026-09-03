@@ -311,6 +311,45 @@ test("print route paginates the room airflow schedule without dropping rows", as
   expect(schedule.fragmentsOutsideTheirPage).toBe(0);
 });
 
+test("print route keeps every table inside its page, labelled", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "Paged.js lays out to the page box, not the viewport");
+  test.skip(scrapedScheduleRowHeadings() === null, "no scraped data in data/");
+  // Paged.js lays out the whole report before anything is assertable.
+  test.setTimeout(240_000);
+
+  await page.goto("/print/");
+  await page.waitForFunction(
+    () => document.documentElement.getAttribute("data-paged-rendered") === "true",
+    null,
+    { timeout: 180_000 },
+  );
+
+  const fragments = await page.evaluate(() =>
+    [...document.querySelectorAll("table[data-table]")].map((table) => {
+      const pageBox = table.closest(".pagedjs_page_content")?.getBoundingClientRect();
+      const rect = table.getBoundingClientRect();
+      return {
+        table: table.getAttribute("data-table"),
+        page: table.closest(".pagedjs_page")?.getAttribute("data-page-number"),
+        outsideItsPage: !pageBox || rect.bottom - pageBox.bottom > 1 || pageBox.top - rect.top > 1,
+        withoutHeader: !table.querySelector("thead"),
+        withoutCaption: !table.querySelector("caption"),
+        withoutRows: !table.querySelector("tbody tr"),
+      };
+    }),
+  );
+
+  expect(fragments.length).toBeGreaterThan(0);
+  // A fragment spilling past its page box is clipped out of the PDF, and one
+  // arriving without a header, a caption or any rows is an artifact of the
+  // split rather than something a reader can use. Comparing whole rows rather
+  // than counts so a failure names the table and page.
+  expect(fragments.filter((fragment) => fragment.outsideItsPage)).toEqual([]);
+  expect(fragments.filter((fragment) => fragment.withoutHeader)).toEqual([]);
+  expect(fragments.filter((fragment) => fragment.withoutCaption)).toEqual([]);
+  expect(fragments.filter((fragment) => fragment.withoutRows)).toEqual([]);
+});
+
 test("envelope masonry primer download keeps its PDF filename", async ({ page }) => {
   await page.goto("/building_envelope/");
 

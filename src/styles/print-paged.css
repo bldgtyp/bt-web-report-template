@@ -163,6 +163,13 @@
 
 h2, h3, h4 { break-after: avoid; }
 
+/* A fragmentable table can otherwise leave its caption, or its caption and
+   column headers, stranded at the foot of the previous page with every row
+   overleaf. Avoiding a break after each in turn walks the break back to
+   before the table. */
+.btwr-table caption { break-after: avoid; }
+.btwr-table thead { break-after: avoid; }
+
 figure,
 .btwr-chart-frame,
 .btwr-metric-card,

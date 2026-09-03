@@ -78,7 +78,7 @@ const hasRows = rows.some((row) => row.cells.some((cell) => cell.value !== MISSI
   data.manifest.status === "pending" || !hasRows ? (
     <DataState state="pending" title="Mechanical inputs pending" message="No matching mechanical system rows are available yet." />
   ) : (
-    <div class="btwr-table-wrap">
+    <div class="btwr-table-wrap btwr-table-wrap--long">
       <table class="btwr-table btwr-variant-inputs-table" data-table="mechanical-inputs">
         <caption>
           <strong class="btwr-table__title">{caption}</strong>
