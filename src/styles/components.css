@@ -686,17 +686,6 @@
   word-break: keep-all;
 }
 
-.btwr-table .btwr-cell-muted {
-  display: block;
-  margin-top: 0.25rem;
-  color: var(--btwr-color-muted);
-  font-family: var(--btwr-font-label);
-  font-size: 0.69rem;
-  font-weight: 300;
-  letter-spacing: 0.02em;
-  line-height: 1.45;
-}
-
 .btwr-table .btwr-row-recommended th,
 .btwr-table .btwr-row-recommended td,
 .btwr-table .btwr-col-recommended {
