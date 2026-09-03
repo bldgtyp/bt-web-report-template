@@ -679,6 +679,11 @@
 .btwr-table .btwr-cell-number {
   text-align: right;
   white-space: normal;
+  /* Wrap between a value and its unit, never inside the digits. The base cell
+     rule sets `overflow-wrap: anywhere` for long room names, which left print
+     breaking "25,626 ft3" as "25,62" / "6 ft3". */
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 
 .btwr-table .btwr-cell-muted {
@@ -704,6 +709,24 @@
 .btwr-table tbody tr.btwr-row-recommended:hover td,
 .btwr-table tbody tr:hover .btwr-col-recommended {
   background: var(--btwr-table-recommended-hover-bg);
+}
+
+/* The room airflow schedule groups its rows into one tbody per ventilation
+   unit, each closed by that unit's total. */
+.btwr-room-airflow-table .btwr-cell-compact {
+  width: 4rem;
+}
+
+.btwr-room-airflow-table tbody:not(:last-child) tr:last-child th,
+.btwr-room-airflow-table tbody:not(:last-child) tr:last-child td {
+  border-bottom: 1px solid var(--btwr-color-border);
+}
+
+.btwr-room-airflow-table .btwr-row-total th,
+.btwr-room-airflow-table .btwr-row-total td {
+  background: var(--btwr-color-panel);
+  color: var(--btwr-color-heading);
+  font-weight: 700;
 }
 
 /* Variant-inputs tables mark the first cell of each run where an input changes

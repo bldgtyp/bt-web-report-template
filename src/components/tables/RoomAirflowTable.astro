@@ -1,5 +1,6 @@
 ---
 import DataState from "../DataState.astro";
+import type { CsvRow } from "../../data/csv";
 import type { ReportData } from "../../data/report-loader";
 import { cellNumber, cellText, formatValue } from "../../data/rows";
 
@@ -14,19 +15,51 @@ const {
   caption = "Room airflow schedule",
   captionSubtitle = "This table lists room-level ventilation airflow values from the PHPP ventilation schedule.",
 } = Astro.props;
-// Every room row is rendered. The schedule is a coordination document and the
-// Total row below covers all rooms, so any cap here would print a total the
-// visible rows do not add up to.
-const rows = data.roomAirflows.filter((row) => cellText(row, "row_type") === "room");
-const totals = data.roomAirflows.find((row) => cellText(row, "row_type") === "total");
+
+const unitOf = (row: CsvRow): string => cellText(row, "allocation_to_vent_unit");
+
+// Every room row is rendered. The schedule is a coordination document, and a
+// cap here would print totals the visible rows do not add up to.
+const roomRows = data.roomAirflows.filter((row) => cellText(row, "row_type") === "room");
+// The scrape emits one `total` row per ventilation unit, already ordered by
+// unit number with any unallocated rooms last, so that order drives the
+// groups. A unit appearing only on room rows still gets a group, without a
+// total, rather than dropping out of the schedule.
+const totalRows = data.roomAirflows.filter((row) => cellText(row, "row_type") === "total");
+const groups = [...new Set([...totalRows.map(unitOf), ...roomRows.map(unitOf)])]
+  .map((unit) => ({
+    unit,
+    rooms: roomRows.filter((row) => unitOf(row) === unit),
+    total: totalRows.find((row) => unitOf(row) === unit),
+  }))
+  .filter((group) => group.rooms.length > 0 || group.total !== undefined);
+
+// Both extra columns are carried only when they explain something. A
+// single-system project with every room at a quantity of one reads exactly as
+// it did before; a project whose totals cannot be reconciled without them
+// gets them. PHPP weights each room by its quantity before summing, which is
+// why a hood carried at 0.01 contributes almost nothing to its unit's total.
+const showUnits = groups.length > 1;
+const showQuantities = roomRows.some((row) => {
+  const quantity = cellNumber(row, "amount");
+  return quantity !== null && quantity !== 1;
+});
+const columnCount = 7 + (showUnits ? 1 : 0) + (showQuantities ? 1 : 0);
+
+function totalLabel(unit: string): string {
+  if (!showUnits) {
+    return "Total";
+  }
+  return unit ? `Total (Unit ${unit})` : "Total (Unallocated)";
+}
 ---
 
 {
-  data.manifest.status === "pending" || rows.length === 0 ? (
+  data.manifest.status === "pending" || roomRows.length === 0 ? (
     <DataState state="pending" title="Room airflow table pending" message="No room-airflow rows are available yet." />
   ) : (
     <div class="btwr-table-wrap btwr-table-wrap--long">
-      <table class="btwr-table" data-table="room-airflows">
+      <table class="btwr-table btwr-room-airflow-table" data-table="room-airflows">
         <caption>
           <strong class="btwr-table__title">{caption}</strong>
           <span class="btwr-table__subtitle">{captionSubtitle}</span>
@@ -34,6 +67,8 @@ const totals = data.roomAirflows.find((row) => cellText(row, "row_type") === "to
         <thead>
           <tr>
             <th>Room</th>
+            {showUnits && <th class="btwr-cell-number btwr-cell-compact">Vent. unit</th>}
+            {showQuantities && <th class="btwr-cell-number btwr-cell-compact">Qty</th>}
             <th class="btwr-cell-number">Area<small class="btwr-table__metric-unit">ft2</small></th>
             <th class="btwr-cell-number">Volume<small class="btwr-table__metric-unit">ft3</small></th>
             <th class="btwr-cell-number">Supply high<small class="btwr-table__metric-unit">cfm</small></th>
@@ -42,30 +77,45 @@ const totals = data.roomAirflows.find((row) => cellText(row, "row_type") === "to
             <th class="btwr-cell-number">Extract med<small class="btwr-table__metric-unit">cfm</small></th>
           </tr>
         </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr>
-              <th>{cellText(row, "room_name")}</th>
-              <td class="btwr-cell-number">{formatValue(cellNumber(row, "room_area_ft2"), "ft2")}</td>
-              <td class="btwr-cell-number">{formatValue(cellNumber(row, "room_volume_ft3"), "ft3")}</td>
-              <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_sup_high_cfm"), "cfm")}</td>
-              <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_eta_high_cfm"), "cfm")}</td>
-              <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_sup_med_cfm"), "cfm")}</td>
-              <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_eta_med_cfm"), "cfm")}</td>
-            </tr>
-          ))}
-          {totals && (
-            <tr>
-              <th>Total</th>
-              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "room_area_ft2"), "ft2")}</td>
-              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "room_volume_ft3"), "ft3")}</td>
-              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "v_sup_high_cfm"), "cfm")}</td>
-              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "v_eta_high_cfm"), "cfm")}</td>
-              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "v_sup_med_cfm"), "cfm")}</td>
-              <td class="btwr-cell-number">{formatValue(cellNumber(totals, "v_eta_med_cfm"), "cfm")}</td>
-            </tr>
-          )}
-        </tbody>
+        {groups.map((group) => (
+          <tbody>
+            {group.rooms.map((row) => (
+              <tr>
+                <th>{cellText(row, "room_name")}</th>
+                {showUnits && <td class="btwr-cell-number btwr-cell-compact">{unitOf(row) || "—"}</td>}
+                {showQuantities && (
+                  <td class="btwr-cell-number btwr-cell-compact">{formatValue(cellNumber(row, "amount"))}</td>
+                )}
+                <td class="btwr-cell-number">{formatValue(cellNumber(row, "room_area_ft2"), "ft2")}</td>
+                <td class="btwr-cell-number">{formatValue(cellNumber(row, "room_volume_ft3"), "ft3")}</td>
+                <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_sup_high_cfm"), "cfm")}</td>
+                <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_eta_high_cfm"), "cfm")}</td>
+                <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_sup_med_cfm"), "cfm")}</td>
+                <td class="btwr-cell-number">{formatValue(cellNumber(row, "v_eta_med_cfm"), "cfm")}</td>
+              </tr>
+            ))}
+            {group.total === undefined ? (
+              <tr class="btwr-row-total">
+                <th>{totalLabel(group.unit)}</th>
+                <td class="btwr-cell-compact" colspan={columnCount - 1}>
+                  Not reported by the ventilation schedule.
+                </td>
+              </tr>
+            ) : (
+              <tr class="btwr-row-total">
+                <th>{totalLabel(group.unit)}</th>
+                {showUnits && <td class="btwr-cell-number btwr-cell-compact" />}
+                {showQuantities && <td class="btwr-cell-number btwr-cell-compact" />}
+                <td class="btwr-cell-number">{formatValue(cellNumber(group.total, "room_area_ft2"), "ft2")}</td>
+                <td class="btwr-cell-number">{formatValue(cellNumber(group.total, "room_volume_ft3"), "ft3")}</td>
+                <td class="btwr-cell-number">{formatValue(cellNumber(group.total, "v_sup_high_cfm"), "cfm")}</td>
+                <td class="btwr-cell-number">{formatValue(cellNumber(group.total, "v_eta_high_cfm"), "cfm")}</td>
+                <td class="btwr-cell-number">{formatValue(cellNumber(group.total, "v_sup_med_cfm"), "cfm")}</td>
+                <td class="btwr-cell-number">{formatValue(cellNumber(group.total, "v_eta_med_cfm"), "cfm")}</td>
+              </tr>
+            )}
+          </tbody>
+        ))}
       </table>
     </div>
   )

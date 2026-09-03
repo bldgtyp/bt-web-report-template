@@ -21,19 +21,30 @@ function projectReportDate(): string | null {
   return project.report_date ?? null;
 }
 
-// The schedule must render every scraped room, so the expectation is the
-// scrape itself rather than a number copied into the test. Returns null when
-// the runtime has no scraped data (the template repo's own `data/` is
-// pending until `pnpm smoke:fixture` drops the Vandam fixture in).
-function scrapedRoomNames(): string[] | null {
+// The schedule must render every scraped room under its own ventilation
+// unit's total, so the expectation is the scrape itself rather than labels
+// copied into the test. Returns the row headings the table should carry, in
+// order, or null when the runtime has no scraped data (the template repo's
+// own `data/` is pending until `pnpm smoke:fixture` drops a scrape in).
+function scrapedScheduleRowHeadings(): string[] | null {
   const csvPath = resolve(process.cwd(), "data", "room-airflows.csv");
   if (!existsSync(csvPath)) {
     return null;
   }
-  const rooms = parseCsv(readFileSync(csvPath, "utf8"))
-    .filter((row) => row.row_type === "room")
-    .map((row) => String(row.room_name));
-  return rooms.length > 0 ? rooms : null;
+  const rows = parseCsv(readFileSync(csvPath, "utf8"));
+  const unitOf = (row: (typeof rows)[number]) => String(row.allocation_to_vent_unit ?? "");
+  const roomRows = rows.filter((row) => row.row_type === "room");
+  if (roomRows.length === 0) {
+    return null;
+  }
+  const totalRows = rows.filter((row) => row.row_type === "total");
+  const units = [...new Set([...totalRows.map(unitOf), ...roomRows.map(unitOf)])];
+  const multiUnit = units.length > 1;
+
+  return units.flatMap((unit) => [
+    ...roomRows.filter((row) => unitOf(row) === unit).map((row) => String(row.room_name)),
+    multiUnit ? (unit ? `Total (Unit ${unit})` : "Total (Unallocated)") : "Total",
+  ]);
 }
 
 const reportPages: { path: string; navLabel: string; heading: string | null }[] = [
@@ -226,7 +237,7 @@ test("energy model page renders available PHPP data state", async ({ page }) => 
 test("mechanical page renders starter plan cards after airflow table", async ({ page }) => {
   // Without scraped data the schedule renders a pending state rather than a
   // table, and there is no table for the cards to sit after.
-  test.skip(scrapedRoomNames() === null, "no scraped room-airflow data in data/");
+  test.skip(scrapedScheduleRowHeadings() === null, "no scraped room-airflow data in data/");
 
   await page.goto("/mechanical/");
 
@@ -251,20 +262,20 @@ test("mechanical page renders starter plan cards after airflow table", async ({ 
   expect(verticalOrder).toBe(true);
 });
 
-test("room airflow schedule lists every scraped room above its total", async ({ page }) => {
-  const rooms = scrapedRoomNames();
-  test.skip(rooms === null, "no scraped room-airflow data in data/");
+test("room airflow schedule groups every scraped room under its unit total", async ({ page }) => {
+  const expectedHeadings = scrapedScheduleRowHeadings();
+  test.skip(expectedHeadings === null, "no scraped room-airflow data in data/");
 
   await page.goto("/mechanical/");
 
   const rowHeadings = page.locator('[data-table="room-airflows"] tbody tr > th');
-  await expect(rowHeadings).toHaveText([...rooms!, "Total"]);
+  await expect(rowHeadings).toHaveText(expectedHeadings!);
 });
 
 test("print route paginates the room airflow schedule without dropping rows", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "Paged.js lays out to the page box, not the viewport");
-  const rooms = scrapedRoomNames();
-  test.skip(rooms === null, "no scraped room-airflow data in data/");
+  const expectedHeadings = scrapedScheduleRowHeadings();
+  test.skip(expectedHeadings === null, "no scraped room-airflow data in data/");
   // Paged.js lays out the whole report before anything is assertable.
   test.setTimeout(240_000);
 
@@ -293,7 +304,7 @@ test("print route paginates the room airflow schedule without dropping rows", as
     };
   });
 
-  expect(schedule.rowHeadings).toEqual([...rooms!, "Total"]);
+  expect(schedule.rowHeadings).toEqual(expectedHeadings!);
   // A continuation page without column headers, or a fragment spilling past
   // its page box, is how the schedule silently loses rows in the PDF.
   expect(schedule.fragmentsWithoutHeader).toBe(0);
