@@ -7,16 +7,17 @@ interface Props {
   data: ReportData;
   caption?: string;
   captionSubtitle?: string;
-  limit?: number;
 }
 
 const {
   data,
   caption = "Room airflow schedule",
   captionSubtitle = "This table lists room-level ventilation airflow values from the PHPP ventilation schedule.",
-  limit = 18,
 } = Astro.props;
-const rows = data.roomAirflows.filter((row) => cellText(row, "row_type") === "room").slice(0, limit);
+// Every room row is rendered. The schedule is a coordination document and the
+// Total row below covers all rooms, so any cap here would print a total the
+// visible rows do not add up to.
+const rows = data.roomAirflows.filter((row) => cellText(row, "row_type") === "room");
 const totals = data.roomAirflows.find((row) => cellText(row, "row_type") === "total");
 ---
 
@@ -24,7 +25,7 @@ const totals = data.roomAirflows.find((row) => cellText(row, "row_type") === "to
   data.manifest.status === "pending" || rows.length === 0 ? (
     <DataState state="pending" title="Room airflow table pending" message="No room-airflow rows are available yet." />
   ) : (
-    <div class="btwr-table-wrap">
+    <div class="btwr-table-wrap btwr-table-wrap--long">
       <table class="btwr-table" data-table="room-airflows">
         <caption>
           <strong class="btwr-table__title">{caption}</strong>

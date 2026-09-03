@@ -172,6 +172,14 @@ figure,
   break-inside: avoid;
 }
 
+/* A schedule longer than a page has to fragment, and Paged.js can only pick a
+   row boundary if the wrapper is neither a scroll container nor marked
+   unbreakable. `overflow-x: auto` earns its keep on the web, not in print. */
+.btwr-table-wrap--long {
+  overflow: visible;
+  break-inside: auto;
+}
+
 table thead   { display: table-header-group; }
 tr            { break-inside: avoid; }
 td, th        { break-inside: avoid; }

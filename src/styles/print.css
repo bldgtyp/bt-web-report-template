@@ -54,6 +54,13 @@
     break-inside: avoid;
   }
 
+  /* Schedules run past a page and have to fragment at a row boundary; a
+     scroll container cannot. See the same rule in print-paged.css. */
+  .btwr-table-wrap--long {
+    overflow: visible;
+    break-inside: auto;
+  }
+
   .btwr-table thead {
     display: table-header-group;
   }

@@ -1,5 +1,25 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+
+import { parseCsv } from "../src/data/csv";
+
+// The schedule must render every scraped room, so the expectation is the
+// scrape itself rather than a number copied into the test. Returns null when
+// the runtime has no scraped data (the template repo's own `data/` is
+// pending until `pnpm smoke:fixture` drops the Vandam fixture in).
+function scrapedRoomNames(): string[] | null {
+  const csvPath = resolve(process.cwd(), "data", "room-airflows.csv");
+  if (!existsSync(csvPath)) {
+    return null;
+  }
+  const rooms = parseCsv(readFileSync(csvPath, "utf8"))
+    .filter((row) => row.row_type === "room")
+    .map((row) => String(row.room_name));
+  return rooms.length > 0 ? rooms : null;
+}
 
 const reportPages = [
   { path: "/", navLabel: "Summary", heading: "Executive summary" },
@@ -196,6 +216,55 @@ test("mechanical page renders starter plan cards after airflow table", async ({ 
   });
 
   expect(verticalOrder).toBe(true);
+});
+
+test("room airflow schedule lists every scraped room above its total", async ({ page }) => {
+  const rooms = scrapedRoomNames();
+  test.skip(rooms === null, "no scraped room-airflow data in data/");
+
+  await page.goto("/mechanical/");
+
+  const rowHeadings = page.locator('[data-table="room-airflows"] tbody tr > th');
+  await expect(rowHeadings).toHaveText([...rooms!, "Total"]);
+});
+
+test("print route paginates the room airflow schedule without dropping rows", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "Paged.js lays out to the page box, not the viewport");
+  const rooms = scrapedRoomNames();
+  test.skip(rooms === null, "no scraped room-airflow data in data/");
+  // Paged.js lays out the whole report before anything is assertable.
+  test.setTimeout(240_000);
+
+  await page.goto("/print/");
+  await page.waitForFunction(
+    () => document.documentElement.getAttribute("data-paged-rendered") === "true",
+    null,
+    { timeout: 180_000 },
+  );
+
+  const schedule = await page.evaluate(() => {
+    const fragments = [...document.querySelectorAll<HTMLTableElement>('table[data-table="room-airflows"]')];
+    return {
+      rowHeadings: fragments.flatMap((fragment) =>
+        [...fragment.querySelectorAll("tbody tr > th")].map((cell) => cell.textContent?.trim() ?? ""),
+      ),
+      fragmentsWithoutHeader: fragments.filter((fragment) => !fragment.querySelector("thead")).length,
+      fragmentsOutsideTheirPage: fragments.filter((fragment) => {
+        const pageBox = fragment.closest(".pagedjs_page_content")?.getBoundingClientRect();
+        if (!pageBox) {
+          return true;
+        }
+        const rect = fragment.getBoundingClientRect();
+        return rect.bottom - pageBox.bottom > 1 || pageBox.top - rect.top > 1;
+      }).length,
+    };
+  });
+
+  expect(schedule.rowHeadings).toEqual([...rooms!, "Total"]);
+  // A continuation page without column headers, or a fragment spilling past
+  // its page box, is how the schedule silently loses rows in the PDF.
+  expect(schedule.fragmentsWithoutHeader).toBe(0);
+  expect(schedule.fragmentsOutsideTheirPage).toBe(0);
 });
 
 test("envelope masonry primer download keeps its PDF filename", async ({ page }) => {
