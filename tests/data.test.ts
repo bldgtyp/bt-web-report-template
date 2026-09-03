@@ -64,7 +64,9 @@ describe("loadReportData", () => {
       "phi_classic",
       "as_drawn",
     ]);
-    expect(data.roomAirflows).toHaveLength(29);
+    // 28 rooms plus one `total` row per allocation_to_vent_unit. The scrape
+    // grew a total row per unit when bldgtyp/bt-web-report-cli#1 landed.
+    expect(data.roomAirflows).toHaveLength(31);
     expect(
       data.variants.some(
         (row) =>
