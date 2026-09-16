@@ -1,0 +1,392 @@
+[
+  {
+    "id": "phi-classic",
+    "title": "PHI Passive House Classic",
+    "markLabel": "Certified Passive House, Passive House Institute",
+    "logo": "phi-new",
+    "sections": [
+      {
+        "heading": "Energy Demand",
+        "rows": [
+          { "label": "Heating Demand", "value": "≤ 4.75 kBtu/sf-yr (15 kWh/m²a)" },
+          { "label": "or Heating Load", "value": "≤ 3.17 Btu/hr-sf (10 W/m²)" },
+          {
+            "label": "Cooling + Dehumidification Demand",
+            "key": "narrative.certification.phi_cd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project in PHPP"
+          },
+          {
+            "label": "Renewable Primary Energy (PER) Demand",
+            "value": "≤ 19.02 kBtu/sf-yr (60 kWh/m²a)"
+          }
+        ]
+      },
+      {
+        "heading": "Airtightness",
+        "rows": [{ "label": "Blower Door Test Result (n50)", "value": "≤ 0.6 ACH50" }]
+      }
+    ],
+    "note": "The original PHI standard, with very low heating and cooling demand limits. In some climates these limits are impractical to reach."
+  },
+  {
+    "id": "phi-leb",
+    "title": "PHI Low Energy Building",
+    "markLabel": "PHI Low Energy Building",
+    "logo": "phi-leb",
+    "sections": [
+      {
+        "heading": "Energy Demand",
+        "rows": [
+          { "label": "Heating Demand", "value": "≤ 9.51 kBtu/sf-yr (30 kWh/m²a)" },
+          {
+            "label": "Cooling + Dehumidification Demand",
+            "key": "narrative.certification.phi_leb_cd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project in PHPP"
+          },
+          {
+            "label": "Renewable Primary Energy (PER) Demand",
+            "value": "≤ 23.77 kBtu/sf-yr (75 kWh/m²a)"
+          }
+        ]
+      },
+      {
+        "heading": "Airtightness",
+        "rows": [{ "label": "Blower Door Test Result (n50)", "value": "≤ 1.0 ACH50" }]
+      }
+    ],
+    "note": "Close to the Classic standard, with a higher heating demand limit and a higher airtightness limit. It suits smaller buildings and often lets the design team avoid high solar-gain glazing, which helps comfort and summer performance."
+  },
+  {
+    "id": "enerphit-component",
+    "title": "PHI EnerPHit, Component Method",
+    "markLabel": "EnerPHit Certified Retrofit, Passive House Institute",
+    "logo": "enerphit",
+    "sections": [
+      {
+        "heading": "Component Limits",
+        "rows": [
+          {
+            "label": "Wall/Roof U-Value, Exterior Insulation",
+            "key": "narrative.certification.enph_ag_ext_limit",
+            "unit": "Btu/hr-sf-F",
+            "fallback": "Set by climate zone in PHPP"
+          },
+          {
+            "label": "Wall U-Value, Interior Insulation",
+            "key": "narrative.certification.enph_ag_int_limit",
+            "unit": "Btu/hr-sf-F",
+            "fallback": "Set by climate zone in PHPP"
+          },
+          {
+            "label": "Ground-Contact U-Value",
+            "key": "narrative.certification.enph_bg_limit",
+            "unit": "Btu/hr-sf-F",
+            "fallback": "Set per project in PHPP"
+          },
+          {
+            "label": "Window U-Value, Installed",
+            "key": "narrative.certification.enph_uw_limit",
+            "unit": "Btu/hr-sf-F",
+            "fallback": "Set by climate zone in PHPP"
+          },
+          { "label": "Ventilation Heat Recovery", "value": "≥ 75%" }
+        ]
+      },
+      {
+        "heading": "Energy Demand",
+        "rows": [
+          {
+            "label": "Renewable Primary Energy (PER) Demand",
+            "key": "narrative.certification.enph_per_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project in PHPP"
+          }
+        ]
+      },
+      {
+        "heading": "Airtightness",
+        "rows": [{ "label": "Blower Door Test Result (n50)", "value": "≤ 1.0 ACH50" }]
+      }
+    ],
+    "note": "PHI's standard for existing buildings where the new-construction limits are not practical. Under the component method, each assembly, the windows, and the ventilation system meet limits set by the climate zone. A retrofit done in stages can be pre-certified with an EnerPHit Retrofit Plan."
+  },
+  {
+    "id": "enerphit-demand",
+    "title": "PHI EnerPHit, Energy Demand Method",
+    "markLabel": "EnerPHit Certified Retrofit, Passive House Institute",
+    "logo": "enerphit",
+    "sections": [
+      {
+        "heading": "Energy Demand",
+        "rows": [
+          {
+            "label": "Heating Demand",
+            "key": "narrative.certification.enph_hd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set by climate zone in PHPP"
+          },
+          {
+            "label": "Cooling + Dehumidification Demand",
+            "key": "narrative.certification.phi_cd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project in PHPP"
+          },
+          {
+            "label": "Renewable Primary Energy (PER) Demand",
+            "key": "narrative.certification.enph_per_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project in PHPP"
+          }
+        ]
+      },
+      {
+        "heading": "Airtightness",
+        "rows": [{ "label": "Blower Door Test Result (n50)", "value": "≤ 1.0 ACH50" }]
+      }
+    ],
+    "note": "The same retrofit standard, met through a whole-building heating demand limit set by the climate zone instead of limits on each component. A retrofit done in stages can be pre-certified with an EnerPHit Retrofit Plan."
+  },
+  {
+    "id": "phius-core-2024",
+    "title": "Phius CORE 2024",
+    "markLabel": "Phius CORE",
+    "logo": "phius-core",
+    "sections": [
+      {
+        "heading": "Energy Demand",
+        "rows": [
+          {
+            "label": "Annual Heating Demand Limit",
+            "key": "narrative.certification.phius_hd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project by the Phius Criteria Calculator"
+          },
+          {
+            "label": "Annual Cooling Demand Limit",
+            "key": "narrative.certification.phius_cd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project by the Phius Criteria Calculator"
+          },
+          {
+            "label": "Peak Heating Load Limit",
+            "key": "narrative.certification.phius_hl_limit",
+            "unit": "Btu/hr-sf",
+            "fallback": "Set per project by the Phius Criteria Calculator"
+          },
+          {
+            "label": "Peak Cooling Load Limit",
+            "key": "narrative.certification.phius_cl_limit",
+            "unit": "Btu/hr-sf",
+            "fallback": "Set per project by the Phius Criteria Calculator"
+          },
+          {
+            "label": "Net Source Energy Demand Limit",
+            "key": "narrative.certification.phius_nse_limit",
+            "unit": "kWh/person-yr",
+            "fallback": "Set per project by the Phius Criteria Calculator"
+          }
+        ]
+      },
+      {
+        "heading": "Airtightness",
+        "rows": [
+          {
+            "label": "Airtightness Limit",
+            "key": "narrative.certification.phius_cfm50_limit",
+            "unit": "cfm50/sf envelope",
+            "fallback": "≤ 0.06 cfm50/sf envelope (0.08 for non-combustible buildings of 5+ stories)"
+          }
+        ]
+      }
+    ],
+    "note": "Phius's main certification. Heating and cooling limits are calculated for each project from its climate, size, and occupancy, and the source energy target is set at a level many multifamily and non-residential buildings can reach."
+  },
+  {
+    "id": "phius-zero-2024",
+    "title": "Phius ZERO 2024",
+    "markLabel": "Phius ZERO",
+    "logo": "phius-zero",
+    "sections": [
+      {
+        "heading": "Energy Demand",
+        "rows": [
+          {
+            "label": "Annual Heating Demand Limit",
+            "key": "narrative.certification.phius_hd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project by the Phius Criteria Calculator"
+          },
+          {
+            "label": "Annual Cooling Demand Limit",
+            "key": "narrative.certification.phius_cd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project by the Phius Criteria Calculator"
+          },
+          {
+            "label": "Peak Heating Load Limit",
+            "key": "narrative.certification.phius_hl_limit",
+            "unit": "Btu/hr-sf",
+            "fallback": "Set per project by the Phius Criteria Calculator"
+          },
+          {
+            "label": "Peak Cooling Load Limit",
+            "key": "narrative.certification.phius_cl_limit",
+            "unit": "Btu/hr-sf",
+            "fallback": "Set per project by the Phius Criteria Calculator"
+          },
+          {
+            "label": "Net Source Energy Demand Limit",
+            "value": "≤ 0 kWh/person-yr",
+            "highlight": true
+          }
+        ]
+      },
+      {
+        "heading": "Airtightness",
+        "rows": [
+          {
+            "label": "Airtightness Limit",
+            "key": "narrative.certification.phius_cfm50_limit",
+            "unit": "cfm50/sf envelope",
+            "fallback": "≤ 0.06 cfm50/sf envelope (0.08 for non-combustible buildings of 5+ stories)"
+          }
+        ]
+      }
+    ],
+    "note": "The same as Phius CORE, except the building must also reach a net-zero source energy balance using on-site or off-site renewable energy."
+  },
+  {
+    "id": "phius-core-prescriptive-2024",
+    "title": "Phius CORE Prescriptive 2024",
+    "markLabel": "Phius CORE",
+    "logo": "phius-core",
+    "sections": [
+      {
+        "heading": "Requirements",
+        "rows": [
+          {
+            "label": "Envelope and Equipment",
+            "value": "Per the Phius prescriptive checklist for the climate zone"
+          },
+          { "label": "Renewable Energy Credit", "value": "None" }
+        ]
+      },
+      {
+        "heading": "Airtightness",
+        "rows": [{ "label": "Airtightness Limit", "value": "≤ 0.04 cfm50/sf envelope" }]
+      }
+    ],
+    "note": "A Phius CORE path that replaces the energy model with a checklist of envelope and equipment requirements. It carries a tighter airtightness limit and gives no credit for renewable energy."
+  },
+  {
+    "id": "phius-core-revive-2021",
+    "title": "Phius CORE REVIVE 2021",
+    "markLabel": "Phius CORE",
+    "logo": "phius-core",
+    "sections": [
+      {
+        "heading": "Energy Demand",
+        "rows": [
+          {
+            "label": "Annual Heating Demand Limit",
+            "key": "narrative.certification.phius_hd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project by the Phius 2021 Criteria Calculator"
+          },
+          {
+            "label": "Annual Cooling Demand Limit",
+            "key": "narrative.certification.phius_cd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project by the Phius 2021 Criteria Calculator"
+          },
+          {
+            "label": "Peak Heating Load Limit",
+            "key": "narrative.certification.phius_hl_limit",
+            "unit": "Btu/hr-sf",
+            "fallback": "Set per project by the Phius 2021 Criteria Calculator"
+          },
+          {
+            "label": "Peak Cooling Load Limit",
+            "key": "narrative.certification.phius_cl_limit",
+            "unit": "Btu/hr-sf",
+            "fallback": "Set per project by the Phius 2021 Criteria Calculator"
+          },
+          {
+            "label": "Net Source Energy Demand Limit",
+            "key": "narrative.certification.phius_nse_limit",
+            "unit": "kWh/person-yr",
+            "fallback": "Set per project by the Phius 2021 Criteria Calculator"
+          }
+        ]
+      },
+      {
+        "heading": "Airtightness",
+        "rows": [
+          {
+            "label": "Airtightness Limit",
+            "key": "narrative.certification.phius_cfm50_limit",
+            "unit": "cfm50/sf envelope",
+            "fallback": "≤ 0.06 cfm50/sf envelope (0.08 for non-combustible buildings of 5+ stories)"
+          }
+        ]
+      }
+    ],
+    "note": "Phius's retrofit certification for existing buildings. It uses the Phius 2021 criteria calculated for the project, with case-by-case allowances for thermal bridges and existing assemblies that cannot be corrected. Airtightness limits are the same as for new construction."
+  },
+  {
+    "id": "phius-zero-revive-2021",
+    "title": "Phius ZERO REVIVE 2021",
+    "markLabel": "Phius ZERO",
+    "logo": "phius-zero",
+    "sections": [
+      {
+        "heading": "Energy Demand",
+        "rows": [
+          {
+            "label": "Annual Heating Demand Limit",
+            "key": "narrative.certification.phius_hd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project by the Phius 2021 Criteria Calculator"
+          },
+          {
+            "label": "Annual Cooling Demand Limit",
+            "key": "narrative.certification.phius_cd_limit",
+            "unit": "kBtu/sf-yr",
+            "fallback": "Set per project by the Phius 2021 Criteria Calculator"
+          },
+          {
+            "label": "Peak Heating Load Limit",
+            "key": "narrative.certification.phius_hl_limit",
+            "unit": "Btu/hr-sf",
+            "fallback": "Set per project by the Phius 2021 Criteria Calculator"
+          },
+          {
+            "label": "Peak Cooling Load Limit",
+            "key": "narrative.certification.phius_cl_limit",
+            "unit": "Btu/hr-sf",
+            "fallback": "Set per project by the Phius 2021 Criteria Calculator"
+          },
+          {
+            "label": "Net Source Energy Demand Limit",
+            "value": "≤ 0 kWh/person-yr",
+            "highlight": true
+          }
+        ]
+      },
+      {
+        "heading": "Airtightness",
+        "rows": [
+          {
+            "label": "Airtightness Limit",
+            "key": "narrative.certification.phius_cfm50_limit",
+            "unit": "cfm50/sf envelope",
+            "fallback": "≤ 0.06 cfm50/sf envelope (0.08 for non-combustible buildings of 5+ stories)"
+          }
+        ]
+      }
+    ],
+    "note": "The Phius retrofit certification with a net-zero source energy requirement added."
+  }
+]

@@ -458,6 +458,37 @@ automatically — there is no second place to edit. See
 [`../bt-web-report-schemas/README.md`](../bt-web-report-schemas/README.md)
 for the full flow.
 
+### Certification pathways
+
+Choose the certification pathways shown in the report, their order, and an optional
+recommended pathway in `project.yaml`:
+
+```yaml
+certification_pathways:
+  show: [enerphit-component, phi-classic, phi-leb]
+  recommended: enerphit-component
+```
+
+If the block is omitted, the report shows `phi-classic`, `phi-leb`,
+`phius-core-2024`, and `phius-zero-2024` in that order, with no recommendation.
+
+| ID | Title | `narrative.certification` keys read |
+| --- | --- | --- |
+| `phi-classic` | PHI Passive House Classic | `phi_cd_limit` |
+| `phi-leb` | PHI Low Energy Building | `phi_leb_cd_limit` |
+| `enerphit-component` | PHI EnerPHit, Component Method | `enph_ag_ext_limit`, `enph_ag_int_limit`, `enph_bg_limit`, `enph_uw_limit`, `enph_per_limit` |
+| `enerphit-demand` | PHI EnerPHit, Energy Demand Method | `enph_hd_limit`, `phi_cd_limit`, `enph_per_limit` |
+| `phius-core-2024` | Phius CORE 2024 | `phius_hd_limit`, `phius_cd_limit`, `phius_hl_limit`, `phius_cl_limit`, `phius_nse_limit`, `phius_cfm50_limit` |
+| `phius-zero-2024` | Phius ZERO 2024 | `phius_hd_limit`, `phius_cd_limit`, `phius_hl_limit`, `phius_cl_limit`, `phius_cfm50_limit` |
+| `phius-core-prescriptive-2024` | Phius CORE Prescriptive 2024 | None |
+| `phius-core-revive-2021` | Phius CORE REVIVE 2021 | `phius_hd_limit`, `phius_cd_limit`, `phius_hl_limit`, `phius_cl_limit`, `phius_nse_limit`, `phius_cfm50_limit` |
+| `phius-zero-revive-2021` | Phius ZERO REVIVE 2021 | `phius_hd_limit`, `phius_cd_limit`, `phius_hl_limit`, `phius_cl_limit`, `phius_cfm50_limit` |
+
+Write bound limit values as bare numbers. The renderer appends the catalog unit. An
+unset value shows the pathway's fallback text and emits a build warning. The
+`recommended` ID controls the badge and default-open panel; it is independent of the
+free-prose `narrative.certification.target` value, so keep the two consistent.
+
 ## Data States
 
 The committed seed content is intentionally pending-data:

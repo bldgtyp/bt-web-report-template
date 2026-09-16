@@ -1,101 +1,13 @@
 ---
-import logoPhiLeb from "../assets/certifications/logo-phi-leb.png";
-import logoPhiNew from "../assets/certifications/logo-phi-new.png";
-import logoPhiusCore from "../assets/certifications/logo-phius-core.png";
-import logoPhiusZero from "../assets/certifications/logo-phius-zero.png";
+import { resolveCertificationPathwayRowValue } from "../data/certification-pathways";
+import type { TemplateReportData } from "../data/report";
 
-const certifications = [
-  {
-    title: "PHI New Construction",
-    mark: "phi-passive",
-    markLabel: "Certified Passive House Passive House Institute",
-    logo: logoPhiNew,
-    sections: [
-      {
-        heading: "Energy Demand",
-        rows: [
-          ["Yearly Heating Demand", "4.75 kBtu/sf-yr"],
-          ["Yearly Sensible Cooling Demand", "4.75 kBtu/sf-yr"],
-          ["Yearly Latent Cooling Demand", "+0.63 kBtu/sf-yr"],
-          ["Primary Energy Demand", "38 kBtu/sf-yr"],
-        ],
-      },
-      {
-        heading: "Airtightness",
-        rows: [["Blower Door Test Result", "0.6 ACH@50"]],
-      },
-    ],
-    note: "This is the original PHI certification level, with very low levels of heating and cooling energy consumption. Note that for some locations and climates the threshold levels for this certification may be impractical or unfeasible.",
-  },
-  {
-    title: "PHI Low Energy Building",
-    mark: "phi-leb",
-    markLabel: "PHI Low Energy Building",
-    logo: logoPhiLeb,
-    sections: [
-      {
-        heading: "Energy Demand",
-        rows: [
-          ["Yearly Heating Demand", "9.50 kBtu/sf-yr"],
-          ["Yearly Sensible Cooling Demand", "9.50 kBtu/sf-yr"],
-          ["Yearly Latent Cooling Demand", "+0.63 kBtu/sf-yr"],
-          ["Primary Energy Demand", "38 kBtu/sf-yr"],
-        ],
-      },
-      {
-        heading: "Airtightness",
-        rows: [["Blower Door Test Result", "1.0 ACH@50"]],
-      },
-    ],
-    note: "This PHI certification level is very similar to the 'classic' new-construction but with a higher annual heating energy demand limit, and a slightly higher total air-change-rate than the 'classic'. This certification is especially well suited to smaller (single-family, etc.) buildings and often allows the design team to avoid the use of high solar-heat-gain glazing, which improves occupant comfort and summer-season performance.",
-  },
-  {
-    title: "Phius CORE 2024",
-    mark: "phius-core",
-    markLabel: "Phius CORE",
-    logo: logoPhiusCore,
-    sections: [
-      {
-        heading: "Energy Demand",
-        rows: [
-          ["Annual Heating Demand Limit", "7.3 kBtu/sf-yr"],
-          ["Annual Cooling Demand Limit", "6.9 kBtu/sf-yr"],
-          ["Peak Heating Load Limit", "5.4 Btu/hr-sf"],
-          ["Peak Cooling Load Limit", "2.5 Btu/hr-sf"],
-          ["Net Source Energy Demand Limit", "5,400 kWh/person-yr"],
-        ],
-      },
-      {
-        heading: "Airtightness",
-        rows: [["Airtightness Limit", "0.06 cfm/ft-envelope at 50 Pa"]],
-      },
-    ],
-    note: "This is the Phius certification level recommended for this building. This certification prioritizes low levels of heating and cooling energy use, and calibrates the Source Energy target to feasible level for many multi-family and non-residential buildings",
-  },
-  {
-    title: "Phius CORE Zero 2024",
-    mark: "phius-zero",
-    markLabel: "Phius ZERO",
-    logo: logoPhiusZero,
-    sections: [
-      {
-        heading: "Energy Demand",
-        rows: [
-          ["Annual Heating Demand Limit", "7.3 kBtu/sf-yr"],
-          ["Annual Cooling Demand Limit", "6.9 kBtu/sf-yr"],
-          ["Peak Heating Load Limit", "5.4 Btu/hr-sf"],
-          ["Peak Cooling Load Limit", "2.5 Btu/hr-sf"],
-          ["Net Source Energy Demand Limit", "0 kWh/person-yr", "highlight"],
-        ],
-      },
-      {
-        heading: "Airtightness",
-        rows: [["Airtightness Limit", "0.06 cfm/ft-envelope at 50 Pa"]],
-      },
-    ],
-    note: "This certification level is similar to the Phius CORE except that buildings meeting this certification must demonstrate a 'net zero' source energy balance.",
-  },
-];
+interface Props {
+  report: TemplateReportData;
+  interactive?: boolean;
+}
+
+const { report, interactive = true } = Astro.props;
 ---
 
 <div class="btwr-ph-certifications">
@@ -114,18 +26,39 @@ const certifications = [
 
   <div class="btwr-ph-certifications__accordion" aria-label="Passive House certification pathways">
     {
-      certifications.map((item) => (
-        <details class="btwr-ph-certifications__item" name="passive-house-certification">
+      report.certificationPathways.map((item) => (
+        <details
+          class="btwr-ph-certifications__item"
+          name={interactive ? "passive-house-certification" : undefined}
+          open={item.recommended || !interactive}
+        >
           <summary>
-            <span>- {item.title}</span>
+            <span class="btwr-ph-certifications__summary-label">
+              <span>- {item.title}</span>
+              {item.recommended && (
+                <span class="btwr-ph-certifications__badge">Recommended for this project</span>
+              )}
+            </span>
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="m6 9 6 6 6-6" />
             </svg>
           </summary>
           <div class="btwr-ph-certifications__panel">
             <div class="btwr-ph-certifications__limits">
-              <div class:list={["btwr-ph-certifications__mark", `btwr-ph-certifications__mark--${item.mark}`]} aria-label={item.markLabel}>
-                <img src={item.logo.src} width={item.logo.width} height={item.logo.height} alt={item.markLabel} loading="lazy" />
+              <div
+                class:list={[
+                  "btwr-ph-certifications__mark",
+                  `btwr-ph-certifications__mark--${item.logo}`,
+                ]}
+                aria-label={item.markLabel}
+              >
+                <img
+                  src={item.logoImage.src}
+                  width={item.logoImage.width}
+                  height={item.logoImage.height}
+                  alt={item.markLabel}
+                  loading="lazy"
+                />
               </div>
               <table class="btwr-table btwr-ph-certifications__table">
                 <caption>
@@ -138,10 +71,10 @@ const certifications = [
                         <tr class="btwr-ph-certifications__table-heading">
                           <th colspan="2" scope="colgroup">{section.heading}</th>
                         </tr>
-                        {section.rows.map(([label, value, tone]) => (
-                          <tr class:list={[tone === "highlight" && "is-highlighted"]}>
-                            <th scope="row">{label}</th>
-                            <td>{value}</td>
+                        {section.rows.map((row) => (
+                          <tr class:list={[row.highlight && "is-highlighted"]}>
+                            <th scope="row">{row.label}</th>
+                            <td>{resolveCertificationPathwayRowValue(report.project, row)}</td>
                           </tr>
                         ))}
                       </>

@@ -101,6 +101,21 @@ assert.deepEqual(withCustomPages.custom_pages, [
   { slug: "design-notes", label: "Design Notes" },
 ]);
 
+const withCertificationPathways = parseProjectYaml(
+  toYaml({
+    ...baseProject,
+    certification_pathways: {
+      show: ["enerphit-component", "phi-classic"],
+      recommended: "enerphit-component",
+    },
+  }),
+  "project.yaml",
+);
+assert.deepEqual(withCertificationPathways.certification_pathways, {
+  show: ["enerphit-component", "phi-classic"],
+  recommended: "enerphit-component",
+});
+
 for (const custom_pages of [
   [
     { slug: "resilience", label: "Resilience" },
@@ -119,7 +134,12 @@ const withNarrative = parseProjectYaml(
   toYaml({
     ...baseProject,
     narrative: {
-      certification: { target: "EnerPHit by Component", ph_ach_limit: "0.8" },
+      certification: {
+        target: "EnerPHit by Component",
+        ph_ach_limit: "0.8",
+        phi_cd_limit: "5.2",
+        phi_leb_cd_limit: "10.0",
+      },
       co2: { epa_subgrid_name: "NY (NYCW)", taget_co2_per_person: "4.0" },
       mechanical: { erv: { manufacturer_name: "Zehnder America" } },
       user_defined: { cad_received_date: "May 1, 2026" },
@@ -128,6 +148,8 @@ const withNarrative = parseProjectYaml(
   "project.yaml",
 );
 assert.equal(withNarrative.narrative.certification.target, "EnerPHit by Component");
+assert.equal(withNarrative.narrative.certification.phi_cd_limit, "5.2");
+assert.equal(withNarrative.narrative.certification.phi_leb_cd_limit, "10.0");
 assert.equal(withNarrative.narrative.co2.epa_subgrid_name, "NY (NYCW)");
 assert.equal(withNarrative.narrative.co2.taget_co2_per_person, "4.0");
 assert.equal(withNarrative.narrative.mechanical.erv.manufacturer_name, "Zehnder America");

@@ -1,8 +1,16 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
+import {
+  DEFAULT_CERTIFICATION_PATHWAY_IDS,
+  resolveCertificationPathwaySelection,
+} from "../src/data/certification-pathway-selection.mjs";
 import { readProjectFile, projectPathFromRoot } from "../src/data/project-schema.mjs";
 
+const certificationPathwayCatalog = JSON.parse(
+  fs.readFileSync(new URL("../src/data/certification-pathways.json", import.meta.url), "utf8"),
+);
+const certificationPathwayIds = certificationPathwayCatalog.map(({ id }) => id);
 // Which .mdx files a project ships is up to the project — the renderer globs
 // each directory and renders what it finds. So this validates the two things
 // that are still structurally required, not a section inventory.
@@ -25,6 +33,14 @@ const REQUIRED_SECTION_DIRS = [
 ];
 
 const REQUIRED_PACKAGE_SCRIPTS = ["dev:editor", "build:editor", "check:editor"];
+
+export function validateCertificationPathwaySelection(config) {
+  resolveCertificationPathwaySelection(
+    config,
+    certificationPathwayIds,
+    DEFAULT_CERTIFICATION_PATHWAY_IDS,
+  );
+}
 
 function requireFile(root, relativePath) {
   if (!fs.existsSync(new URL(relativePath, root))) {
@@ -131,6 +147,7 @@ function findFirstMdx(directory, relativeDir) {
 export async function validateProjectRoot(rootPath = process.cwd()) {
   const root = pathToFileURL(`${rootPath}/`);
   const project = await readProjectFile(projectPathFromRoot(rootPath));
+  validateCertificationPathwaySelection(project.certification_pathways);
   for (const sectionFile of REQUIRED_SECTION_FILES) {
     requireFile(root, sectionFile);
   }
