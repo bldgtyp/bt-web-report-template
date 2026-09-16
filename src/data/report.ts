@@ -1,13 +1,19 @@
 import { loadReportData, type ReportData } from "./report-loader";
 
+import {
+  resolveCertificationPathways,
+  type ResolvedCertificationPathway,
+} from "./certification-pathways";
 import { loadProjectConfig, manifestProject, projectDataDir, type ProjectConfig } from "./project";
 
 export interface TemplateReportData extends ReportData {
   project: ProjectConfig;
+  certificationPathways: ResolvedCertificationPathway[];
 }
 
 export async function loadTemplateReportData(root = process.cwd()): Promise<TemplateReportData> {
   const project = await loadProjectConfig(root);
+  const certificationPathways = resolveCertificationPathways(project);
   const report = await loadReportData(projectDataDir(project, root));
   if (
     project.recommended_variant_id &&
@@ -27,6 +33,7 @@ export async function loadTemplateReportData(root = process.cwd()): Promise<Temp
 
   return {
     ...report,
+    certificationPathways,
     variantOrder,
     project,
     manifest: {

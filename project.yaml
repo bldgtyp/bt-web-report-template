@@ -11,6 +11,9 @@ target_standard: "Passive House"
 certification_program: "Design analysis only"
 certification_path: "Not submitted"
 recommended_variant_id: "enerphit_by_component"
+certification_pathways:
+  show: [enerphit-component, phi-classic, phi-leb, phius-core-2024, phius-zero-2024]
+  recommended: enerphit-component
 building:
   address: "123 Example Street"
   city: "Brooklyn"

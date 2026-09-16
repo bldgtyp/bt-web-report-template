@@ -5,7 +5,9 @@ import { projectPathFromRoot, readProjectFile } from "./project-schema.mjs";
 export interface CertificationNarrative {
   target?: string | null;
   ph_ach_limit?: string | null;
+  phi_cd_limit?: string | null;
   phi_lcd_limit?: string | null;
+  phi_leb_cd_limit?: string | null;
   enph_hd_limit?: string | null;
   enph_per_limit?: string | null;
   enph_bg_limit?: string | null;
@@ -83,6 +85,11 @@ export interface CustomPageConfig {
   label: string;
 }
 
+export interface CertificationPathwaysConfig {
+  show: string[];
+  recommended?: string | null;
+}
+
 export interface ProjectConfig {
   schema_version: string;
   slug: string;
@@ -119,6 +126,7 @@ export interface ProjectConfig {
       allowed_emails: string[];
     };
   };
+  certification_pathways?: CertificationPathwaysConfig | null;
   custom_pages?: CustomPageConfig[];
   narrative: Narrative;
 }

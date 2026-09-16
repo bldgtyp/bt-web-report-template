@@ -5,7 +5,10 @@ import { pathToFileURL } from "node:url";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { validateCustomPageContent } from "../scripts/validate-project.mjs";
+import {
+  validateCertificationPathwaySelection,
+  validateCustomPageContent,
+} from "../scripts/validate-project.mjs";
 
 const roots: string[] = [];
 
@@ -73,5 +76,13 @@ describe("validateCustomPageContent", () => {
     expect(() =>
       validateCustomPageContent(root, [{ slug: "resilience", label: "Resilience" }]),
     ).toThrow(/nested custom page MDX is not supported: content\/custom\/resilience\/nested\/details.mdx/);
+  });
+});
+
+describe("validateCertificationPathwaySelection", () => {
+  it("rejects an invalid selection through the project validation hook", () => {
+    expect(() => validateCertificationPathwaySelection({ show: ["not-a-pathway"] })).toThrow(
+      /Unknown certification pathway ID "not-a-pathway"/,
+    );
   });
 });
