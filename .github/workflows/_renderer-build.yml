@@ -7,16 +7,16 @@ name: Renderer build (reusable)
 # Cascade-resistance principles (every change here is in service of one of these):
 #
 # 1. Schema validation reads from a sibling checkout of bt-web-report-schemas,
-#    NOT from the GitHub Packages tarball. New schema fields land on `main`
+#    NOT from the npm registry tarball. New schema fields land on `main`
 #    immediately; consumers never wait for a publish to validate.
 #
 # 2. The schemas npm package is still needed for `pnpm install` (Tina helpers).
-#    If the renderer's pinned version isn't on GitHub Packages yet, we POLL
+#    If the renderer's pinned version isn't on public npm yet, we POLL
 #    until it lands instead of failing. Combined with the schemas repo's
 #    auto-publish-on-version-bump workflow, CI can never race ahead of the publish.
 #
 # 3. Every step that touches an external network or API (Cloudflare, the npm
-#    registry, GitHub Packages, git checkouts) is wrapped in retry-with-backoff
+#    registry, git checkouts) is wrapped in retry-with-backoff
 #    via scripts/retry.sh. Cloudflare returning a 5xx on asset upload (it does,
 #    regularly) no longer fails the whole pipeline.
 #

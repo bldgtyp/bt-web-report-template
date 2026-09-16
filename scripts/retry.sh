@@ -2,7 +2,7 @@
 # Run a command with exponential backoff retries.
 #
 # Use for any step in CI that hits a network or external API (Cloudflare,
-# GitHub Packages, npm registry, etc.). Transient 5xx / DNS / rate-limit
+# npm registry, etc.). Transient 5xx / DNS / rate-limit
 # failures should not fail the whole pipeline — they should retry.
 #
 # Usage:
