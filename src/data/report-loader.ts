@@ -10,6 +10,7 @@ export type ReportDataKey =
   | "climateMonthly"
   | "demandDetail"
   | "energy"
+  | "envelopeAreas"
   | "roomAirflows"
   | "variants";
 
@@ -21,6 +22,7 @@ export interface ReportData {
   climateMonthly: CsvRow[];
   demandDetail: CsvRow[];
   energy: CsvRow[];
+  envelopeAreas: CsvRow[];
   roomAirflows: CsvRow[];
   variants: CsvRow[];
 }
@@ -31,6 +33,7 @@ const CSV_FILES: Record<ReportDataKey, string> = {
   climateMonthly: "climate-monthly.csv",
   demandDetail: "demand-detail.csv",
   energy: "energy.csv",
+  envelopeAreas: "envelope-areas.csv",
   roomAirflows: "room-airflows.csv",
   variants: "variants.csv",
 };

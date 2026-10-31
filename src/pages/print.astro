@@ -9,6 +9,7 @@ import AirtightnessChart from "../components/sections/AirtightnessChart.astro";
 import CertificationThresholdsChart from "../components/sections/CertificationThresholdsChart.astro";
 import ClimateDataChart from "../components/sections/ClimateDataChart.astro";
 import Co2EmissionsPanel from "../components/sections/Co2EmissionsPanel.astro";
+import EnvelopeHeatLossChart from "../components/sections/EnvelopeHeatLossChart.astro";
 import FreshAirFlowRatesExtras from "../components/sections/FreshAirFlowRatesExtras.astro";
 import ModelGeometryExtras from "../components/sections/ModelGeometryExtras.astro";
 import ModelVariantsTables from "../components/sections/ModelVariantsTables.astro";
@@ -44,6 +45,7 @@ const coreExtras: Record<string, SectionExtras> = {
   "climate-data": { Children: ClimateDataChart },
   "passive-house-certifications": { Children: PassiveHouseCertificationsInfo },
   "recommended-assemblies": { Children: AssemblyCards },
+  "envelope-heat-loss": { Children: EnvelopeHeatLossChart },
   "building-airtightness": { Children: AirtightnessChart },
   aerobarrier: { Before: AeroBarrierHero },
   "window-thermal-comfort": { Before: WindowThermalComfortHero },

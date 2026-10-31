@@ -9,6 +9,7 @@ project replaces or adds the Phase 1 files:
 - `variants.csv`
 - `climate-monthly.csv`
 - `room-airflows.csv`
+- `envelope-areas.csv`
 - `building-metrics.csv`
 - `certification.csv`
 - `energy.csv`

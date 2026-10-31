@@ -51,6 +51,7 @@ describe("loadReportData", () => {
     expect(data.certification).toHaveLength(85);
     expect(data.energy).toHaveLength(410);
     expect(data.variants).toHaveLength(870);
+    expect(data.envelopeAreas).toHaveLength(7);
   });
 
   it("loads the Linde secondary fixture", async () => {
@@ -67,6 +68,7 @@ describe("loadReportData", () => {
     // 28 rooms plus one `total` row per allocation_to_vent_unit. The scrape
     // grew a total row per unit when bldgtyp/bt-web-report-cli#1 landed.
     expect(data.roomAirflows).toHaveLength(31);
+    expect(data.envelopeAreas).toHaveLength(11);
     expect(
       data.variants.some(
         (row) =>
