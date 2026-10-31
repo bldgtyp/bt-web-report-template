@@ -148,6 +148,43 @@ const faviconHref =
           </nav>
         </details>
       </div>
+      <script is:inline>
+        // Collapse the page links into the menu when the full nav would squeeze
+        // the project name. Measures real content, so it holds for any number of
+        // pages or name length. Runs inline so the first paint is already right.
+        (function () {
+          var masthead = document.currentScript.previousElementSibling;
+          var meta = masthead.querySelector(".btwr-masthead__meta");
+          var nav = masthead.querySelector(".btwr-masthead__nav");
+          if (!meta || !nav) {
+            return;
+          }
+          function overflows(el) {
+            return el.scrollWidth > el.clientWidth + 1;
+          }
+          function fit() {
+            masthead.removeAttribute("data-nav");
+            var squeezed =
+              overflows(masthead) ||
+              overflows(meta) ||
+              Array.prototype.some.call(meta.querySelectorAll("span"), overflows);
+            if (squeezed) {
+              masthead.setAttribute("data-nav", "compact");
+            }
+          }
+          fit();
+          if (window.ResizeObserver) {
+            var frame = 0;
+            new ResizeObserver(function () {
+              cancelAnimationFrame(frame);
+              frame = requestAnimationFrame(fit);
+            }).observe(masthead);
+          }
+          if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(fit);
+          }
+        })();
+      </script>
 
       {
         showHero && (
