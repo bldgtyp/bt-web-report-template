@@ -3,6 +3,7 @@ import AssemblyCards from "../../components/AssemblyCards.astro";
 import ReportSectionList from "../../components/ReportSectionList.astro";
 import AeroBarrierHero from "../../components/sections/AeroBarrierHero.astro";
 import AirtightnessChart from "../../components/sections/AirtightnessChart.astro";
+import EnvelopeHeatLossChart from "../../components/sections/EnvelopeHeatLossChart.astro";
 import { reportPageOrderFor, reportPages } from "../../data/pages";
 import { envelopeSections } from "../../data/report-sections";
 import { tocItemsFromSections, type SectionExtras } from "../../data/sections";
@@ -22,6 +23,7 @@ const tocItems = tocItemsFromSections(sections);
 // the archetype, and deleting its file removes the section entirely.
 const extras: Record<string, SectionExtras> = {
   "recommended-assemblies": { Children: AssemblyCards },
+  "envelope-heat-loss": { Children: EnvelopeHeatLossChart },
   "building-airtightness": { Children: AirtightnessChart },
   aerobarrier: { Before: AeroBarrierHero },
 };

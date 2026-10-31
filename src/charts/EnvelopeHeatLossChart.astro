@@ -1,0 +1,279 @@
+---
+import DataState from "../components/DataState.astro";
+import type { ReportData } from "../data/report-loader";
+import { formatValue, variantColorMap } from "../data/rows";
+import { recommendedVariant } from "../data/variants";
+import { linearAxis } from "./chart-axis";
+import { envelopeHeatLoss, heatLossAtR, rValueAtHeatLoss } from "./envelope-heat-loss";
+
+interface Props {
+  data: ReportData;
+  title?: string;
+}
+
+const { data, title = "Winter Heat Loss due to Envelope Transmission" } = Astro.props;
+const recommended = recommendedVariant(data.variantOrder) ?? data.variantOrder[0];
+const result = recommended
+  ? envelopeHeatLoss({
+      areas: data.envelopeAreas,
+      variants: data.variants,
+      variantOrder: data.variantOrder,
+      gtVariantId: recommended.id,
+    })
+  : null;
+const hasInputs = data.manifest.status !== "pending" && result !== null && result.series.length > 0;
+
+const chartWidth = 760;
+const legendRowHeight = 18;
+const legendRows = Math.ceil(data.variantOrder.length / 3);
+// The right margin holds the curve labels: each curve is named at its right
+// end, so a family of nested hyperbolas needs no in-plot annotation.
+const margin = { top: 34, right: 136, bottom: 64 + legendRows * legendRowHeight, left: 84 };
+const chartHeight = 500 + legendRows * legendRowHeight;
+const plotWidth = chartWidth - margin.left - margin.right;
+const plotHeight = chartHeight - margin.top - margin.bottom;
+
+const series = result?.series ?? [];
+const markers = series.flatMap((entry) => entry.markers);
+const maxMarkerR = Math.max(...markers.map((marker) => marker.rValue), 0);
+const maxMarkerLoss = Math.max(...markers.map((marker) => marker.heatLoss), 0);
+// Clip at the worst modeled R-value rather than the R-5 end of the curves, or
+// the largest wall flattens every other assembly onto the x-axis.
+const yAxis = linearAxis(maxMarkerLoss * 1.5, 6);
+const yMax = yAxis.max > 0 ? yAxis.max : 1;
+const xMax = Math.max(60, Math.ceil((maxMarkerR * 1.15) / 10) * 10);
+const xTicks = Array.from({ length: xMax / 10 + 1 }, (_, index) => index * 10);
+const x = (rValue: number) => margin.left + (rValue / xMax) * plotWidth;
+const y = (heatLoss: number) => margin.top + plotHeight - (heatLoss / yMax) * plotHeight;
+
+interface Curve {
+  fieldId: string;
+  label: string;
+  path: string;
+  endY: number;
+  labelY: number;
+}
+
+// Labels sit in a ladder beside the plot: lowest curve first, each slot pushed
+// up just far enough to clear the one below it, so leaders never cross.
+const labelSpacing = 13;
+const plotBottom = margin.top + plotHeight;
+const curvesByEnd = [...series].sort((a, b) => heatLossAtR(a.areaGt, xMax) - heatLossAtR(b.areaGt, xMax));
+let previousSlot = Number.POSITIVE_INFINITY;
+const curves: Curve[] = curvesByEnd.map((entry) => {
+  const rStart = Math.max(1, rValueAtHeatLoss(entry.areaGt, yMax));
+  const points: string[] = [];
+  for (let rValue = rStart; rValue < xMax; rValue += 1) {
+    points.push(`${x(rValue).toFixed(2)} ${y(heatLossAtR(entry.areaGt, rValue)).toFixed(2)}`);
+  }
+  const endY = y(heatLossAtR(entry.areaGt, xMax));
+  points.push(`${x(xMax).toFixed(2)} ${endY.toFixed(2)}`);
+  const slotY = Math.min(endY, previousSlot - labelSpacing, plotBottom - 4);
+  previousSlot = slotY;
+  return { fieldId: entry.fieldId, label: entry.label, path: `M ${points.join(" L ")}`, endY, labelY: slotY };
+});
+const labelLeaderX = margin.left + plotWidth + 10;
+
+// Thick span along each curve from the first variant's R-value to the
+// recommended variant's: the improvement the report is arguing for.
+const firstVariantId = data.variantOrder[0]?.id;
+const spans = series.flatMap((entry) => {
+  const from = entry.markers.find((marker) => marker.variantId === firstVariantId);
+  const to = entry.markers.find((marker) => marker.variantId === recommended?.id);
+  if (!from || !to || from.rValue === to.rValue) {
+    return [];
+  }
+  const [rLow, rHigh] = from.rValue < to.rValue ? [from.rValue, to.rValue] : [to.rValue, from.rValue];
+  const points: string[] = [];
+  for (let rValue = rLow; rValue < rHigh; rValue += 0.5) {
+    points.push(`${x(rValue).toFixed(2)} ${y(heatLossAtR(entry.areaGt, rValue)).toFixed(2)}`);
+  }
+  points.push(`${x(rHigh).toFixed(2)} ${y(heatLossAtR(entry.areaGt, rHigh)).toFixed(2)}`);
+  return [{ fieldId: entry.fieldId, path: `M ${points.join(" L ")}` }];
+});
+
+const variantColors = variantColorMap(data.variantOrder);
+const recommendedId = recommended?.id;
+const markerFill = (variantId: string) =>
+  variantId === recommendedId ? "var(--btwr-chart-recommended)" : variantColors.get(variantId);
+const legendColumnWidth = (chartWidth - margin.left - 26) / 3;
+const legendTop = margin.top + plotHeight + 58;
+const yGridLines = yAxis.ticks.filter((tick) => tick > 0);
+const xGridLines = xTicks.filter((tick) => tick > 0);
+
+// Table: one row per assembly, each variant column shows R-value over heat loss.
+const tableRows = series.map((entry) => ({
+  fieldId: entry.fieldId,
+  label: entry.label,
+  areaFt2: entry.areaFt2,
+  cells: data.variantOrder.map((variant) => entry.markers.find((marker) => marker.variantId === variant.id) ?? null),
+}));
+const totals = data.variantOrder.map((variant) =>
+  series.reduce((sum, entry) => sum + (entry.markers.find((marker) => marker.variantId === variant.id)?.heatLoss ?? 0), 0),
+);
+const totalAreaFt2 = series.reduce((sum, entry) => sum + entry.areaFt2, 0);
+---
+
+{
+  !hasInputs ? (
+    <DataState
+      state="pending"
+      title="Envelope heat-loss chart pending"
+      message="Assembly areas or variant R-values are not available yet. Run the PHPP scrape to populate the chart."
+    />
+  ) : (
+    <div class="btwr-envelope-heat-loss" data-series-scope>
+      <figure class="btwr-chart-frame btwr-envelope-heat-loss__chart" data-chart="envelope-heat-loss">
+        <div class="btwr-chart-frame__header">
+          <h3>{title}</h3>
+          <p class="btwr-chart-frame__subtitle">
+            Each dashed curve is one assembly at its modeled area. Markers show the R-value modeled in each variant.
+          </p>
+          <ul class="btwr-envelope-heat-loss__inputs">
+            <li>Heat loss = area × U-value × Gt, with U = 5.678 / R.</li>
+            <li>
+              Gt is the heating-season temperature difference from {recommended?.name}: {formatValue(result?.gtA ?? null)} kKh/a
+              for surfaces against outdoor air (walls, roofs, exposed floors) and {formatValue(result?.gtB ?? null)} kKh/a for
+              surfaces against the ground (basement walls, slabs).
+            </li>
+            <li>Areas are the PHPP Areas worksheet surfaces summed per assembly; an assembly that is partly below grade uses each Gt for its own share.</li>
+            {result?.excluded.length ? <li>Not plotted (no outdoor-air or ground exposure): {result.excluded.join(", ")}.</li> : null}
+            {result?.unmatched.length ? <li>No variant R-value found for: {result.unmatched.join(", ")}.</li> : null}
+          </ul>
+        </div>
+        <div class="btwr-chart-frame__plot">
+          {/* The accessible name is an attribute, not a <title> child: browsers
+              show a root <title> as a native tooltip over the whole plot, which
+              collides with the marker tooltips. */}
+          <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} role="img" aria-label={title} aria-describedby="envelope-heat-loss-desc">
+            <desc id="envelope-heat-loss-desc">
+              Chart showing annual heating-season heat loss through each opaque envelope assembly as its R-value increases, with
+              the R-value modeled in each design variant marked on the assembly's curve.
+            </desc>
+            <rect class="btwr-envelope-heat-loss__plot-bg" x={margin.left} y={margin.top} width={plotWidth} height={plotHeight} />
+            {yGridLines.map((tick) => (
+              <line class="btwr-envelope-heat-loss__grid" x1={margin.left} y1={y(tick)} x2={margin.left + plotWidth} y2={y(tick)} />
+            ))}
+            {xGridLines.map((tick) => (
+              <line class="btwr-envelope-heat-loss__grid" x1={x(tick)} y1={margin.top} x2={x(tick)} y2={margin.top + plotHeight} />
+            ))}
+            {curves.map((curve) => (
+              <path class="btwr-envelope-heat-loss__curve" data-series={curve.fieldId} d={curve.path} />
+            ))}
+            {spans.map((span) => (
+              <path class="btwr-envelope-heat-loss__span" data-series={span.fieldId} d={span.path} />
+            ))}
+            {/* Wide invisible twin of each curve: a 1.5px dashed stroke is too thin a hover target. */}
+            {curves.map((curve) => (
+              <path class="btwr-envelope-heat-loss__curve-hit" data-series={curve.fieldId} d={curve.path} />
+            ))}
+            {curves.map((curve) => (
+              <g class="btwr-envelope-heat-loss__curve-label" data-series={curve.fieldId}>
+                <line x1={margin.left + plotWidth} y1={curve.endY} x2={labelLeaderX} y2={curve.labelY} />
+                <text x={labelLeaderX + 4} y={curve.labelY + 3}>{curve.label}</text>
+              </g>
+            ))}
+            {series.map((entry) =>
+              entry.markers.map((marker) => (
+                <circle
+                  class:list={[
+                    "btwr-chart-mark",
+                    "btwr-envelope-heat-loss__marker",
+                    { "btwr-envelope-heat-loss__marker--recommended": marker.variantId === recommendedId },
+                  ]}
+                  data-series={entry.fieldId}
+                  cx={x(marker.rValue)}
+                  cy={y(marker.heatLoss)}
+                  r={marker.variantId === recommendedId ? 6 : 5}
+                  fill={markerFill(marker.variantId)}
+                >
+                  <title>{`${entry.label} · ${data.variantOrder.find((variant) => variant.id === marker.variantId)?.name ?? marker.variantId}: R-${formatValue(marker.rValue)}, ${formatValue(marker.heatLoss, "kWh/yr")}`}</title>
+                </circle>
+              )),
+            )}
+            <line class="btwr-envelope-heat-loss__axis" x1={margin.left} y1={margin.top} x2={margin.left} y2={margin.top + plotHeight} />
+            <line class="btwr-envelope-heat-loss__axis" x1={margin.left} y1={margin.top + plotHeight} x2={margin.left + plotWidth} y2={margin.top + plotHeight} />
+            {yAxis.ticks.map((tick) => (
+              <text class="btwr-envelope-heat-loss__tick btwr-envelope-heat-loss__tick--y" x={margin.left - 10} y={y(tick) + 4}>{formatValue(tick)}</text>
+            ))}
+            {xTicks.map((tick) => (
+              <text class="btwr-envelope-heat-loss__tick" x={x(tick)} y={margin.top + plotHeight + 20}>{tick}</text>
+            ))}
+            <text class="btwr-envelope-heat-loss__axis-label" text-anchor="middle" x={margin.left + plotWidth / 2} y={margin.top + plotHeight + 44}>
+              Assembly R-value (hr·ft²·°F/Btu)
+            </text>
+            <text class="btwr-envelope-heat-loss__axis-label" text-anchor="middle" transform={`translate(22 ${margin.top + plotHeight / 2}) rotate(-90)`}>
+              Heating-Season Heat Loss (kWh/yr)
+            </text>
+            {data.variantOrder.map((variant, index) => {
+              const legendX = margin.left + (index % 3) * legendColumnWidth;
+              const legendY = legendTop + Math.floor(index / 3) * legendRowHeight;
+              return (
+                <g class="btwr-envelope-heat-loss__legend-item">
+                  <circle cx={legendX + 6} cy={legendY} r={variant.id === recommendedId ? 6 : 5} fill={markerFill(variant.id)} />
+                  <text x={legendX + 18} y={legendY + 4}>{variant.name}</text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      </figure>
+      <div class="btwr-table-wrap">
+        <table class="btwr-table btwr-envelope-heat-loss__table" data-table="envelope-heat-loss">
+          <caption>
+            <strong class="btwr-table__title">Heat Loss by Assembly and Variant</strong>
+            <span class="btwr-table__subtitle">
+              The values behind the chart: each cell gives the assembly's modeled R-value and its heating-season heat loss in
+              kWh/yr at the {recommended?.name} Gt. Values from the recommended variant are highlighted.
+            </span>
+          </caption>
+          <thead>
+            <tr>
+              <th>Assembly</th>
+              <th class="btwr-cell-number">Area</th>
+              {data.variantOrder.map((variant) => (
+                <th class:list={["btwr-cell-number", { "btwr-col-recommended": variant.recommended }]}>
+                  {variant.recommended && <span class="btwr-recommended-tag">Recommended</span>}
+                  {variant.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {tableRows.map((row) => (
+              <tr data-series={row.fieldId}>
+                <th>{row.label}</th>
+                <td class="btwr-cell-number">
+                  {formatValue(row.areaFt2)} <small class="btwr-table__metric-unit">ft²</small>
+                </td>
+                {row.cells.map((cell, index) => (
+                  <td class:list={["btwr-cell-number", { "btwr-col-recommended": data.variantOrder[index].recommended }]}>
+                    {cell ? (
+                      <>
+                        R-{formatValue(cell.rValue)}
+                        <small class="btwr-table__metric-unit">{formatValue(cell.heatLoss)} kWh/yr</small>
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+            <tr class="btwr-envelope-heat-loss__total">
+              <th>Total</th>
+              <td class="btwr-cell-number">
+                {formatValue(totalAreaFt2)} <small class="btwr-table__metric-unit">ft²</small>
+              </td>
+              {totals.map((total, index) => (
+                <td class:list={["btwr-cell-number", { "btwr-col-recommended": data.variantOrder[index].recommended }]}>
+                  {formatValue(total)} <small class="btwr-table__metric-unit">kWh/yr</small>
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}

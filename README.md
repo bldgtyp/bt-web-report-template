@@ -499,8 +499,8 @@ The committed seed content is intentionally pending-data:
 
 That state must build. After scraping, `data/` should contain:
 `manifest.json`, `variants.csv`, `climate-monthly.csv`, `room-airflows.csv`,
-`building-metrics.csv`, `certification.csv`, `energy.csv`, and
-`demand-detail.csv`.
+`envelope-areas.csv`, `building-metrics.csv`, `certification.csv`, `energy.csv`,
+and `demand-detail.csv`.
 
 ## Deploy
 

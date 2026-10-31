@@ -433,8 +433,80 @@
     }
   }
 
+  // Linked-series highlighting: every element carrying `data-series` inside a
+  // `[data-series-scope]` container (curves, markers, labels, table rows)
+  // lights up together when any one of them is hovered.
+  const seriesScopeSelector = "[data-series-scope]";
+  const seriesSelector = "[data-series]";
+  let activeSeriesScope = null;
+  let activeSeriesId = null;
+  let clearSeriesTimer = null;
+  // Leaving a series onto plot background clears after a short grace period,
+  // so skimming along a thin curve does not flicker the highlight.
+  const clearSeriesDelay = 160;
+
+  function cancelClearSeries() {
+    if (clearSeriesTimer !== null) {
+      window.clearTimeout(clearSeriesTimer);
+      clearSeriesTimer = null;
+    }
+  }
+
+  function scheduleClearSeries() {
+    if (!activeSeriesScope || clearSeriesTimer !== null) {
+      return;
+    }
+    clearSeriesTimer = window.setTimeout(() => {
+      clearSeriesTimer = null;
+      clearSeries();
+    }, clearSeriesDelay);
+  }
+
+  function clearSeries() {
+    cancelClearSeries();
+    activeSeriesId = null;
+    if (!activeSeriesScope) {
+      return;
+    }
+    activeSeriesScope.classList.remove("has-active-series");
+    activeSeriesScope.querySelectorAll(".is-series-active").forEach((element) => element.classList.remove("is-series-active"));
+    activeSeriesScope = null;
+  }
+
+  function activateSeries(target) {
+    const item = target instanceof Element ? target.closest(seriesSelector) : null;
+    const scope = item?.closest(seriesScopeSelector);
+    if (!item || !scope) {
+      scheduleClearSeries();
+      return;
+    }
+    const seriesId = item.getAttribute("data-series");
+    if (scope === activeSeriesScope && seriesId === activeSeriesId) {
+      cancelClearSeries();
+      return;
+    }
+    if (scope !== activeSeriesScope) {
+      clearSeries();
+    }
+    cancelClearSeries();
+    activeSeriesId = seriesId;
+    scope.classList.add("has-active-series");
+    scope.querySelectorAll(seriesSelector).forEach((element) => {
+      element.classList.toggle("is-series-active", element.getAttribute("data-series") === seriesId);
+    });
+    activeSeriesScope = scope;
+  }
+
   decorateCharts();
   decorateImages();
+
+  document.addEventListener("pointerover", (event) => {
+    if (event.target instanceof Element && event.target.closest(seriesScopeSelector)) {
+      activateSeries(event.target);
+    } else if (activeSeriesScope) {
+      scheduleClearSeries();
+    }
+  });
 
   document.addEventListener("click", (event) => {
     const downloadLink = event.target instanceof Element ? event.target.closest(fileDownloadSelector) : null;
