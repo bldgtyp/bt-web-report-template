@@ -14,10 +14,6 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-.btwr-masthead {
-  grid-template-columns: minmax(14rem, auto) minmax(18rem, 1fr) minmax(28rem, auto);
-}
-
 .btwr-masthead__meta {
   display: flex;
   min-width: 0;
@@ -1336,13 +1332,6 @@
 .btwr-envelope-heat-loss__marker--recommended {
   stroke: var(--btwr-color-heading);
   stroke-width: 1;
-}
-
-@media (max-width: 1180px) {
-  .btwr-masthead {
-    grid-template-columns: minmax(14rem, 1fr) minmax(12rem, auto) minmax(9rem, auto);
-    gap: var(--btwr-space-4);
-  }
 }
 
 @media (max-width: 860px) {

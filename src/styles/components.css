@@ -32,7 +32,10 @@
   top: 0;
   z-index: 10;
   display: grid;
-  grid-template-columns: minmax(16rem, 1fr) minmax(12rem, auto) minmax(24rem, auto);
+  /* Brand and nav size to their content; the project name takes what is left
+     and truncates. The inline fit script in ProjectReportLayout switches to the
+     menu (data-nav="compact") once the name no longer fits. */
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas: "brand meta nav";
   gap: var(--btwr-space-5);
   align-items: center;
@@ -135,6 +138,14 @@
   font-size: 0.69rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+
+.btwr-masthead[data-nav="compact"] .btwr-masthead__nav {
+  display: none;
+}
+
+.btwr-masthead[data-nav="compact"] .btwr-masthead__menu {
+  display: block;
 }
 
 .btwr-masthead__menu summary {
@@ -1726,16 +1737,7 @@
   }
 
   .btwr-masthead {
-    grid-template-columns: minmax(14rem, 1fr) minmax(12rem, auto) minmax(9rem, auto);
     gap: var(--btwr-space-4);
-  }
-
-  .btwr-masthead__nav {
-    display: none;
-  }
-
-  .btwr-masthead__menu {
-    display: block;
   }
 
   .btwr-report-grid {
@@ -1767,6 +1769,14 @@
       "brand nav"
       "meta meta";
     gap: var(--btwr-space-2) var(--btwr-space-4);
+  }
+
+  .btwr-masthead__nav {
+    display: none;
+  }
+
+  .btwr-masthead__menu {
+    display: block;
   }
 
   .btwr-masthead__menu nav {
