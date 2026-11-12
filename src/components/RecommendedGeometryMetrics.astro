@@ -3,6 +3,7 @@ import DataState from "./DataState.astro";
 import MetricCard from "./MetricCard.astro";
 import { cellNumber, cellText, formatValue } from "../data/rows";
 import { recommendedVariant } from "../data/variants";
+import { standardDisplay } from "../data/standard";
 
 import type { TemplateReportData } from "../data/report";
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const { data } = Astro.props;
+const display = standardDisplay(data.project);
 const recommended = recommendedVariant(data.variantOrder);
 const recommendedId = recommended?.id ?? data.variantOrder[0]?.id;
 
@@ -49,19 +51,10 @@ const hasMetrics = tfa !== null || envelopeArea !== null || totalWindowArea > 0;
   ) : (
     <div class="btwr-geometry-metrics" aria-label={`Recommended geometry metrics for ${recommended?.name ?? recommendedId}`}>
       <div class="btwr-geometry-metrics__with-info">
-        <MetricCard label="TFA" value={formatValue(tfa)} units={areaUnits} note="Treated floor area" />
+        <MetricCard label={display.floorAreaLabel} value={formatValue(tfa)} units={areaUnits} note={display.floorAreaNote} />
         <span class="btwr-info-badge" tabindex="0" aria-describedby="tfa-info-tooltip">i</span>
         <span id="tfa-info-tooltip" class="btwr-info-tooltip" role="tooltip">
-          <span>
-            1. For any/all PHI energy model results, interior 'treated' floor areas (TFA) are used for these cases. These
-            areas are based on the European Standard for Residential Floor areas. For more info and details as to which
-            areas are included and which are excluded, see the standard DIN #277.
-          </span>
-          <span>
-            2. For any/all Phius energy model results, interior conditioned floor areas (iCFA) are used for these cases.
-            These areas are based on the Phius CORE 2021 rules, and more information can be found in the Phius rules
-            document.
-          </span>
+          {display.floorAreaTooltip.map((paragraph) => <span>{paragraph}</span>)}
         </span>
       </div>
       <MetricCard label="Envelope Area" value={formatValue(envelopeArea)} units={areaUnits} note="Thermal envelope area" />

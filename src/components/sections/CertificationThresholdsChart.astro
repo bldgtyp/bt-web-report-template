@@ -2,6 +2,7 @@
 // Extras for the `passive-house-thresholds` section.
 import CertificationChart from "../../charts/CertificationChart.astro";
 import type { TemplateReportData } from "../../data/report";
+import { standardDisplay } from "../../data/standard";
 
 interface Props {
   report: TemplateReportData;
@@ -10,4 +11,4 @@ interface Props {
 const { report } = Astro.props;
 ---
 
-<CertificationChart data={report} title="Passive House thresholds" />
+<CertificationChart data={report} title={standardDisplay(report.project).thresholdsTitle} />

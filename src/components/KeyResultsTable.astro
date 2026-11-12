@@ -1,6 +1,8 @@
 ---
 import DataState from "./DataState.astro";
 import { cellNumber, cellText, formatCell, formatValue } from "../data/rows";
+import { displayForReport } from "../data/standard";
+import { phiusCompliance, phiusComplianceLabel } from "../data/phius-compliance";
 
 import type { TemplateReportData } from "../data/report";
 
@@ -18,10 +20,13 @@ interface SummaryMetric {
   fieldId?: string;
   metric?: string;
   role?: string;
+  /** Multiplies a numeric variants-sheet value before display (unit conversion). */
+  factor?: number;
 }
 
 const { data, caption = "Key Results By Variant" } = Astro.props;
-const metrics: SummaryMetric[] = [
+const display = displayForReport(data);
+const allMetrics: SummaryMetric[] = [
   {
     label: "Certification Compliant?",
     units: "",
@@ -29,7 +34,7 @@ const metrics: SummaryMetric[] = [
     fieldId: "certification_compliant.certification_compliant_2",
   },
   {
-    label: "Total Primary Energy",
+    label: display.primaryEnergyLabel,
     units: "kWh/yr",
     source: "variants",
     fieldId: "report_inputs.total_primary_energy",
@@ -49,9 +54,10 @@ const metrics: SummaryMetric[] = [
   },
   {
     label: "Heat Demand",
-    units: "kWh/m2",
+    units: display.specificDemandUnits,
     source: "variants",
     fieldId: "certification_results.heat_demand",
+    factor: display.specificDemandFactor,
   },
   {
     label: "Cooling Demand",
@@ -62,9 +68,10 @@ const metrics: SummaryMetric[] = [
   },
   {
     label: "Total Cooling Demand",
-    units: "kWh/m2",
+    units: display.specificDemandUnits,
     source: "variants",
     fieldId: "certification_results.total_cooling_demand",
+    factor: display.specificDemandFactor,
   },
   {
     label: "Peak Heat Load",
@@ -85,13 +92,28 @@ const metrics: SummaryMetric[] = [
     fieldId: "peak_loads.peak_latent_cooling_load",
   },
 ];
+const metrics = allMetrics;
+const COMPLIANCE_FIELD = "certification_compliant.certification_compliant_2";
+const cfm50LimitText = data.project?.narrative?.certification?.phius_cfm50_limit;
+const cfm50Limit = cfm50LimitText ? Number(cfm50LimitText) : null;
 
 function valueFor(metric: SummaryMetric, variantId: string): string {
+  // PHPP's compliance cell checks PHI criteria, so Phius reports evaluate the Phius criteria instead.
+  if (display.standard === "phius" && metric.fieldId === COMPLIANCE_FIELD) {
+    return phiusComplianceLabel(
+      phiusCompliance(data, variantId, cfm50Limit !== null && Number.isFinite(cfm50Limit) ? cfm50Limit : null),
+    );
+  }
   if (metric.source === "variants") {
     const row = data.variants.find(
       (candidate) => cellText(candidate, "field_id") === metric.fieldId && cellText(candidate, "variant_id") === variantId,
     );
-    return row ? formatCell(row.value) : "—";
+    if (!row) return "—";
+    if (metric.factor !== undefined && metric.factor !== 1) {
+      const value = cellNumber(row, "value");
+      return value === null ? formatCell(row.value) : formatValue(value * metric.factor);
+    }
+    return formatCell(row.value);
   }
 
   const row = data.certification.find(
