@@ -2,6 +2,7 @@
 import DataState from "../DataState.astro";
 import type { ReportData } from "../../data/report-loader";
 import { cellNumber, cellText, formatValue, labelize } from "../../data/rows";
+import { displayForReport, standardLabel } from "../../data/standard";
 
 interface Props {
   data: ReportData;
@@ -27,6 +28,7 @@ const {
   caption = "Building metrics by variant",
   captionSubtitle = "This table lists model geometry metrics for each variant tested as part of this investigation. Values from the recommended variant are highlighted.",
 } = Astro.props;
+const display = displayForReport(data);
 const rows = metrics
   .map((metric) => {
     const metricRows = data.buildingMetrics.filter((row) => cellText(row, "metric") === metric);
@@ -68,7 +70,7 @@ const rows = metrics
           {rows.map((row) => (
             <tr>
               <th>
-                {row.sourceLabel || labelize(row.metric)}
+                {standardLabel(row.sourceLabel || labelize(row.metric), display)}
                 {row.units && <small class="btwr-table__metric-unit">{row.units}</small>}
               </th>
               {data.variantOrder.map((variant) => (

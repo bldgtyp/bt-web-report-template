@@ -4,6 +4,7 @@ import type { ReportData } from "../data/report-loader";
 import { cellNumber, cellText, formatValue } from "../data/rows";
 import { axisGridBackground, linearAxis } from "./chart-axis";
 import { certificationTarget } from "./certification-target";
+import { displayForReport } from "../data/standard";
 
 interface Props {
   data: ReportData;
@@ -15,31 +16,32 @@ interface Props {
 const { data, subtitle: subtitleProp, title = "Certification results vs limits", variantId } = Astro.props;
 const variants = variantId ? data.variantOrder.filter((variant) => variant.id === variantId) : data.variantOrder;
 const target = certificationTarget(data, variantId);
+const display = displayForReport(data);
 
 const thresholdMetrics = [
   {
     color: "var(--btwr-chart-heating)",
     id: "heat_demand",
     title: "Annual Heating Energy Demand",
-    targetLabel: "PH-Limit",
+    targetLabel: display.limitLabel,
   },
   {
     color: "var(--btwr-chart-cooling)",
     id: "total_cooling_demand",
     title: "Annual Total Cooling Energy Demand",
-    targetLabel: "PH-Limit",
+    targetLabel: display.limitLabel,
   },
   {
     color: "var(--btwr-chart-heating)",
     id: "peak_heat_load",
     title: "Peak Heating Load",
-    targetLabel: "PH-Limit",
+    targetLabel: display.limitLabel,
   },
   {
     color: "var(--btwr-chart-cooling)",
     id: "peak_cooling_load",
-    title: "Peak Sensible Cooling Load",
-    targetLabel: "PH-Limit",
+    title: display.peakCoolingTitle,
+    targetLabel: display.limitLabel,
   },
 ] as const;
 
